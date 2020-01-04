@@ -308,6 +308,15 @@ struct PacketEditor
 
 	bool toLogPacket = false;
 
+	void CopyClipboard(std::vector<char*> pVector, BYTE Element)
+	{
+		HGLOBAL glob = GlobalAlloc(GMEM_FIXED, 0x400);
+		memcpy(glob, pVector[Element], 0x400);
+		OpenClipboard(NULL);
+		EmptyClipboard();
+		SetClipboardData(CF_UNICODETEXT, glob);
+		CloseClipboard();
+	}
 
 	void HexDump(UINT_PTR DataBuffer, UINT Size)
 	{
@@ -323,9 +332,8 @@ struct PacketEditor
 		if (pVector.size() < Element + 1)
 			return;
 
-		DWORD PacketSize = *(WORD*)pVector[Element];
+		Size = 0x400;
 
-		Size = 500;
 		Address = (ImU64*)pVector[Element];
 	}
 

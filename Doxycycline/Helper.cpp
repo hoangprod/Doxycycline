@@ -326,11 +326,16 @@ void* DetourFunction64(void* pSource, void* pDestination, int dwLen)
 
 char* Scan_Offsets(char* pBase, UINT_PTR RegionSize, const char* szPattern, const char* szMask, uintptr_t szOffset, size_t szSize)
 {
-	char* result = nullptr;
-	char* initResult = PatternScan(pBase, RegionSize, szPattern, szMask) + szOffset;
-	if (initResult)
+	printf("pBase %p %p\n", pBase, RegionSize);
+
+	char* result = 0;
+	char* initResult = PatternScan(pBase, RegionSize, szPattern, szMask);
+
+	printf("pattern found %p\n", initResult);
+
+	if ((size_t)initResult)
 	{
-		memcpy(&result, initResult, szSize);
+		memcpy(&result, initResult + szOffset, szSize);
 		if (result)
 			return result;
 	}

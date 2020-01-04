@@ -5,9 +5,9 @@
 
 PVOID WINAPI Initialize()
 {
-	//AllocConsole();
-	//FILE* fp;
-	//freopen_s(&fp, "CONOUT$", "w", stdout);
+	AllocConsole();
+	FILE* fp;
+	freopen_s(&fp, "CONOUT$", "w", stdout);
 
 	InitializeHooks();
 

@@ -63,13 +63,14 @@ void PacketEditor::Display()
 		char* buttonID = (char*)"Replay##";
 		char* buttonID2 = (char*)"Save##";
 		char* buttonID3 = (char*)"Edit##";
+		char* buttonID4 = (char*)"Copy##";
 
-		std::stringstream ss;
+		std::stringstream ss, sss, ssss, sssss;
+
 		ss << buttonID << element;
-		std::stringstream sss;
 		sss << buttonID2 << element;
-		std::stringstream ssss;
 		ssss << buttonID3 << element;
+		sssss << buttonID4 << element;
 
 		if (ImGui::Button(ss.str().c_str()))
 		{
@@ -85,6 +86,11 @@ void PacketEditor::Display()
 		{
 			SavedPackets.push_back(i);
 		}
+		ImGui::SameLine();
+		if (ImGui::Button(sssss.str().c_str()))
+		{
+			this->CopyClipboard(PacketsArr, element);
+		}
 		element++;
 	}
 	ImGui::NextColumn();
@@ -95,13 +101,14 @@ void PacketEditor::Display()
 		char* buttonID = (char*)"Replay####";
 		char* buttonID2 = (char*)"Remove####";
 		char* buttonID3 = (char*)"Edit###";
+		char* buttonID4 = (char*)"Copy###";
 
-		std::stringstream ss;
+		std::stringstream ss, sss, ssss, sssss;
 		ss << buttonID << element;
-		std::stringstream sss;
 		sss << buttonID2 << element;
-		std::stringstream ssss;
 		ssss << buttonID3 << element;
+		sssss << buttonID4 << element;
+
 		if (ImGui::Button(ss.str().c_str()))
 		{
 			this->Replay(SavedPackets, element2);
@@ -116,6 +123,11 @@ void PacketEditor::Display()
 		{
 			this->Edit(SavedPackets, element2);
 		}
+		ImGui::SameLine();
+		if (ImGui::Button(sssss.str().c_str()))
+		{
+			this->CopyClipboard(SavedPackets, element2);
+		}
 		element2++;
 	}
 	ImGui::NextColumn();
@@ -128,7 +140,7 @@ void PacketEditor::Push(UINT_PTR pBody)
 		if (PacketsArr.size() > 15) {
 			Pop();
 		}
-		WORD pSize = 0x1000;
+		WORD pSize = 0x400;
 
 		char* packet = new char[pSize];
 		memcpy(packet, (void*)pBody, pSize);

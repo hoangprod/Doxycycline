@@ -98,9 +98,6 @@
     <ClInclude Include="Menu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="detours.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GameClasses.h">
       <Filter>Header Files</Filter>
     </ClInclude>

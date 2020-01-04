@@ -138,13 +138,14 @@ DWORD __stdcall InitializeHooks()
 {
 	hWnd = FindWindowEx(0, 0, L"ArcheAge", 0);
 
-	DWORD_PTR* p_Swapchain = (DWORD_PTR*)((DWORD_PTR)SSystemGlobalEnvironment::GetInstance()->pRenderer + 0x159E0); // Pattern scan 0x159e0
+	char* offset_Swapchain = Scan_Offsets((char*)HdnGetModuleBase("CryRenderD3D10.dll"), 0x200000, "\x48\x8b\x8b\xCC\xCC\xCC\x00\x48\x8b\x01\xff\x50\x40\x8b\xf8\x3d\x21\x00\x7a\x88", "xxx???xxxxxxxxxxxxxx", 3, 4);
+
+	DWORD_PTR* p_Swapchain = (DWORD_PTR*)((DWORD_PTR)SSystemGlobalEnvironment::GetInstance()->pRenderer + offset_Swapchain); // offset_Swapchain =  0x159e0
 	DWORD_PTR* pSwapChainVtable = **(DWORD_PTR***)p_Swapchain;
 	dx_swapchain.vmt = ((void**)pSwapChainVtable);
 
 	phookD3D11Present = (D3D11PresentHook)dx_swapchain.Hook(8, hookD3D11Present);
 
-	// Scan for EncryptFunction **** Switch to custom GetModuleHandle and better signature.
 	char* pEncryptPacket = PatternScan((char*)HdnGetModuleBase("CryNetwork.dll"), 0x100000, "\x4c\x89\x4c\x24\x20\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8d\xac", "xxxxxxxxxxxxxxxxxxx");
 
 	o_EncryptPacket = (f_EncryptPacket)pEncryptPacket;
