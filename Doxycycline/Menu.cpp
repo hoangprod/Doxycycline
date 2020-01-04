@@ -10,7 +10,6 @@ const char* Data = "PlaceholderData";
 ImU64* Address = (ImU64*)Data;
 ImU32 Size = 15;
 const ImU64 iStep = 1;
-
 extern __int64 fakeKey;
 extern __int64* sUnknown;
 extern int* sClear;

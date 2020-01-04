@@ -3,7 +3,7 @@
 
 PVOID WINAPI Initialize()
 {
-	InitializeHook();
+	InitializeHooks();
 
 	return 0;
 }

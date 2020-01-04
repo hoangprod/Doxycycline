@@ -303,7 +303,6 @@ extern ImU32 Size;
 
 struct PacketEditor
 {
-
 	std::vector<char*> PacketsArr;
 	std::vector<char*> SavedPackets;
 

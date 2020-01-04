@@ -78,6 +78,6 @@ public:
 
 	static SSystemGlobalEnvironment* GetInstance()
 	{
-		return (SSystemGlobalEnvironment*)0x4C30E5D0;
+		return *(SSystemGlobalEnvironment**)0x3CFAFAC8;
 	}
 }; //Size: 0x0440

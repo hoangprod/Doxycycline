@@ -1,4 +1,6 @@
 #pragma once
 
 
-DWORD __stdcall InitializeHook();
+DWORD __stdcall InitializeHooks();
+
+DWORD __stdcall RemoveHooks();
