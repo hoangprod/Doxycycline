@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Imgui/examples/imgui_memory_editor.h"
 #include "Menu.h"
+#include "GameClasses.h"
 
 MemoryEditor mem_edit;
 Consolelogs console;
@@ -14,7 +15,7 @@ const ImU64 iStep = 1;
 extern __int64 fakeKey;
 extern __int64* sUnknown;
 extern int* sClear;
-#include "GameClasses.h"
+bool b_displayLocalPlayerInfo = false;
 
 typedef bool(__fastcall* f_EncryptPacket)(__int64* buffer, unsigned __int8 isEncrypted, __int64 key, int* cleartextbuffer);
 
@@ -165,6 +166,33 @@ void HackView::Display()
 
 		}
 		*/
+	}
+
+	ImGui::Checkbox("Display local player debug info", &b_displayLocalPlayerInfo);
+
+	if (b_displayLocalPlayerInfo)
+	{
+		IEntity* localEnt = LocalPlayerFinder::GetClientEntity();
+
+		std::stringstream addressStrm;
+		std::stringstream positionStrm;
+		std::stringstream angleStrm;
+		std::stringstream rotationStrm;
+
+		addressStrm << "Local Entity: 0x" << localEnt;
+		ImGui::Text(addressStrm.str().c_str());
+
+		Vec3 pos = localEnt->GetPos();
+		positionStrm << "Your position - X: " << pos.x << ", Y: " << pos.y << ", Z: " << pos.z;
+		ImGui::Text(positionStrm.str().c_str());
+
+		Vec3 angles = localEnt->GetFixedAngles();
+		angleStrm << "Your angles - X: " << angles.x << ", Y: " << angles.y << ", Z: " << angles.z;
+		ImGui::Text(angleStrm.str().c_str());
+
+		Quat rotation = localEnt->GetRotation();
+		rotationStrm << "Your rotation - X: " << rotation.v.x << ", Y: " << rotation.v.y << ", Z: " << rotation.v.z << ", W: " << rotation.w;
+		ImGui::Text(rotationStrm.str().c_str());
 	}
 
 	ImGui::End();

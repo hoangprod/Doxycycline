@@ -93,14 +93,14 @@ public:
 	virtual void SetPos(Vec3 &vPos, int nWhyFlags);
 	virtual Vec3& GetPos();
 	virtual void SetRotation(const Quat& qRotation, int nWhyFlags = 0);
-	virtual const Quat& GetRotation();
+	virtual const Quat& GetRotation(); // this works
 	virtual void Function34();
 	virtual Vec3 GetScale();
 	virtual void Function36();
 	virtual void SetPosRotScale(const Vec3 &vPos, const Quat &qRotation, const Vec3 &vScale, int nWhyFlags = 0);
-	virtual Vec3 GetWorldPos(); // the next 2 should be correct
-	virtual Vec3 GetWorldAngles();
-	virtual Quat GetWorldRotation();
+	virtual Vec3 GetWorldPos(); //This function worked in older versions but is giving me weird output. TODO: Discuss this/figure out if its fixable
+	virtual Vec3 GetWorldAngles(); // this works
+	virtual Quat GetWorldRotation(); // This function worked in older versions but is giving me weird output. TODO: Discuss this/figure out if its fixable
 	virtual void GetForwardDir();
 	virtual void Function42();
 	virtual void Function43();
@@ -138,6 +138,18 @@ public:
 	virtual void Function75();
 	virtual void Function76();
 	virtual void Function77();
+
+	Vec3 GetFixedAngles()
+	{
+		Vec3 angles = GetWorldAngles();
+		if (angles.y < 0)
+		{
+			angles.y = 6.28319 + angles.y;
+		}
+
+		angles.y = angles.y * (180.0 / 3.14159265358979323846);
+		return angles;
+	}
 }; //Size: 0x0240
 
 class IEntityIt // allows you to iterate through entities - basically the entity list
@@ -312,3 +324,22 @@ public:
 		return *(SSystemGlobalEnvironment**)0x3CFAFAC8;
 	}
 }; //Size: 0x0440
+
+class LocalPlayerFinder
+{
+public:
+	static unsigned int GetClientActorId() // this should also return the entity
+	{
+		return SSystemGlobalEnvironment::GetInstance()->pGame->pGameFramework->GetClientActorId();
+	}
+
+	static void* GetClientActor()
+	{
+		return SSystemGlobalEnvironment::GetInstance()->pGame->pGameFramework->GetClientActor();
+	}
+
+	static IEntity* GetClientEntity()
+	{
+		return SSystemGlobalEnvironment::GetInstance()->pEntitySystem->FindEntityById(LocalPlayerFinder::GetClientActorId());
+	}
+};
