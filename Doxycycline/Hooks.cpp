@@ -22,12 +22,13 @@ ID3D11RenderTargetView* mainRenderTargetView;
 HWND window = nullptr;
 HWND hWnd = nullptr;
 
+VMTHook dx_swapchain;
+
 bool firstTime = true;
 bool g_ShowMenu = false;
 
 f_EncryptPacket o_EncryptPacket = NULL;
 
-VMTHook vmt_dx_swapchain((void*)0);
 
 int* sClear = NULL;
 __int64 fakeKey = 0;
@@ -71,6 +72,9 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 			g_ShowMenu = !g_ShowMenu;
 		}
+
+		if (wParam == VK_HOME)
+			Unload();
 	}
 
 	if (g_ShowMenu)
@@ -144,15 +148,28 @@ BOOL hook_function(PVOID& t1, PBYTE t2, const char* s = NULL)
 	}
 }
 
+BOOL unhook_function(PVOID& t1, PBYTE t2, const char* s = NULL)
+{
+	DetourTransactionBegin();
+	DetourUpdateThread(GetCurrentThread());
+	DetourDetach(&t1, t2);
+	if (DetourTransactionCommit() != NO_ERROR) {
+		printf("[Hook] - Failed to unhook %s.\n", s);
+		return false;
+	}
+	return true;
+}
+
+
 DWORD __stdcall InitializeHooks()
 {
 	hWnd = FindWindowEx(0, 0, L"ArcheAge", 0);
 
 	DWORD_PTR* p_Swapchain = (DWORD_PTR*)((DWORD_PTR)SSystemGlobalEnvironment::GetInstance()->pRenderer + 0x159E0);
 	DWORD_PTR* pSwapChainVtable = **(DWORD_PTR***)p_Swapchain;
-	VMTHook dx_swapchain((void*)pSwapChainVtable);
-	vmt_dx_swapchain = dx_swapchain;
-	phookD3D11Present = (D3D11PresentHook)vmt_dx_swapchain.Hook(8, hookD3D11Present);
+	dx_swapchain.vmt = ((void**)pSwapChainVtable);
+
+	phookD3D11Present = (D3D11PresentHook)dx_swapchain.Hook(8, hookD3D11Present);
 
 	// Scan for EncryptFunction **** Switch to custom GetModuleHandle and better signature.
 	char* pEncryptPacket = PatternScan((char*)GetModuleHandleA("crynetwork.dll"), 0x100000, "\x4c\x89\x4c\x24\x20\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8d\xac", "xxxxxxxxxxxxxxxxxxx");
@@ -164,7 +181,13 @@ DWORD __stdcall InitializeHooks()
 	return NULL;
 }
 
-DWORD __stdcall RemoveHooks()
+bool __stdcall Unload()
 {
-	vmt_dx_swapchain.ClearHooks();
+	if (unhook_function((PVOID&)o_EncryptPacket, (PBYTE)h_EncryptPacket, "EncryptPacket"))
+	{
+		dx_swapchain.ClearHooks();
+		return true;
+	}
+
+	return false;
 }

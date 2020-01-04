@@ -11,8 +11,8 @@ public:
 
 	void** vmt = nullptr; // Pointer to the VMT, we're using it more as an array of void*
 
+	VMTHook();
 	VMTHook(void* vmt); // Hook original VMT by it's address
-	VMTHook(DWORD64* vmt_ptr); // Create Shadow VMT from VMT pointer ( Not implemented here )
 	~VMTHook(); // Destructor, removes all hooks
 
 	void* Hook(int index, void* hk);
@@ -22,10 +22,15 @@ private:
 	map<int, void*> hooked_funcs; // std::map which holds the index hooked and the original function's address
 };
 
+inline VMTHook::VMTHook()
+{
+}
+
 VMTHook::VMTHook(void* vmt_addy)
 {
 	vmt = (void**)vmt_addy;
 }
+
 
 void* VMTHook::Hook(int index, void* hk)
 {

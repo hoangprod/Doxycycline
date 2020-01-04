@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Hooks.h"
 
+
+
 PVOID WINAPI Initialize()
 {
 	InitializeHooks();

@@ -3,4 +3,4 @@
 
 DWORD __stdcall InitializeHooks();
 
-DWORD __stdcall RemoveHooks();
+bool __stdcall Unload();
