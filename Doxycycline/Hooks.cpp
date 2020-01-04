@@ -3,7 +3,9 @@
 #include "Menu.h"
 #include "vmt.h"
 #include "Scan.h"
+#include "Helper.h"
 #include "GameClasses.h"
+
 typedef bool(__fastcall* f_EncryptPacket)(__int64* a1, unsigned __int8 a2, __int64 packet, int* a3);
 typedef HRESULT(__stdcall* D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 
@@ -172,7 +174,7 @@ DWORD __stdcall InitializeHooks()
 	phookD3D11Present = (D3D11PresentHook)dx_swapchain.Hook(8, hookD3D11Present);
 
 	// Scan for EncryptFunction **** Switch to custom GetModuleHandle and better signature.
-	char* pEncryptPacket = PatternScan((char*)GetModuleHandleA("crynetwork.dll"), 0x100000, "\x4c\x89\x4c\x24\x20\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8d\xac", "xxxxxxxxxxxxxxxxxxx");
+	char* pEncryptPacket = PatternScan((char*)HdnGetModuleBase("CryNetwork.dll"), 0x100000, "\x4c\x89\x4c\x24\x20\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8d\xac", "xxxxxxxxxxxxxxxxxxx");
 
 	o_EncryptPacket = (f_EncryptPacket)pEncryptPacket;
 
@@ -186,7 +188,7 @@ bool __stdcall Unload()
 	if (unhook_function((PVOID&)o_EncryptPacket, (PBYTE)h_EncryptPacket, "EncryptPacket"))
 	{
 		dx_swapchain.ClearHooks();
-		return true;
+		FreeLibrary(h_Module);
 	}
 
 	return false;

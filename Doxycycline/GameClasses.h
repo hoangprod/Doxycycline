@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Helper.h"
+
 // This header contains reversed game structures
 
 class IEntitySystem
@@ -78,6 +80,7 @@ public:
 
 	static SSystemGlobalEnvironment* GetInstance()
 	{
-		return *(SSystemGlobalEnvironment**)0x3CFAFAC8;
+		return *(SSystemGlobalEnvironment**)((UINT_PTR)HdnGetModuleBase("x2game.dll") + 0x3FAFAC8);
+		//return *(SSystemGlobalEnvironment**)0x3CFAFAC8;
 	}
 }; //Size: 0x0440
