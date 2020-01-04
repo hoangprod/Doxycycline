@@ -50,7 +50,6 @@ bool __fastcall h_EncryptPacket(__int64* Buffer, unsigned __int8 isEncrypted, __
 
 	if (isEncrypted == 1)
 	{
-		printf("woah");
 		peditor.Push((UINT_PTR)key);
 	}
 
@@ -164,8 +163,6 @@ bool __stdcall Unload()
 		FreeLibrary(h_Module);
 		return true;
 	}
-
-	printf("Failed to unhook oencrypt\n");
 
 	return false;
 }
