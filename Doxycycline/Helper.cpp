@@ -2,6 +2,9 @@
 #include <tchar.h>
 #include <TlHelp32.h>
 #include <strsafe.h>
+#include <detours.h>
+#include <vector>
+#include "Scan.h"
 #include "Helper.h"
 
 #define ReCa reinterpret_cast
@@ -255,4 +258,174 @@ BYTE* GetProcAddressA(HINSTANCE hDll, const char* szFunc)
 	}
 
 	return pBase + FuncRVA;
+}
+
+/*
+BOOL hook_function(PVOID& t1, PBYTE t2, const char* s = NULL)
+{
+	DetourTransactionBegin();
+	DetourUpdateThread(GetCurrentThread());
+	DetourAttach(&t1, t2);
+	if (DetourTransactionCommit() != NO_ERROR) {
+		printf("[Hook] - Failed to hook %s.\n", s);
+		return false;
+	}
+	else {
+		printf("[Hook] - Successfully hooked %s.\n", s);
+		return true;
+	}
+}
+
+BOOL unhook_function(PVOID& t1, PBYTE t2, const char* s = NULL)
+{
+	DetourTransactionBegin();
+	DetourUpdateThread(GetCurrentThread());
+	DetourDetach(&t1, t2);
+	if (DetourTransactionCommit() != NO_ERROR) {
+		printf("[Hook] - Failed to unhook %s.\n", s);
+		return false;
+	}
+	return true;
+}*/
+
+
+void* DetourFunction64(void* pSource, void* pDestination, int dwLen)
+{
+	DWORD MinLen = 14;
+
+	if (dwLen < MinLen) return NULL;
+
+	BYTE stub[] = {
+	0xFF, 0x25, 0x00, 0x00, 0x00, 0x00, // jmp qword ptr [$+6]
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 // ptr
+	};
+
+	void* pTrampoline = VirtualAlloc(0, dwLen + sizeof(stub), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+
+	DWORD dwOld = 0;
+	VirtualProtect(pSource, dwLen, PAGE_EXECUTE_READWRITE, &dwOld);
+
+	DWORD64 retto = (DWORD64)pSource + dwLen;
+
+	memcpy(stub + 6, &retto, 8);
+	memcpy((void*)((DWORD_PTR)pTrampoline), pSource, dwLen);
+	memcpy((void*)((DWORD_PTR)pTrampoline + dwLen), stub, sizeof(stub));
+
+	// orig
+	memcpy(stub + 6, &pDestination, 8);
+	memcpy(pSource, stub, sizeof(stub));
+
+	for (int i = MinLen; i < dwLen; i++)
+	{
+		*(BYTE*)((DWORD_PTR)pSource + i) = 0x90;
+	}
+
+	VirtualProtect(pSource, dwLen, dwOld, &dwOld);
+	return (void*)((DWORD_PTR)pTrampoline);
+}
+
+char* Scan_Offsets(char* pBase, UINT_PTR RegionSize, const char* szPattern, const char* szMask, uintptr_t szOffset, size_t szSize)
+{
+	char* result = nullptr;
+	char* initResult = PatternScan(pBase, RegionSize, szPattern, szMask) + szOffset;
+	if (initResult)
+	{
+		memcpy(&result, initResult, szSize);
+		if (result)
+			return result;
+	}
+	return nullptr;
+}
+
+char* ptr_offset_Scanner(char* pBase, UINT_PTR RegionSize, const char* szPattern, uintptr_t i_offset,
+	uintptr_t i_length, uintptr_t instruction_before_offset, const char* szMask)
+{
+	char* initial_addr = PatternScan(pBase, RegionSize, szPattern, szMask);
+	if (!initial_addr)
+	{
+		return nullptr;
+	}
+
+	char* offset_read = nullptr;
+	char* second_addr = initial_addr + i_offset + instruction_before_offset;
+	memcpy(&offset_read, second_addr, i_length - instruction_before_offset);
+	offset_read = i_length + initial_addr + i_offset + (UINT_PTR)(offset_read);
+
+	if (offset_read)
+		return offset_read;
+	return nullptr;
+}
+
+Detour64::Detour64()
+{
+	// Empty
+}
+
+void* Detour64::Hook(void* pSource, void* pDestination, int dwLen)
+{
+
+	void * trampoline = DetourFunction64(pSource, pDestination, dwLen);
+
+	Detour64::detour saveDetour = { pSource, (char*)trampoline, dwLen };
+
+	hooked_funcs.push_back(saveDetour);
+
+	return trampoline;
+}
+
+bool Detour64::Unhook(void* pTrampoline)
+{
+	for (func_iterator = hooked_funcs.begin(); func_iterator != hooked_funcs.end(); func_iterator++)
+	{
+		Detour64::detour curHook = *func_iterator;
+
+		if (pTrampoline == curHook.origBytes)
+		{
+			DWORD dwOld = 0;
+			VirtualProtect(curHook.origAddr, 1, PAGE_EXECUTE_READWRITE, &dwOld);
+			memcpy(curHook.origAddr, curHook.origBytes, curHook.orgByteCount);
+			VirtualProtect(curHook.origAddr, 1, dwOld, &dwOld);
+			
+			if (*(char*)curHook.origAddr == *curHook.origBytes)
+			{
+				VirtualFree(curHook.origBytes, 0, MEM_RELEASE);
+				hooked_funcs.erase(func_iterator);
+				return true;
+			}
+			else
+			{
+				printf("Unhook failed at %p\n", curHook.origAddr);
+				return false;
+			}
+		}
+
+	}
+
+	return false;
+}
+
+bool Detour64::Clearhook()
+{
+	for (func_iterator = hooked_funcs.begin(); func_iterator != hooked_funcs.end(); func_iterator++)
+	{
+		detour curHook = *func_iterator;
+
+		DWORD dwOld = 0;
+		VirtualProtect(curHook.origAddr, 1, PAGE_EXECUTE_READWRITE, &dwOld);
+		memcpy(curHook.origAddr, curHook.origBytes, curHook.orgByteCount);
+		VirtualProtect(curHook.origAddr, 1, dwOld, &dwOld);
+
+		if (*(char*)curHook.origAddr == *curHook.origBytes)
+		{
+			VirtualFree(curHook.origBytes, 0, MEM_RELEASE);
+			hooked_funcs.erase(func_iterator);
+		}
+		else
+		{
+			printf("Unhook failed at %p\n", curHook.origAddr);
+			return false;
+		}
+	}
+	hooked_funcs.clear();
+	return true;
 }

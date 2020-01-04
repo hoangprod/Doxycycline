@@ -31,19 +31,7 @@ bool g_ShowMenu = false;
 
 f_EncryptPacket o_EncryptPacket = NULL;
 
-
-bool __fastcall h_EncryptPacket(__int64* Buffer, unsigned __int8 isEncrypted, __int64 key, int* cleartextbuffer)
-{
-	packetinfo.sUnknown = Buffer;
-	packetinfo.sClear = cleartextbuffer;
-
-	if (isEncrypted == 1)
-	{
-		peditor.Push((UINT_PTR)key);
-	}
-
-	return o_EncryptPacket(Buffer, isEncrypted, key, cleartextbuffer);
-}
+Detour64 detours;
 
 HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** ppDevice, ID3D11DeviceContext** ppContext)
 {
@@ -53,6 +41,20 @@ HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** 
 		(*ppDevice)->GetImmediateContext(ppContext);
 
 	return ret;
+}
+
+bool __fastcall h_EncryptPacket(__int64* Buffer, unsigned __int8 isEncrypted, __int64 key, int* cleartextbuffer)
+{
+	packetinfo.sUnknown = Buffer;
+	packetinfo.sClear = cleartextbuffer;
+
+	if (isEncrypted == 1)
+	{
+		printf("woah");
+		peditor.Push((UINT_PTR)key);
+	}
+
+	return o_EncryptPacket(Buffer, isEncrypted, key, cleartextbuffer);
 }
 
 LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -132,33 +134,6 @@ HRESULT __fastcall hookD3D11Present(IDXGISwapChain* pChain, UINT SyncInterval, U
 	return phookD3D11Present(pChain, SyncInterval, Flags);
 }
 
-BOOL hook_function(PVOID& t1, PBYTE t2, const char* s = NULL)
-{
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
-	DetourAttach(&t1, t2);
-	if (DetourTransactionCommit() != NO_ERROR) {
-		printf("[Hook] - Failed to hook %s.\n", s);
-		return false;
-	}
-	else {
-		printf("[Hook] - Successfully hooked %s.\n", s);
-		return true;
-	}
-}
-
-BOOL unhook_function(PVOID& t1, PBYTE t2, const char* s = NULL)
-{
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
-	DetourDetach(&t1, t2);
-	if (DetourTransactionCommit() != NO_ERROR) {
-		printf("[Hook] - Failed to unhook %s.\n", s);
-		return false;
-	}
-	return true;
-}
-
 
 DWORD __stdcall InitializeHooks()
 {
@@ -175,18 +150,22 @@ DWORD __stdcall InitializeHooks()
 
 	o_EncryptPacket = (f_EncryptPacket)pEncryptPacket;
 
-	hook_function((PVOID&)o_EncryptPacket, (PBYTE)h_EncryptPacket, "EncryptPacket");
+	o_EncryptPacket = (f_EncryptPacket)detours.Hook(o_EncryptPacket, h_EncryptPacket, 14);
 
 	return NULL;
 }
 
 bool __stdcall Unload()
 {
-	if (unhook_function((PVOID&)o_EncryptPacket, (PBYTE)h_EncryptPacket, "EncryptPacket"))
+	if (detours.Unhook(o_EncryptPacket))
 	{
 		dx_swapchain.ClearHooks();
+		SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)OriginalWndProcHandler);
 		FreeLibrary(h_Module);
+		return true;
 	}
+
+	printf("Failed to unhook oencrypt\n");
 
 	return false;
 }

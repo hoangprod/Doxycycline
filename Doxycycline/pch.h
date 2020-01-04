@@ -13,7 +13,6 @@
 #include <fstream>
 #include <dinput.h>
 #include <tchar.h>
-#include "detours.h"
 #include <vector>
 #include <string>
 #include <DXGI.h>
