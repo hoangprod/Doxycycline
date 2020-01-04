@@ -1,8 +1,161 @@
 #pragma once
 
-#include "Helper.h"
-
 // This header contains reversed game structures
+
+class Matrix34
+{
+public:
+	float Unk1; //0x0000
+	float Unk2; //0x0004
+	float Unk3; //0x0008
+	float z; //0x000C
+	float Unk5; //0x0010
+	float Unk6; //0x0014
+	float Unk7; //0x0018
+	float x; //0x001C
+	float Unk9; //0x0020
+	float Unk10; //0x0024
+	float Unk11; //0x0028
+	float y; //0x002C
+	float Unk12; //0x0030
+	float Unk13; //0x0034
+}; //Size: 0x0038
+
+class Vec3
+{
+public:
+	float x; //0x0000
+	float z; //0x0004
+	float y; //0x0008
+}; //Size: 0x000C
+
+class Quat
+{
+public:
+	Vec3 v;
+	float w;
+
+	void Normalize()
+	{
+		// removed implementation
+	}
+};
+
+struct AABB
+{
+	Vec3 min;
+	Vec3 max;
+	BOOL IsReset() { return min.x > max.x; }
+};
+
+class IEntity
+{
+public:
+	char pad_0008[8]; //0x0008
+	uint32_t N000001A7; //0x0010
+	uint32_t ID; //0x0014
+	char pad_0018[8]; //0x0018
+	uint32_t Flags; //0x0020
+	char pad_0024[4]; //0x0024
+	char *Name; //0x0028
+	char pad_0030[528]; //0x0030
+
+	virtual uint32_t GetId();
+	virtual void Function1();
+	virtual void* GetClass();
+	virtual void Function3();
+	virtual void Function4();
+	virtual void Function5();
+	virtual void Function6(); // this looks like getflags? but its possible its also GetId
+	virtual void Function7();
+	virtual void Function8();
+	virtual void Function9();
+	virtual void Function10();
+	virtual void Function11();
+	virtual const char* GetName(); // Use entity->Name over this function
+	virtual void Function13();
+	virtual void Function14();
+	virtual void Function15();
+	virtual void Function16();
+	virtual void Function17();
+	virtual void Function18();
+	virtual void Function19();
+	virtual void Function20();
+	virtual void Function21();
+	virtual void Function22();
+	virtual void Function23();
+	virtual const Matrix34& GetWorldTM(); // this is most likely incorrect but needs to be tested
+	virtual void Function25();
+	virtual void Function26();
+	virtual void GetWorldBounds(AABB &bbox); // the AABB struct hasn't been tested. THis function may be valid 
+	virtual void Function28();
+	virtual void Function29();
+	virtual void SetPos(Vec3 &vPos, int nWhyFlags);
+	virtual Vec3& GetPos();
+	virtual void SetRotation(const Quat& qRotation, int nWhyFlags = 0);
+	virtual const Quat& GetRotation();
+	virtual void Function34();
+	virtual Vec3 GetScale();
+	virtual void Function36();
+	virtual void SetPosRotScale(const Vec3 &vPos, const Quat &qRotation, const Vec3 &vScale, int nWhyFlags = 0);
+	virtual Vec3 GetWorldPos(); // the next 2 should be correct
+	virtual Vec3 GetWorldAngles();
+	virtual Quat GetWorldRotation();
+	virtual void GetForwardDir();
+	virtual void Function42();
+	virtual void Function43();
+	virtual void Function44();
+	virtual void Function45();
+	virtual void Function46();
+	virtual void Function47();
+	virtual void Function48();
+	virtual void Function49();
+	virtual void Function50();
+	virtual void Function51();
+	virtual void Function52(); // looks like EnablePhysics but it appears to be useless
+	virtual void Function53();
+	virtual void Function54();
+	virtual void Function55();
+	virtual void Function56(); // this used to be GetPhysics on x64 client. Not labeling because it appears that the vtable offset changed but idk
+	virtual void Function57();
+	virtual void Function58();
+	virtual void Function59();
+	virtual void Function60();
+	virtual void Function61();
+	virtual void GetWorldBBox();
+	virtual void Function63();
+	virtual void Function64();
+	virtual void Function65();
+	virtual void Function66();
+	virtual void Function67();
+	virtual void Function68();
+	virtual void Function69();
+	virtual void Function70();
+	virtual void Function71();
+	virtual void Function72();
+	virtual void Function73();
+	virtual void Function74();
+	virtual void Function75();
+	virtual void Function76();
+	virtual void Function77();
+}; //Size: 0x0240
+
+class IEntityIt // allows you to iterate through entities - basically the entity list
+{
+public:
+	char pad_0008[56]; //0x0008
+
+	virtual void Function0();
+	virtual void Function1();
+	virtual bool IsEnd(); // works
+	virtual void Function3();
+	virtual IEntity* Next(); // works
+	virtual void Release();
+	virtual void Function6();
+	virtual void Function7();
+	virtual void Function8();
+	virtual void Function9();
+}; //Size: 0x0040
 
 class IEntitySystem
 {
@@ -23,14 +176,14 @@ public:
 	virtual void SpawnEntity();
 	virtual void Function12();
 	virtual void Function13();
-	virtual void FindEntityByIdPossibly(unsigned int id); // one of these two functions is used to find an entity by ID. Not sure about the other. If both cause a crash when called, then change the parameter to uint16.
-	virtual void FindEntityByIdPossiblyTwo(unsigned int id);
-	virtual void FindEntityByName(const char* name); // tested and works
+	virtual IEntity* FindEntityById(uint32_t id); // tested and works
+	virtual IEntity* SomethingToDoWithIDs(uint32_t id); // this function accepts an ID as a parameter but I'm not sure what it does.
+	virtual IEntity* FindEntityByName(const char* name); // tested and works
 	virtual void Function17();
 	virtual void RemoveEntity();
 	virtual void Function19();
-	virtual void GetNumEntities(); // works
-	virtual void GetEntityIterator(); // works
+	virtual uint32_t GetNumEntities(); // works
+	virtual IEntityIt* GetEntityIterator(); // works
 	virtual void Function22();
 	virtual void Function23();
 	virtual void Function24();
@@ -53,12 +206,88 @@ public:
 	virtual void Function41();
 }; //Size: 0x0080
 
+class IGameFramework
+{
+public:
+	char pad_0008[120]; //0x0008
+
+	virtual void Function0();
+	virtual void Function1();
+	virtual void Function2();
+	virtual void Function3();
+	virtual void Function4();
+	virtual void Init();
+	virtual void CompleteInit();
+	virtual void Function7();
+	virtual void PreUpdate();
+	virtual void Function9();
+	virtual void PostUpdate();
+	virtual void Function11();
+	virtual void Function12();
+	virtual void Function13();
+	virtual void Function14();
+	virtual void Function15();
+	virtual void Function16();
+	virtual void Function17();
+	virtual void Function18();
+	virtual void Function19();
+	virtual void* GetILevelSystem();
+	virtual void* GetIActorSystem(); // pretty sure this is GetIActorSystem but it may actually be the function below or above
+	virtual void* GetIItemSystem();
+	virtual void Function23();
+	virtual void Function24();
+	virtual void Function25();
+	virtual void Function26();
+	virtual void Function27();
+	virtual void Function28();
+	virtual void Function29();
+	virtual void Function30();
+	virtual void Function31();
+	virtual void Function32();
+	virtual void Function33();
+	virtual void Function34();
+	virtual void Function35();
+	virtual void Function36();
+	virtual void Function37();
+	virtual void Function38();
+	virtual void Function39();
+	virtual void Function40();
+	virtual void* GetClientActor(); // works
+	virtual uint32_t GetClientActorId(); // works. This ID is also the same as the client entity ID, so it can be used to grab local entity.
+	virtual void Function43();
+	virtual void GetServerTime();
+	virtual void GetClientChannelId();
+	virtual void Function46();
+	virtual void Function47();
+	virtual void GetGameObject();
+	virtual void GetNetworkSafeClassId();
+	virtual void Function50();
+}; //Size: 0x0080
+
+class IGame
+{
+public:
+	char pad_0008[32]; //0x0008
+	IGameFramework* pGameFramework; //0x0028
+	char pad_0030[144]; //0x0030
+
+	virtual void Function0();
+	virtual void Function1();
+	virtual void Function2();
+	virtual void Function3();
+	virtual void Function4();
+	virtual void Function5();
+	virtual void Function6();
+	virtual void Function7();
+	virtual void Function8();
+	virtual void Function9();
+}; //Size: 0x00C0
 
 class SSystemGlobalEnvironment
 {
 public:
 	void *pSystem; //0x0000
-	void *pGame; //0x0008
+	IGame *pGame; //0x0008
 	void *pNetwork; //0x0010
 	void *pRenderer; //0x0018
 	void *pInput; //0x0020
@@ -80,7 +309,6 @@ public:
 
 	static SSystemGlobalEnvironment* GetInstance()
 	{
-		return *(SSystemGlobalEnvironment**)((UINT_PTR)HdnGetModuleBase("x2game.dll") + 0x3FAFAC8);
-		//return *(SSystemGlobalEnvironment**)0x3CFAFAC8;
+		return *(SSystemGlobalEnvironment**)0x3CFAFAC8;
 	}
 }; //Size: 0x0440

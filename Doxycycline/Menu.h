@@ -349,5 +349,10 @@ struct PacketEditor
 	}
 };
 
+struct HackView
+{
+	void Display();
+};
+
 extern PacketEditor peditor;
 void MenuRender();

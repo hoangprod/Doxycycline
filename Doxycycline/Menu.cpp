@@ -5,6 +5,7 @@
 MemoryEditor mem_edit;
 Consolelogs console;
 PacketEditor peditor;
+HackView hackView;
 
 const char* Data = "PlaceholderData";
 ImU64* Address = (ImU64*)Data;
@@ -13,6 +14,7 @@ const ImU64 iStep = 1;
 extern __int64 fakeKey;
 extern __int64* sUnknown;
 extern int* sClear;
+#include "GameClasses.h"
 
 typedef bool(__fastcall* f_EncryptPacket)(__int64* buffer, unsigned __int8 isEncrypted, __int64 key, int* cleartextbuffer);
 
@@ -38,6 +40,7 @@ void MenuRender()
 	}
 
 	peditor.Display();
+	hackView.Display();
 }
 
 
@@ -133,3 +136,36 @@ void PacketEditor::Push(UINT_PTR pBody)
 	}
 }
 
+
+void HackView::Display()
+{
+	ImGui::Begin("Hacks");
+	if (ImGui::Button("Get Entity Iterator"))
+	{
+		std::stringstream strm;
+		auto localEntID =  SSystemGlobalEnvironment::GetInstance()->pGame->pGameFramework->GetClientActorId();
+		auto localEnt = SSystemGlobalEnvironment::GetInstance()->pEntitySystem->SomethingToDoWithIDs(localEntID);
+		strm << localEntID << " " << localEnt;
+		console.AddLog(strm.str().c_str());
+		// the commented code below is an example of how to iterate through all entities
+		/*
+		auto entSys = SSystemGlobalEnvironment::GetInstance()->pEntitySystem;
+		auto entIT = entSys->GetEntityIterator();
+		std::stringstream strm;
+		strm << "Entity atext " << entSys->GetNumEntities() << " " << entSys->GetEntityIterator();
+		console.AddLog(strm.str().c_str());
+
+		for (int i = 0; i < 10; i++)
+		{
+			IEntity* ent = entIT->Next();
+			if (ent && ent->Name)
+			{
+				console.AddLog(ent->Name);
+			}
+
+		}
+		*/
+	}
+
+	ImGui::End();
+}
