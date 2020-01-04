@@ -10,3 +10,9 @@ void* HdnGetModuleBase(const char* moduleName);
 bool GetProcAddressA_WOW64(HANDLE hProc, HINSTANCE hDll, const char* szFunc, void*& pOut);
 HINSTANCE GetModuleHandleExA_WOW64(HANDLE hProc, const char* szDll);
 #endif
+
+struct packetCrypto
+{
+	__int64* sUnknown;
+	int* sClear;
+};

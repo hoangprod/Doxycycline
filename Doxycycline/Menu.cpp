@@ -12,9 +12,9 @@ const char* Data = "PlaceholderData";
 ImU64* Address = (ImU64*)Data;
 ImU32 Size = 15;
 const ImU64 iStep = 1;
-extern __int64 fakeKey;
-extern __int64* sUnknown;
-extern int* sClear;
+
+packetCrypto packetinfo;
+
 bool b_displayLocalPlayerInfo = false;
 
 typedef bool(__fastcall* f_EncryptPacket)(__int64* buffer, unsigned __int8 isEncrypted, __int64 key, int* cleartextbuffer);
@@ -23,8 +23,7 @@ extern f_EncryptPacket o_EncryptPacket;
 
 void PacketEditor::Replay(std::vector<char*> pVector, BYTE Element)
 {
-	fakeKey = (__int64)pVector[Element];
-	o_EncryptPacket(sUnknown, 1, fakeKey, sClear);
+	o_EncryptPacket(packetinfo.sUnknown, 1, (__int64)pVector[Element], packetinfo.sClear);
 }
 
 void MenuRender()
@@ -59,7 +58,7 @@ void PacketEditor::Display()
 	ImGui::Columns(2);
 	BYTE element = 0;
 	for (auto i : PacketsArr) {
-		ImGui::Text("[%d] - %02X %02X %02X %02X", element, *(BYTE*)i, *(BYTE*)(i + 1), *(BYTE*)(i + 2), *(BYTE*)(i + 3)); ImGui::SameLine();
+		ImGui::Text("[%d] - Opcode: %02X %02X", element, *(BYTE*)(i + 8), *(BYTE*)(i + 9)); ImGui::SameLine();
 
 		char* buttonID = (char*)"Replay##";
 		char* buttonID2 = (char*)"Save##";
@@ -91,7 +90,7 @@ void PacketEditor::Display()
 	ImGui::NextColumn();
 	BYTE element2 = 0;
 	for (auto i : SavedPackets) {
-		ImGui::Text("[%d] - %02X %02X %02X %02X", element2, *(BYTE*)i, *(BYTE*)(i + 1), *(BYTE*)(i + 2), *(BYTE*)(i + 3)); ImGui::SameLine();
+		ImGui::Text("[%d] - Opcode: %02X %02X", element2, *(BYTE*)(i + 8), *(BYTE*)(i + 9)); ImGui::SameLine();
 
 		char* buttonID = (char*)"Replay####";
 		char* buttonID2 = (char*)"Remove####";
@@ -129,7 +128,7 @@ void PacketEditor::Push(UINT_PTR pBody)
 		if (PacketsArr.size() > 15) {
 			Pop();
 		}
-		WORD pSize = 0x2000;
+		WORD pSize = 0x1000;
 
 		char* packet = new char[pSize];
 		memcpy(packet, (void*)pBody, pSize);
@@ -143,11 +142,25 @@ void HackView::Display()
 	ImGui::Begin("Hacks");
 	if (ImGui::Button("Get Entity Iterator"))
 	{
-		std::stringstream strm;
-		auto localEntID =  SSystemGlobalEnvironment::GetInstance()->pGame->pGameFramework->GetClientActorId();
-		auto localEnt = SSystemGlobalEnvironment::GetInstance()->pEntitySystem->SomethingToDoWithIDs(localEntID);
-		strm << localEntID << " " << localEnt;
-		console.AddLog(strm.str().c_str());
+		auto localEntID = SSystemGlobalEnvironment::GetInstance()->pGame->pGameFramework->GetClientActorId();
+		if (localEntID)
+		{
+			auto localEnt = SSystemGlobalEnvironment::GetInstance()->pEntitySystem->SomethingToDoWithIDs(localEntID);
+			
+			if (localEnt)
+			{
+				std::stringstream strm;
+				strm << localEntID << " " << localEnt;
+				console.AddLog(strm.str().c_str());
+			}
+		}
+
+
+
+		//auto localEntID =  SSystemGlobalEnvironment::GetInstance()->pGame->pGameFramework->GetClientActorId();
+		//auto localEnt = SSystemGlobalEnvironment::GetInstance()->pEntitySystem->SomethingToDoWithIDs(localEntID);
+
+
 		// the commented code below is an example of how to iterate through all entities
 		/*
 		auto entSys = SSystemGlobalEnvironment::GetInstance()->pEntitySystem;
@@ -172,27 +185,34 @@ void HackView::Display()
 
 	if (b_displayLocalPlayerInfo)
 	{
-		IEntity* localEnt = LocalPlayerFinder::GetClientEntity();
+		if (LocalPlayerFinder::GetClientActorId())
+		{
+			IEntity* localEnt = LocalPlayerFinder::GetClientEntity();
 
-		std::stringstream addressStrm;
-		std::stringstream positionStrm;
-		std::stringstream angleStrm;
-		std::stringstream rotationStrm;
+			if (localEnt)
+			{
+				std::stringstream addressStrm;
+				std::stringstream positionStrm;
+				std::stringstream angleStrm;
+				std::stringstream rotationStrm;
 
-		addressStrm << "Local Entity: 0x" << localEnt;
-		ImGui::Text(addressStrm.str().c_str());
+				addressStrm << "Local Entity: 0x" << localEnt;
+				ImGui::Text(addressStrm.str().c_str());
 
-		Vec3 pos = localEnt->GetPos();
-		positionStrm << "Your position - X: " << pos.x << ", Y: " << pos.y << ", Z: " << pos.z;
-		ImGui::Text(positionStrm.str().c_str());
+				Vec3 pos = localEnt->GetPos();
+				positionStrm << "Your position - X: " << pos.x << ", Y: " << pos.y << ", Z: " << pos.z;
+				ImGui::Text(positionStrm.str().c_str());
 
-		Vec3 angles = localEnt->GetFixedAngles();
-		angleStrm << "Your angles - X: " << angles.x << ", Y: " << angles.y << ", Z: " << angles.z;
-		ImGui::Text(angleStrm.str().c_str());
+				Vec3 angles = localEnt->GetFixedAngles();
+				angleStrm << "Your angles - X: " << angles.x << ", Y: " << angles.y << ", Z: " << angles.z;
+				ImGui::Text(angleStrm.str().c_str());
 
-		Quat rotation = localEnt->GetRotation();
-		rotationStrm << "Your rotation - X: " << rotation.v.x << ", Y: " << rotation.v.y << ", Z: " << rotation.v.z << ", W: " << rotation.w;
-		ImGui::Text(rotationStrm.str().c_str());
+				Quat rotation = localEnt->GetRotation();
+				rotationStrm << "Your rotation - X: " << rotation.v.x << ", Y: " << rotation.v.y << ", Z: " << rotation.v.z << ", W: " << rotation.w;
+				ImGui::Text(rotationStrm.str().c_str());
+			}
+		}
+
 	}
 
 	ImGui::End();

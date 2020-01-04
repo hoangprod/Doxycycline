@@ -10,6 +10,7 @@ typedef bool(__fastcall* f_EncryptPacket)(__int64* a1, unsigned __int8 a2, __int
 typedef HRESULT(__stdcall* D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+extern packetCrypto packetinfo;
 
 ID3D11Device* pDevice = NULL;
 ID3D11DeviceContext* pContext = NULL;
@@ -26,20 +27,15 @@ HWND hWnd = nullptr;
 
 VMTHook dx_swapchain;
 
-bool firstTime = true;
 bool g_ShowMenu = false;
 
 f_EncryptPacket o_EncryptPacket = NULL;
 
 
-int* sClear = NULL;
-__int64 fakeKey = 0;
-__int64* sUnknown = 0;
-
 bool __fastcall h_EncryptPacket(__int64* Buffer, unsigned __int8 isEncrypted, __int64 key, int* cleartextbuffer)
 {
-	sUnknown = Buffer;
-	sClear = cleartextbuffer;
+	packetinfo.sUnknown = Buffer;
+	packetinfo.sClear = cleartextbuffer;
 
 	if (isEncrypted == 1)
 	{
@@ -90,7 +86,8 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 HRESULT __fastcall hookD3D11Present(IDXGISwapChain* pChain, UINT SyncInterval, UINT Flags)
 {
-	
+	static bool firstTime = true;
+
 	if (firstTime) {
 		if (FAILED(GetDeviceAndCtxFromSwapchain(pChain, &pDevice, &pContext)))
 			return phookD3D11Present(pChain, SyncInterval, Flags);
@@ -167,7 +164,7 @@ DWORD __stdcall InitializeHooks()
 {
 	hWnd = FindWindowEx(0, 0, L"ArcheAge", 0);
 
-	DWORD_PTR* p_Swapchain = (DWORD_PTR*)((DWORD_PTR)SSystemGlobalEnvironment::GetInstance()->pRenderer + 0x159E0);
+	DWORD_PTR* p_Swapchain = (DWORD_PTR*)((DWORD_PTR)SSystemGlobalEnvironment::GetInstance()->pRenderer + 0x159E0); // Pattern scan 0x159e0
 	DWORD_PTR* pSwapChainVtable = **(DWORD_PTR***)p_Swapchain;
 	dx_swapchain.vmt = ((void**)pSwapChainVtable);
 
