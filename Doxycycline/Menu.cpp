@@ -76,6 +76,7 @@ void PacketEditor::Display()
 
 		if (ImGui::Button(ss.str().c_str()))
 		{
+			console.AddLog("replay 2");
 			this->Replay(PacketsArr, element);
 		}
 		ImGui::SameLine();
@@ -100,33 +101,28 @@ void PacketEditor::Display()
 	for (auto i : SavedPackets) {
 		ImGui::Text("[%d] - Opcode: %02X %02X", element2, *(BYTE*)(i + 8), *(BYTE*)(i + 9)); ImGui::SameLine();
 
-		char* buttonID = (char*)"Replay####";
-		char* buttonID2 = (char*)"Remove####";
-		char* buttonID3 = (char*)"Edit###";
-		char* buttonID4 = (char*)"Copy###";
+		std::string Replay = "Replay##" + std::to_string(element2);
+		std::string Remove = "Remove##" + std::to_string(element2);
+		std::string Edit = "Edit##" + std::to_string(element2);
+		std::string Copy = "Copy##" + std::to_string(element2);
 
-		std::stringstream ss, sss, ssss, sssss;
-		ss << buttonID << element;
-		sss << buttonID2 << element;
-		ssss << buttonID3 << element;
-		sssss << buttonID4 << element;
 
-		if (ImGui::Button(ss.str().c_str()))
+		if (ImGui::Button(Replay.c_str()))
 		{
 			this->Replay(SavedPackets, element2);
 		}
 		ImGui::SameLine();
-		if (ImGui::Button(sss.str().c_str()))
+		if (ImGui::Button(Remove.c_str()))
 		{
 			SavedPackets.erase(SavedPackets.begin() + element2);
 		}
 		ImGui::SameLine();
-		if (ImGui::Button(ssss.str().c_str()))
+		if (ImGui::Button(Edit.c_str()))
 		{
 			this->Edit(SavedPackets, element2);
 		}
 		ImGui::SameLine();
-		if (ImGui::Button(sssss.str().c_str()))
+		if (ImGui::Button(Copy.c_str()))
 		{
 			this->CopyClipboard(SavedPackets, element2);
 		}
