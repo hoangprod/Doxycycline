@@ -204,7 +204,7 @@ void HackView::Display()
 
 	if (ImGui::Button("Test lua"))
 	{
-		lua_c_ExecuteLuaString(SSystemGlobalEnvironment::GetInstance()->scriptSysOne->luaState, "X2Chat:DispatchChatMessage(CMF_LOOT_METHOD_CHANGED,\"Executing \")");
+		lua_c_ExecuteLuaString(SSystemGlobalEnvironment::GetInstance()->scriptSysTwo->luaState, "X2Chat:DispatchChatMessage(CMF_LOOT_METHOD_CHANGED,\"Executing \")");
 	}
 
 	ImGui::Checkbox("Display local player debug info", &b_displayLocalPlayerInfo);

@@ -151,7 +151,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <ControlFlowGuard>false</ControlFlowGuard>
-      <DisableSpecificWarnings>26812;6387;</DisableSpecificWarnings>
+      <DisableSpecificWarnings>26812;6387;6001;</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

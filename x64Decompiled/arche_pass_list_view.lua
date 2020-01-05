@@ -1,0 +1,252 @@
+ARCHE_PASS_LIST_INFO = {
+  LIST_ROW_COUNT = 5,
+  COLUMN_HEIGHT = 33,
+  LIST_DATA_HEIGHT = 48
+}
+local sideMargin, titleMargin, bottomMargin = GetWindowMargin()
+local LIST_ROW_COUNT = ARCHE_PASS_LIST_INFO.LIST_ROW_COUNT
+local COLUMN_HEIGHT = ARCHE_PASS_LIST_INFO.COLUMN_HEIGHT
+function CreateArchePassRegistryWnd(parent)
+  local archePassRegistryWnd = CreateWindow("archePassRegistryWnd", "UIParent")
+  archePassRegistryWnd:SetExtent(800, 715)
+  archePassRegistryWnd:AddAnchor("CENTER", "UIParent", 0, 0)
+  archePassRegistryWnd:SetTitle(GetCommonText("arche_pass_registry_title"))
+  archePassRegistryWnd:Show(false)
+  parent.archePassRegistryWnd = archePassRegistryWnd
+  local function CreateArchePassListFrame(parent)
+    local passListWidget = parent:CreateChildWidget("emptyWidget", "passListWidget", 0, true)
+    passListWidget:SetExtent(335, 541)
+    passListWidget:AddAnchor("TOPLEFT", parent.titleBar, sideMargin, titleMargin + 10)
+    parent.passListWidget = passListWidget
+    local passTitleBg = passListWidget:CreateDrawable(TEXTURE_PATH.DEFAULT, "common_bg", "background")
+    passTitleBg:SetTextureColor("alpha40")
+    passTitleBg:AddAnchor("TOPLEFT", passListWidget, 0, 0)
+    passTitleBg:AddAnchor("BOTTOMRIGHT", passListWidget, 0, -passListWidget:GetHeight() + 30)
+    local passTitleLabel = passListWidget:CreateChildWidget("label", "passTitleLabel", 0, true)
+    passTitleLabel:AddAnchor("LEFT", passTitleBg, 15, 0)
+    passTitleLabel:SetExtent(100, FONT_SIZE.MIDDLE)
+    ApplyTextColor(passTitleLabel, FONT_COLOR.DEFAULT)
+    passTitleLabel.style:SetAlign(ALIGN_LEFT)
+    passTitleLabel:SetText(GetUIText(COMMON_TEXT, "arche_pass_list_title"))
+    local scrollListBox = W_CTRL.CreateScrollListBox("scrollListBox", passListWidget, passListWidget, "TYPE2")
+    scrollListBox.content:TurnoffOverParent()
+    scrollListBox.content:SetTreeTypeIndent(true, 20, 20)
+    scrollListBox.content:SetHeight(FONT_SIZE.MIDDLE)
+    scrollListBox.content.itemStyle:SetFontSize(FONT_SIZE.LARGE)
+    scrollListBox.content:UseChildStyle(true)
+    scrollListBox.content.childStyle:SetEllipsis(true)
+    scrollListBox.content.childStyle:SetFontSize(FONT_SIZE.MIDDLE)
+    scrollListBox.content.childStyle:SetColor(FONT_COLOR.DEFAULT[1], FONT_COLOR.DEFAULT[2], FONT_COLOR.DEFAULT[3], FONT_COLOR.DEFAULT[4])
+    parent.scrollListBox = scrollListBox
+    local line = scrollListBox.content:CreateSeparatorImageDrawable(TEXTURE_PATH.DEFAULT, "background")
+    line:SetTextureInfo("line_02", "default")
+    line:SetExtent(170, 3)
+    scrollListBox:SetTreeImage()
+    scrollListBox:AddAnchor("TOPLEFT", passTitleBg, 1, passTitleBg:GetHeight() + 5)
+    scrollListBox:AddAnchor("BOTTOMRIGHT", passListWidget, -6, 0)
+  end
+  local CreateArchePassInfoFrame = function(parent)
+    local passInfoWidget = parent:CreateChildWidget("emptyWidget", "passInfoWidget", 0, true)
+    passInfoWidget:SetExtent(413, 180)
+    passInfoWidget:AddAnchor("TOPLEFT", parent.passListWidget, parent.passListWidget:GetWidth() + 12, 0)
+    parent.passInfoWidget = passInfoWidget
+    local passInfoTitleBg = passInfoWidget:CreateDrawable(TEXTURE_PATH.DEFAULT, "common_bg", "background")
+    passInfoTitleBg:SetTextureColor("alpha40")
+    passInfoTitleBg:AddAnchor("TOPLEFT", passInfoWidget, 0, 0)
+    passInfoTitleBg:AddAnchor("BOTTOMRIGHT", passInfoWidget, 0, -passInfoWidget:GetHeight() + 30)
+    local passInfoTitleLabel = passInfoWidget:CreateChildWidget("label", "passInfoTitleLabel", 0, true)
+    passInfoTitleLabel:AddAnchor("LEFT", passInfoTitleBg, 15, 0)
+    passInfoTitleLabel:SetExtent(100, FONT_SIZE.MIDDLE)
+    ApplyTextColor(passInfoTitleLabel, FONT_COLOR.DEFAULT)
+    passInfoTitleLabel.style:SetAlign(ALIGN_LEFT)
+    passInfoTitleLabel:SetText(GetUIText(COMMON_TEXT, "arche_pass_info_title"))
+    local passInfoBg = passInfoWidget:CreateDrawable(TEXTURE_PATH.DEFAULT, "common_bg", "background")
+    passInfoBg:SetTextureColor("bg_02")
+    passInfoBg:AddAnchor("TOPLEFT", passInfoTitleBg, 0, 0)
+    passInfoBg:AddAnchor("BOTTOMRIGHT", passInfoWidget, 0, 0)
+    local passItemIconFrame = CreateItemIconButton("passItemIconFrame", parent)
+    passItemIconFrame:SetExtent(54, 54)
+    passItemIconFrame:AddAnchor("TOPLEFT", passInfoTitleBg, 17, passInfoTitleBg:GetHeight() + 17)
+    local passItemIcon = parent:CreateImageDrawable("ui/icon/archepass/icon_pass_01.dds", "overlay")
+    passItemIcon:SetExtent(50, 50)
+    passItemIcon:AddAnchor("TOPLEFT", passItemIconFrame, 2, 2)
+    parent.passItemIcon = passItemIcon
+    local passPeroidImg = parent:CreateDrawable("ui/eventcenter/icon_text.dds", "date", "artwork")
+    passPeroidImg:AddAnchor("LEFT", passItemIcon, passItemIcon:GetWidth() + 11, 0)
+    local passNameImg = parent:CreateDrawable("ui/eventcenter/icon_text.dds", "name", "artwork")
+    passNameImg:AddAnchor("BOTTOMLEFT", passPeroidImg, 0, -passPeroidImg:GetHeight() - 3)
+    local passCostImg = parent:CreateDrawable("ui/eventcenter/icon_text.dds", "money", "artwork")
+    passCostImg:AddAnchor("BOTTOMLEFT", passPeroidImg, 0, passPeroidImg:GetHeight() + 3)
+    local passNameLabel = parent:CreateChildWidget("textbox", "passNameLabel", 0, true)
+    passNameLabel:AddAnchor("LEFT", passNameImg, "RIGHT", 10, 0)
+    passNameLabel:SetExtent(250, FONT_SIZE.MIDDLE)
+    passNameLabel.style:SetFontSize(FONT_SIZE.MIDDLE)
+    ApplyTextColor(passNameLabel, FONT_COLOR.DEFAULT)
+    passNameLabel.style:SetAlign(ALIGN_LEFT)
+    passNameLabel.style:SetEllipsis(true)
+    parent.passNameLabel = passNameLabel
+    local passPeriodLabel = parent:CreateChildWidget("textbox", "passPeriodLabel", 0, true)
+    passPeriodLabel:AddAnchor("LEFT", passPeroidImg, "RIGHT", 10, 0)
+    passPeriodLabel:SetExtent(250, FONT_SIZE.MIDDLE)
+    passPeriodLabel.style:SetFontSize(FONT_SIZE.MIDDLE)
+    ApplyTextColor(passPeriodLabel, FONT_COLOR.DEFAULT)
+    passPeriodLabel.style:SetAlign(ALIGN_LEFT)
+    passPeriodLabel.style:SetEllipsis(true)
+    parent.passPeriodLabel = passPeriodLabel
+    local passCostLabel = parent:CreateChildWidget("textbox", "passCostLabel", 0, true)
+    passCostLabel:AddAnchor("LEFT", passCostImg, "RIGHT", 10, 0)
+    passCostLabel:SetExtent(250, FONT_SIZE.MIDDLE)
+    passCostLabel.style:SetFontSize(FONT_SIZE.MIDDLE)
+    ApplyTextColor(passCostLabel, FONT_COLOR.DEFAULT)
+    passCostLabel.style:SetAlign(ALIGN_LEFT)
+    passCostLabel.style:SetEllipsis(true)
+    parent.passCostLabel = passCostLabel
+    local passDescriptionLabel = parent:CreateChildWidget("textbox", "passDescriptionLabel", 0, true)
+    passDescriptionLabel:AddAnchor("TOPLEFT", passInfoWidget, 16, 116)
+    passDescriptionLabel:AddAnchor("BOTTOMRIGHT", passInfoWidget, -16, 0)
+    passDescriptionLabel.style:SetFontSize(FONT_SIZE.MIDDLE)
+    ApplyTextColor(passDescriptionLabel, FONT_COLOR.DEFAULT)
+    passDescriptionLabel.style:SetAlign(ALIGN_LEFT)
+    passDescriptionLabel.style:SetEllipsis(true)
+    parent.passDescriptionLabel = passDescriptionLabel
+    local line = CreateLine(passDescriptionLabel, "TYPE1")
+    line:AddAnchor("TOPLEFT", passDescriptionLabel, "BOTTOMLEFT", -10, -passDescriptionLabel:GetHeight())
+    line:AddAnchor("TOPRIGHT", passDescriptionLabel, "BOTTOMRIGHT", 10, -passDescriptionLabel:GetHeight())
+  end
+  local function CreateArchePassRewardFrame(parent)
+    local passRewardWidget = parent:CreateChildWidget("emptyWidget", "passRewardWidget", 0, true)
+    passRewardWidget:SetExtent(413, 355)
+    passRewardWidget:AddAnchor("TOPLEFT", parent.passInfoWidget, 0, parent.passInfoWidget:GetHeight() + 8)
+    parent.passRewardWidget = passRewardWidget
+    local passRewardTitleBg = passRewardWidget:CreateDrawable(TEXTURE_PATH.DEFAULT, "common_bg", "background")
+    passRewardTitleBg:SetTextureColor("alpha40")
+    passRewardTitleBg:AddAnchor("TOPLEFT", passRewardWidget, 0, 0)
+    passRewardTitleBg:AddAnchor("BOTTOMRIGHT", passRewardWidget, 0, -passRewardWidget:GetHeight() + 31)
+    local passInfoTitleLabel = passRewardWidget:CreateChildWidget("label", "passInfoTitleLabel", 0, true)
+    passInfoTitleLabel:AddAnchor("LEFT", passRewardTitleBg, 15, 0)
+    passInfoTitleLabel:SetExtent(100, FONT_SIZE.MIDDLE)
+    ApplyTextColor(passInfoTitleLabel, FONT_COLOR.DEFAULT)
+    passInfoTitleLabel.style:SetAlign(ALIGN_LEFT)
+    passInfoTitleLabel:SetText(GetUIText(COMMON_TEXT, "arche_pass_reward_info_title"))
+    local passRewardListWnd = W_CTRL.CreateScrollListCtrl("listWnd", parent)
+    passRewardListWnd:SetExtent(405, 272)
+    passRewardListWnd:AddAnchor("TOPLEFT", passRewardWidget, 0, passRewardTitleBg:GetHeight())
+    parent.passRewardListWnd = passRewardListWnd
+    local TierLayoutSetFunc = function(frame, rowIndex, colIndex, subItem)
+      local tier = subItem:CreateChildWidget("label", "tier", 0, true)
+      tier.style:SetAlign(ALIGN_CENTER)
+      subItem.style:SetFontSize(FONT_SIZE.MIDDLE)
+      ApplyTextColor(tier, FONT_COLOR.DEFAULT)
+      tier:AddAnchor("CENTER", subItem, -1, 1)
+      local line = DrawItemUnderLine(subItem, "overlay")
+      line:AddAnchor("TOPLEFT", subItem, "BOTTOMLEFT", 0, 0)
+      line:AddAnchor("TOPRIGHT", subItem, "BOTTOMRIGHT", 300, 0)
+      line:SetVisible(false)
+      subItem.line = line
+    end
+    local TierDataSetFunc = function(subItem, data, setValue)
+      if setValue then
+        subItem.tier:SetText(tostring(data.tier))
+        if subItem.line ~= nil then
+          subItem.line:Show(true)
+        end
+      else
+        subItem.tier:SetText("")
+        if subItem.line ~= nil then
+          subItem.line:Show(false)
+        end
+      end
+    end
+    local RewardItemLayoutSetFunc = function(frame, rowIndex, colIndex, subItem)
+      local rewardItemButton = CreateItemIconButton("rewardItemButton", subItem)
+      rewardItemButton:AddAnchor("CENTER", subItem, -1, 1)
+    end
+    local RewardItemDataSetFunc = function(subItem, data, setValue)
+      if setValue then
+        subItem.rewardItemButton:SetItemInfo(data.rewardItemInfo)
+        subItem.rewardItemButton:SetStack(data.rewardItemCount)
+        subItem.rewardItemButton:Show(true)
+      else
+        subItem.rewardItemButton:Init()
+        subItem.rewardItemButton:Show(false)
+      end
+    end
+    local PremiumRewardItemLayoutSetFunc = function(frame, rowIndex, colIndex, subItem)
+      local rewardItemButton = CreateItemIconButton("rewardItemButton", subItem)
+      rewardItemButton:AddAnchor("CENTER", subItem, -1, 1)
+    end
+    local PremiumRewardItemDataSetFunc = function(subItem, data, setValue)
+      if setValue then
+        subItem.rewardItemButton:SetItemInfo(data.premiumRewardItemInfo)
+        subItem.rewardItemButton:SetStack(data.premiumRewardItemCount)
+        subItem.rewardItemButton:Show(true)
+      else
+        subItem.rewardItemButton:Init()
+        subItem.rewardItemButton:Show(false)
+      end
+    end
+    passRewardListWnd:InsertColumn(GetCommonText("arche_pass_tier_info"), 95, LCCIT_STRING, TierDataSetFunc, nil, nil, TierLayoutSetFunc)
+    passRewardListWnd:InsertColumn(GetCommonText("arche_pass_normal_reward"), 145, LCCIT_WINDOW, RewardItemDataSetFunc, nil, nil, RewardItemLayoutSetFunc)
+    passRewardListWnd:InsertColumn(GetCommonText("arche_pass_premium_reward"), 145, LCCIT_WINDOW, PremiumRewardItemDataSetFunc, nil, nil, PremiumRewardItemLayoutSetFunc)
+    passRewardListWnd:InsertRows(LIST_ROW_COUNT, false)
+    passRewardListWnd.listCtrl:DisuseSorting()
+    DrawListCtrlUnderLine(passRewardListWnd.listCtrl, COLUMN_HEIGHT - 2)
+    local columnBg = passRewardListWnd:CreateDrawable(TEXTURE_PATH.DEFAULT, "common_bg", "background")
+    columnBg:SetTextureColor("alpha40")
+    columnBg:AddAnchor("TOPLEFT", passRewardListWnd.listCtrl.column[1], 0, 0)
+    columnBg:AddAnchor("BOTTOMRIGHT", passRewardListWnd.listCtrl.column[3], 27, 0)
+    local listBg = passRewardListWnd:CreateDrawable(TEXTURE_PATH.DEFAULT, "common_bg", "background")
+    listBg:SetTextureColor("bg_02")
+    listBg:AddAnchor("TOPLEFT", passRewardListWnd.listCtrl, 0, passRewardListWnd.listCtrl.column[1]:GetHeight())
+    listBg:AddAnchor("BOTTOMRIGHT", passRewardListWnd.listCtrl.column[3], 25, passRewardListWnd:GetHeight() - passRewardListWnd.listCtrl.column[1]:GetHeight())
+    local premiumListBg = passRewardListWnd:CreateDrawable(TEXTURE_PATH.DEFAULT, "common_bg_crop", "background")
+    premiumListBg:SetTextureColor("alpha10")
+    premiumListBg:AddAnchor("TOPLEFT", passRewardListWnd.listCtrl.column[3], 0, passRewardListWnd.listCtrl.column[1]:GetHeight())
+    premiumListBg:AddAnchor("BOTTOMRIGHT", passRewardListWnd.listCtrl.column[3], 25, passRewardListWnd:GetHeight() - passRewardListWnd.listCtrl.column[1]:GetHeight())
+    local premiumListEffectBg = passRewardListWnd:CreateDrawable("ui/eventcenter/archepass.dds", "bg_effect", "background")
+    premiumListEffectBg:AddAnchor("TOPLEFT", passRewardListWnd.listCtrl.column[3], 0, passRewardListWnd.listCtrl.column[1]:GetHeight() + 5)
+    premiumListEffectBg:AddAnchor("BOTTOMRIGHT", passRewardListWnd.listCtrl.column[3], 0, passRewardListWnd.listCtrl:GetHeight() - passRewardListWnd.listCtrl.column[1]:GetHeight() - 5)
+    parent.premiumListEffectBg = premiumListEffectBg
+    for i = 1, #passRewardListWnd.listCtrl.column do
+      SettingListColumn(passRewardListWnd.listCtrl, passRewardListWnd.listCtrl.column[i], COLUMN_HEIGHT)
+      DrawListCtrlColumnSperatorLine(passRewardListWnd.listCtrl.column[i], #passRewardListWnd.listCtrl.column, i)
+      SetButtonFontColor(passRewardListWnd.listCtrl.column[i], GetButtonDefaultFontColor_V2())
+    end
+    local lastRewardBg = passRewardWidget:CreateDrawable(TEXTURE_PATH.DEFAULT, "common_bg", "background")
+    lastRewardBg:SetTextureColor("orange")
+    lastRewardBg:AddAnchor("TOPLEFT", passRewardListWnd, 0, passRewardListWnd:GetHeight() + 5)
+    lastRewardBg:AddAnchor("BOTTOMRIGHT", passRewardWidget, 0, 0)
+    local lastPremiumRewardBg = passRewardWidget:CreateDrawable("ui/eventcenter/archepass.dds", "bg_effect_final", "background")
+    lastPremiumRewardBg:AddAnchor("TOPLEFT", passRewardListWnd, 239, passRewardListWnd:GetHeight() + 5)
+    lastPremiumRewardBg:AddAnchor("BOTTOMRIGHT", passRewardWidget, 0, 0)
+    local lastRewardLabel = passRewardWidget:CreateChildWidget("label", "lastRewardLabel", 0, true)
+    lastRewardLabel:AddAnchor("LEFT", lastRewardBg, 10, 0)
+    lastRewardLabel:SetExtent(100, FONT_SIZE.MIDDLE)
+    ApplyTextColor(lastRewardLabel, FONT_COLOR.DEFAULT)
+    lastRewardLabel.style:SetAlign(ALIGN_CENTER)
+    lastRewardLabel:SetText(GetUIText(COMMON_TEXT, "arche_pass_last_reward"))
+    local lastRewardButton = CreateItemIconButton("lastRewardButton", passRewardWidget)
+    lastRewardButton:AddAnchor("TOPLEFT", lastRewardBg, 146, 2)
+    parent.lastRewardButton = lastRewardButton
+    local lastPremiumRewardButton = CreateItemIconButton("lastPremiumRewardButton", passRewardWidget)
+    lastPremiumRewardButton:AddAnchor("TOPLEFT", lastPremiumRewardBg, 53, 2)
+    parent.lastPremiumRewardButton = lastPremiumRewardButton
+  end
+  CreateArchePassListFrame(archePassRegistryWnd)
+  CreateArchePassInfoFrame(archePassRegistryWnd)
+  CreateArchePassRewardFrame(archePassRegistryWnd)
+  local descriptionLabel = archePassRegistryWnd:CreateChildWidget("textbox", "descriptionLabel", 0, true)
+  descriptionLabel:AddAnchor("TOPLEFT", archePassRegistryWnd.passListWidget, 0, archePassRegistryWnd.passListWidget:GetHeight() + 10)
+  descriptionLabel:SetExtent(760, 50)
+  descriptionLabel.style:SetFontSize(FONT_SIZE.MIDDLE)
+  ApplyTextColor(descriptionLabel, FONT_COLOR.DEFAULT)
+  descriptionLabel.style:SetAlign(ALIGN_CENTER)
+  descriptionLabel:SetText(GetCommonText("arche_pass_registry_description"))
+  local startButton = archePassRegistryWnd:CreateChildWidget("button", "startButton", 0, true)
+  startButton:SetText(GetCommonText("squad_info_apply_matching"))
+  ApplyButtonSkin(startButton, BUTTON_BASIC.DEFAULT)
+  startButton:AddAnchor("BOTTOM", archePassRegistryWnd, 0, -17)
+  parent.startButton = startButton
+  SetArchePassListEventFunction(archePassRegistryWnd)
+  return parent
+end

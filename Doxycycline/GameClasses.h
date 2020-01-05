@@ -279,9 +279,10 @@ public:
 class IScriptSystem
 {
 public:
-	char pad_0008[24]; //0x0008
+	char pad_0008[16]; //0x0008
+	void* luaState; //0x0018
 	int32_t PlaceHolderIgnore; //0x0020
-	void *luaState; //0x0024
+	void* InvalidPlaceHolder; //0x0024
 	char pad_002C[24]; //0x002C
 
 	virtual void Function0();
@@ -290,7 +291,7 @@ public:
 	virtual void Function3();
 	virtual void Function4();
 	virtual void ExecuteFile();
-	virtual void ExecuteBuffer(); // every function in this vtable is valid but
+	virtual void ExecuteBuffer();
 	virtual void Function7();
 	virtual void Function8();
 	virtual void Function9();

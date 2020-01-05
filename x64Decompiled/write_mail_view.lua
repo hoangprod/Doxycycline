@@ -1,0 +1,22 @@
+function SetViewOfWriteMailWindow(id, parent)
+  local sideMargin, titleMargin, bottomMargin = GetWindowMargin()
+  local window = CreateWindow(id, parent)
+  window:SetExtent(430, 545)
+  window:SetTitle(locale.mail.writeMail)
+  CreateMailUpperFrame(window, "write")
+  CreateContentFrame(window, "write")
+  local buttonSetWindow = window:CreateChildWidget("window", "buttonSetWindow", 0, true)
+  buttonSetWindow:Show(true)
+  buttonSetWindow:SetExtent(390, BUTTON_SIZE.DEFAULT_SMALL.HEIGHT)
+  buttonSetWindow:AddAnchor("BOTTOMLEFT", window, sideMargin, -sideMargin)
+  buttonSetWindow:EnableFocus(false)
+  local radioGroup = CreateRadioGroup(window:GetId() .. ".radioGroup", buttonSetWindow, "vertical")
+  radioGroup:SetAutoWidth(true)
+  radioGroup:AddAnchor("TOPLEFT", buttonSetWindow, 0, 0)
+  window.radioGroup = radioGroup
+  local sendButton = window:CreateChildWidget("button", "sendButton", 0, true)
+  sendButton:AddAnchor("RIGHT", buttonSetWindow, 3, 0)
+  sendButton:SetText(locale.mail.send)
+  ApplyButtonSkin(sendButton, BUTTON_BASIC.DEFAULT)
+  return window
+end
