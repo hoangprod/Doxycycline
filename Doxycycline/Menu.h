@@ -351,7 +351,10 @@ struct PacketEditor
 
 	void Clear() {
 		for (auto i : PacketsArr) {
-			//delete[](i);
+			if (std::find(SavedPackets.begin(), SavedPackets.end(), i) == SavedPackets.end())
+			{
+				delete[] i;
+			}
 		}
 		PacketsArr.clear();
 	}
@@ -359,7 +362,11 @@ struct PacketEditor
 	void Push(UINT_PTR pBody);
 
 	void Pop(BYTE Element = 0) {
-		//delete[] PacketsArr[Element];
+		if (std::find(SavedPackets.begin(), SavedPackets.end(), PacketsArr[Element]) == SavedPackets.end())
+		{
+			delete[] PacketsArr[Element];
+		}
+
 		PacketsArr.erase(PacketsArr.begin() + Element);
 	}
 };
