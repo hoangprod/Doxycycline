@@ -38,6 +38,9 @@ extern f_lua_pushboolean lua_pushboolean;
 extern f_lua_pushvalue lua_pushvalue;
 extern f_lua_settop lua_settop;
 
+extern void* luaState1;
+extern void* luaState2;
+
 #define lua_tostring(L,i)	lua_tolstring(L, (i), NULL)
 #define lua_getglobal(L,s)	lua_getfield(L, -10002, (s))
 #define lua_istable(L,n)	(lua_type(L, (n)) == 5)

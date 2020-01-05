@@ -22,6 +22,12 @@ f_lua_pushboolean lua_pushboolean;
 f_lua_pushvalue lua_pushvalue;
 f_lua_settop lua_settop;
 
+// this lua state holds shit related to game windows, auction stuff, x2Unit, X2Chat, and other stuff. More information is needed to properly name this lua state
+void* luaState1;
+
+// this lua state contains shit related to actors, entities, AI, stats
+void* luaState2;
+
 void LuaError(const char* functionName)
 {
 	std::stringstream ss;

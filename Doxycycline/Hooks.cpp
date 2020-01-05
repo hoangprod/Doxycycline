@@ -6,6 +6,7 @@
 #include "Helper.h"
 #include "GameClasses.h"
 #include "Hacks.h"
+#include "LuaAPI.h"
 #include <intrin.h>
 #include <iostream>
 
@@ -49,6 +50,7 @@ HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** 
 
 	return ret;
 }
+
 
 float __fastcall h_GetWaterLevel(void* cry3DEngine, void* referencePOS)
 {

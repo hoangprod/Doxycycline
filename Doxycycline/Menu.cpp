@@ -194,9 +194,14 @@ void HackView::Display()
 		*/
 	}
 
-	ImGui::Checkbox("Display local player debug info", &b_displayLocalPlayerInfo);
 	ImGui::Checkbox("Fly Hack", &bFlyHack);
 
+	if (ImGui::SliderFloat("Player Speed", &speedMultiplier, 1.0f, 50.0f))
+	{
+		SetSpeed(speedMultiplier);
+	}
+
+	ImGui::Checkbox("Display local player debug info", &b_displayLocalPlayerInfo);
 	if (b_displayLocalPlayerInfo)
 	{
 		if (LocalPlayerFinder::GetClientActorId())
@@ -213,7 +218,7 @@ void HackView::Display()
 				addressStrm << "Local Entity: 0x" << localEnt;
 				ImGui::Text(addressStrm.str().c_str());
 
-				Vec3 pos = localEnt->GetPos();
+				Vec3 pos = localEnt->GetWorldPos();
 				positionStrm << "Your position - X: " << pos.x << ", Y: " << pos.y << ", Z: " << pos.z;
 				ImGui::Text(positionStrm.str().c_str());
 
@@ -226,7 +231,6 @@ void HackView::Display()
 				ImGui::Text(rotationStrm.str().c_str());
 			}
 		}
-
 	}
 
 	ImGui::End();

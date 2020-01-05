@@ -66,7 +66,7 @@ public:
 	virtual void Function3();
 	virtual void Function4();
 	virtual void Function5();
-	virtual void Function6(); // this looks like getflags? but its possible its also GetId
+	virtual void Function6(); // this looks like getflags?
 	virtual void Function7();
 	virtual void Function8();
 	virtual void Function9();
@@ -98,7 +98,7 @@ public:
 	virtual Vec3 GetScale();
 	virtual void Function36();
 	virtual void SetPosRotScale(const Vec3 &vPos, const Quat &qRotation, const Vec3 &vScale, int nWhyFlags = 0);
-	virtual Vec3 GetWorldPos(); //This function worked in older versions but is giving me weird output. TODO: Discuss this/figure out if its fixable
+	virtual Vec3& GetWorldPos(); // This function works now. If any of the other Get functions return weird values, try making it return a reference with &
 	virtual Vec3 GetWorldAngles(); // this works
 	virtual Quat GetWorldRotation(); // This function worked in older versions but is giving me weird output. TODO: Discuss this/figure out if its fixable
 	virtual void GetForwardDir();
@@ -276,6 +276,58 @@ public:
 	virtual void Function50();
 }; //Size: 0x0080
 
+class IScriptSystem
+{
+public:
+	char pad_0008[24]; //0x0008
+	int32_t PlaceHolderIgnore; //0x0020
+	void *luaState; //0x0024
+	char pad_002C[24]; //0x002C
+
+	virtual void Function0();
+	virtual void Function1();
+	virtual void Function2();
+	virtual void Function3();
+	virtual void Function4();
+	virtual void ExecuteFile();
+	virtual void ExecuteBuffer(); // every function in this vtable is valid but
+	virtual void Function7();
+	virtual void Function8();
+	virtual void Function9();
+	virtual void Function10();
+	virtual void Function11();
+	virtual void Function12();
+	virtual void BeginCallOne();
+	virtual void BeginCallTwo();
+	virtual void BeginCallThree();
+	virtual void BeginCallFour();
+	virtual void EndCall();
+	virtual void Function18();
+	virtual void Function19();
+	virtual void Function20();
+	virtual void Function21();
+	virtual void Function22();
+	virtual void Function23();
+	virtual void Function24();
+	virtual void Function25();
+	virtual void Function26();
+	virtual void Function27();
+	virtual void Function28();
+	virtual void Function29();
+	virtual void Function30();
+	virtual void Function31();
+	virtual void Function32();
+	virtual void Function33();
+	virtual void Function34();
+	virtual void Function35();
+	virtual void Function36();
+	virtual void Function37();
+	virtual void Function38();
+	virtual void Function39();
+	virtual void Function40();
+	virtual void Function41();
+}; //Size: 0x0044
+
 class IGame
 {
 public:
@@ -305,9 +357,9 @@ public:
 	void *pInput; //0x0020
 	void *pTimer; //0x0028
 	char pad_0030[16]; //0x0030
-	void *possibleScriptSysThree; //0x0040
-	void *possibleScriptSys; //0x0048
-	void *possibleScriptSysTwo; //0x0050
+	IScriptSystem* scriptSysOne; //0x0040
+	IScriptSystem* scriptSysTwo; //0x0048
+	IScriptSystem* ScriptSysThree; //0x0050
 	void *p3DEngine; //0x0058
 	void *pSoundSystem; //0x0060
 	void *pMusicSystem; //0x0068
