@@ -22,14 +22,17 @@ void SetPlayerSpeed(float speed)
 void ToggleNoFall(bool bEnable)
 {
 	DWORD_PTR IActor = (DWORD_PTR)LocalPlayerFinder::GetClientActor();
-	float* pFallDamageSafetyNet = (float*)(IActor + 0x184);
-	if (bEnable)
+	if (IActor)
 	{
-		*pFallDamageSafetyNet = 999999.0f;
-	}
+		float* pFallDamageSafetyNet = (float*)(IActor + 0x184);
+		if (bEnable)
+		{
+			*pFallDamageSafetyNet = 999999.0f;
+		}
 
-	else
-	{
-		*pFallDamageSafetyNet = 0;
+		else
+		{
+			*pFallDamageSafetyNet = 0;
+		}
 	}
 }
