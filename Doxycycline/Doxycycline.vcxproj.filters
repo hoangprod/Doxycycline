@@ -57,6 +57,9 @@
     <ClCompile Include="Hacks.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LuaAPI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Imgui\imconfig.h">
@@ -109,6 +112,9 @@
     </ClInclude>
     <ClInclude Include="Imgui\examples\imgui_memory_editor.h">
       <Filter>Schofferhoffer</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaAPI.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
