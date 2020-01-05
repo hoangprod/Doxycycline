@@ -150,57 +150,21 @@ void PacketEditor::Push(UINT_PTR pBody)
 void HackView::Display()
 {
 	ImGui::Begin("Hacks");
-	if (ImGui::Button("Get Entity Iterator"))
-	{
-		auto localEntID = SSystemGlobalEnvironment::GetInstance()->pGame->pGameFramework->GetClientActorId();
-		if (localEntID)
-		{
-			auto localEnt = SSystemGlobalEnvironment::GetInstance()->pEntitySystem->SomethingToDoWithIDs(localEntID);
-			
-			if (localEnt)
-			{
-				std::stringstream strm;
-				strm << localEntID << " " << localEnt;
-				console.AddLog(strm.str().c_str());
-			}
-		}
-
-
-
-		//auto localEntID =  SSystemGlobalEnvironment::GetInstance()->pGame->pGameFramework->GetClientActorId();
-		//auto localEnt = SSystemGlobalEnvironment::GetInstance()->pEntitySystem->SomethingToDoWithIDs(localEntID);
-
-
-		// the commented code below is an example of how to iterate through all entities
-		/*
-		auto entSys = SSystemGlobalEnvironment::GetInstance()->pEntitySystem;
-		auto entIT = entSys->GetEntityIterator();
-		std::stringstream strm;
-		strm << "Entity atext " << entSys->GetNumEntities() << " " << entSys->GetEntityIterator();
-		console.AddLog(strm.str().c_str());
-
-		for (int i = 0; i < 10; i++)
-		{
-			IEntity* ent = entIT->Next();
-			if (ent && ent->Name)
-			{
-				console.AddLog(ent->Name);
-			}
-
-		}
-		*/
-	}
 
 	ImGui::Checkbox("Fly Hack", &bFlyHack);
+	if (ImGui::Checkbox("No Fall Damage", &bNoFallDamage))
+	{
+		ToggleNoFall(bNoFallDamage);
+	}
 
 	if (ImGui::SliderFloat("Player Speed", &speedMultiplier, 1.0f, 50.0f))
 	{
-		SetSpeed(speedMultiplier);
+		SetPlayerSpeed(speedMultiplier);
 	}
 
 	if (ImGui::Button("Test lua"))
 	{
-		lua_c_ExecuteLuaString(SSystemGlobalEnvironment::GetInstance()->scriptSysTwo->luaState, "X2Chat:DispatchChatMessage(CMF_LOOT_METHOD_CHANGED,\"Executing \")");
+		lua_c_ExecuteLuaString(SSystemGlobalEnvironment::GetInstance()->pScriptSysTwo->luaState, "X2Chat:DispatchChatMessage(CMF_LOOT_METHOD_CHANGED,\"Executing \")");
 	}
 
 	ImGui::Checkbox("Display local player debug info", &b_displayLocalPlayerInfo);
@@ -209,16 +173,20 @@ void HackView::Display()
 		if (LocalPlayerFinder::GetClientActorId())
 		{
 			IEntity* localEnt = LocalPlayerFinder::GetClientEntity();
-
+			void* localActor = LocalPlayerFinder::GetClientActor();
 			if (localEnt)
 			{
-				std::stringstream addressStrm;
+				std::stringstream entAddressStrm;
+				std::stringstream actorAddressStrm;
 				std::stringstream positionStrm;
 				std::stringstream angleStrm;
 				std::stringstream rotationStrm;
 
-				addressStrm << "Local Entity: 0x" << localEnt;
-				ImGui::Text(addressStrm.str().c_str());
+				actorAddressStrm << "Local Actor: 0x" << localActor;
+				ImGui::Text(actorAddressStrm.str().c_str());
+
+				entAddressStrm << "Local Entity: 0x" << localEnt;
+				ImGui::Text(entAddressStrm.str().c_str());
 
 				Vec3 pos = localEnt->GetWorldPos();
 				positionStrm << "Your position - X: " << pos.x << ", Y: " << pos.y << ", Z: " << pos.z;

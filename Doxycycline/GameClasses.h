@@ -280,9 +280,9 @@ class IScriptSystem
 {
 public:
 	char pad_0008[16]; //0x0008
-	void* luaState; //0x0018
+	void *luaState; //0x0018
 	int32_t PlaceHolderIgnore; //0x0020
-	void* InvalidPlaceHolder; //0x0024
+	void *InvalidPlaceHolder; //0x0024
 	char pad_002C[24]; //0x002C
 
 	virtual void Function0();
@@ -358,9 +358,9 @@ public:
 	void *pInput; //0x0020
 	void *pTimer; //0x0028
 	char pad_0030[16]; //0x0030
-	IScriptSystem* scriptSysOne; //0x0040
-	IScriptSystem* scriptSysTwo; //0x0048
-	IScriptSystem* ScriptSysThree; //0x0050
+	IScriptSystem* pScriptSysOne; //0x0040
+	IScriptSystem* pScriptSysTwo; //0x0048
+	IScriptSystem* pScriptSysThree; //0x0050
 	void *p3DEngine; //0x0058
 	void *pSoundSystem; //0x0060
 	void *pMusicSystem; //0x0068

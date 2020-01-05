@@ -196,6 +196,8 @@ DWORD __stdcall InitializeHooks()
 
 bool __stdcall Unload()
 {
+	ToggleNoFall(false);
+	SetPlayerSpeed(1.0f);
 	if (detours.Unhook(o_EncryptPacket))
 	{
 		dx_swapchain.ClearHooks();

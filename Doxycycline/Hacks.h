@@ -1,6 +1,8 @@
 #pragma once
 
 extern bool bFlyHack;
+extern bool bNoFallDamage;
 extern float speedMultiplier;
 
-void SetSpeed(float speed);
+void SetPlayerSpeed(float speed);
+void ToggleNoFall(bool bEnable);
