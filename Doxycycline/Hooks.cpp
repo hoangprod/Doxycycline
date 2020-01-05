@@ -64,7 +64,7 @@ float __fastcall h_GetWaterLevel(void* cry3DEngine, void* referencePOS)
 		if (address == (void*)pUpdateSwimCaller)
 		{
 			Vec3 pos = LocalPlayerFinder::GetClientEntity()->GetPos();
-			return pos.y + 15;
+			return pos.y + 15.f;
 		}
 	}
 	
