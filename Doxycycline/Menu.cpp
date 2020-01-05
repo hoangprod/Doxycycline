@@ -3,6 +3,7 @@
 #include "Menu.h"
 #include "GameClasses.h"
 #include "Hacks.h"
+#include "LuaAPI.h"
 MemoryEditor mem_edit;
 Consolelogs console;
 PacketEditor peditor;
@@ -201,6 +202,11 @@ void HackView::Display()
 		SetSpeed(speedMultiplier);
 	}
 
+	if (ImGui::Button("Test lua"))
+	{
+		lua_c_ExecuteLuaString(SSystemGlobalEnvironment::GetInstance()->scriptSysOne->luaState, "X2Chat:DispatchChatMessage(CMF_LOOT_METHOD_CHANGED,\"Executing \")");
+	}
+
 	ImGui::Checkbox("Display local player debug info", &b_displayLocalPlayerInfo);
 	if (b_displayLocalPlayerInfo)
 	{
@@ -232,6 +238,7 @@ void HackView::Display()
 			}
 		}
 	}
+
 
 	ImGui::End();
 }

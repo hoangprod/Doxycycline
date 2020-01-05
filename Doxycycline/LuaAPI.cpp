@@ -38,7 +38,7 @@ void LuaError(const char* functionName)
 void LocateLuaFunctions()
 {
 	char* scriptSysBase = (char*)HdnGetModuleBase("CryScriptSystem.dll");
-	UINT_PTR dwLen = 0x49EA0AA0;
+	UINT_PTR dwLen = 0xCF78F;
 
 	lua_gettop = (f_lua_gettop)PatternScan(scriptSysBase, dwLen, "\x48\x8B\x41\x10\x48\x2B\x41\x18", "xxxxxxxx");
 	lua_getfield = (f_lua_getfield)PatternScan(scriptSysBase, dwLen, "\x48\x89\x5C\x24\x00\x48\x89\x74\x24\x00\x57\x48\x83\xEC\x30\x4D\x8B\xD0\x48\x8B\xF1\xE8\x00\x00\x00\x00\x48\x83\xC9\xFF\x48\x8B\xD8\x49\x8B\xFA\x33\xC0\x49\x8B\xD2\xF2\xAE\x48\xF7\xD1\x4C\x8D\x41\xFF\x48\x8B\xCE\xE8\x00\x00\x00\x00\x4C\x8B\x4E\x10\x4C\x8D\x44\x24\x00", "xxxx?xxxx?xxxxxxxxxxxx????xxxxxxxxxxxxxxxxxxxxxxxxxxxx????xxxxxxxx?");
@@ -49,7 +49,7 @@ void LocateLuaFunctions()
 	lua_newthread = (f_lua_newthread)PatternScan(scriptSysBase, dwLen, "\x40\x53\x48\x83\xEC\x20\x48\x8B\x51\x20", "xxxxxxxxxx");
 	lua_next = (f_lua_next)PatternScan(scriptSysBase, dwLen, "\x40\x53\x48\x83\xEC\x20\x48\x8B\xD9\xE8\x00\x00\x00\x00\x4C\x8B\x43\x10\x48\x8B\x10", "xxxxxxxxxx????xxxxxxx");
 	lua_type = (f_lua_type)PatternScan(scriptSysBase, dwLen, "\x48\x83\xEC\x28\xE8\x00\x00\x00\x00\x48\x8D\x0D\x00\x00\x00\x00\x48\x3B\xC1\x75\x08", "xxxxx????xxx????xxxxx");
-	lua_tonumber = (f_lua_tonumber)PatternScan(scriptSysBase, dwLen, "\x55\x8B\xEC\x8B\x4D\x0C\x8B\x55\x08\x83\xEC\x08\xE8\x00\x00\x00\x00\x83\x78\x04\x03\x74\x17", "xxxxxxxxxxxxx????xxxxxx");
+	lua_tonumber = (f_lua_tonumber)PatternScan(scriptSysBase, dwLen, "\x48\x83\xEC\x38\xE8\x00\x00\x00\x00\x83\x78\x08\x03\x74\x1A", "xxxxx????xxxxxx");
 	lua_tolstring = (f_lua_tolstring)PatternScan(scriptSysBase, dwLen, "\x48\x89\x5C\x24\x00\x48\x89\x74\x24\x00\x57\x48\x83\xEC\x20\x49\x8B\xD8\x8B\xF2", "xxxx?xxxx?xxxxxxxxxx");
 	lua_pcall = (f_lua_pcall)PatternScan(scriptSysBase, dwLen, "\x48\x89\x5C\x24\x00\x57\x48\x83\xEC\x40\x41\x8B\xF8", "xxxx?xxxxxxxx");
 	lua_pushnil = (f_lua_pushnil)PatternScan(scriptSysBase, dwLen, "\x48\x8B\x41\x10\xC7\x40\x00\x00\x00\x00\x00", "xxxxxx?????");
@@ -131,4 +131,10 @@ void LocateLuaFunctions()
 	{
 		LuaError("lua_settop");
 	}
+}
+
+void lua_c_ExecuteLuaString(void* lua_State, const char* buffer)
+{
+	lua_loadbuffer(lua_State, buffer, strlen(buffer), buffer);
+	lua_pcall(lua_State, 0, 0, 0);
 }

@@ -176,6 +176,8 @@ DWORD __stdcall InitializeHooks()
 
 	phookD3D11Present = (f_D3D11PresentHook)dx_swapchain.Hook(8, hookD3D11Present);
 
+	LocateLuaFunctions();
+
 	char* pEncryptPacket = PatternScan((char*)HdnGetModuleBase("CryNetwork.dll"), 0x100000, "\x4c\x89\x4c\x24\x20\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8d\xac", "xxxxxxxxxxxxxxxxxxx");
 
 	o_EncryptPacket = (f_EncryptPacket)pEncryptPacket;
