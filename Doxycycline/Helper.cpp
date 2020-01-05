@@ -320,11 +320,15 @@ char* ptr_offset_Scanner(char* pBase, UINT_PTR RegionSize, const char* szPattern
 
 	char* offset_read = nullptr;
 	char* second_addr = initial_addr + i_offset + instruction_before_offset;
+
 	memcpy(&offset_read, second_addr, i_length - instruction_before_offset);
-	offset_read = i_length + initial_addr + i_offset + (UINT_PTR)(offset_read);
+
+	offset_read = i_length + initial_addr + i_offset + (uintptr_t)offset_read;
+
 
 	if (offset_read)
 		return offset_read;
+
 	return nullptr;
 }
 
