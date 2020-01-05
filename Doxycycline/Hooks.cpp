@@ -8,9 +8,11 @@
 #include "Hacks.h"
 #include <intrin.h>
 #include <iostream>
-typedef bool(__fastcall* f_EncryptPacket)(__int64* a1, unsigned __int8 a2, __int64 packet, int* a3);
-typedef HRESULT(__stdcall* D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
+
 typedef float(__fastcall* f_GetWaterLevel)(void* cry3DEngine, void* referencePOS);
+typedef bool(__fastcall* f_EncryptPacket)(__int64* a1, unsigned __int8 a2, __int64 packet, int* a3);
+
+typedef HRESULT(__stdcall* f_D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern packetCrypto packetinfo;
@@ -22,7 +24,7 @@ static IDXGISwapChain* pSwapChain = NULL;
 
 static WNDPROC OriginalWndProcHandler = nullptr;
 
-D3D11PresentHook phookD3D11Present = NULL;
+f_D3D11PresentHook phookD3D11Present = NULL;
 ID3D11RenderTargetView* mainRenderTargetView;
 
 HWND window = nullptr;
@@ -34,7 +36,6 @@ VMTHook vGetWaterLevel;
 bool g_ShowMenu = false;
 
 f_EncryptPacket o_EncryptPacket = NULL;
-
 f_GetWaterLevel o_GetWaterLevel = NULL;
 
 Detour64 detours;
@@ -51,10 +52,16 @@ HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** 
 
 float __fastcall h_GetWaterLevel(void* cry3DEngine, void* referencePOS)
 {
+	static char* pUpdateSwimCaller = NULL;
+
+	if (!pUpdateSwimCaller) {
+		pUpdateSwimCaller = PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x500000, "\x0f\x28\xc8\xf3\x0f\x5c\xCC\xCC\x00\x00\x00\x41\x0f\x2f\xcc", "xxxxxx??xxxxxxx");
+	}
+
 	if (bFlyHack)
 	{
 		void* address = _ReturnAddress();
-		if (address == (void*)0x3926F9A2)
+		if (address == (void*)pUpdateSwimCaller)
 		{
 			Vec3 pos = LocalPlayerFinder::GetClientEntity()->GetPos();
 			return pos.y + 15;
@@ -62,7 +69,6 @@ float __fastcall h_GetWaterLevel(void* cry3DEngine, void* referencePOS)
 	}
 	
 	return o_GetWaterLevel(cry3DEngine, referencePOS);
-	//return 300.0f;
 }
 
 bool __fastcall h_EncryptPacket(__int64* Buffer, unsigned __int8 isEncrypted, __int64 key, int* cleartextbuffer)
@@ -162,11 +168,11 @@ DWORD __stdcall InitializeHooks()
 
 	char* offset_Swapchain = Scan_Offsets((char*)HdnGetModuleBase("CryRenderD3D10.dll"), 0x200000, "\x48\x8b\x8b\xCC\xCC\xCC\x00\x48\x8b\x01\xff\x50\x40\x8b\xf8\x3d\x21\x00\x7a\x88", "xxx???xxxxxxxxxxxxxx", 3, 4);
 
-	DWORD_PTR* p_Swapchain = (DWORD_PTR*)((DWORD_PTR)SSystemGlobalEnvironment::GetInstance()->pRenderer + offset_Swapchain); // offset_Swapchain =  0x159e0
-	DWORD_PTR* pSwapChainVtable = **(DWORD_PTR***)p_Swapchain;
+	DWORD_PTR* pSwapChainVtable = **(DWORD_PTR***)((DWORD_PTR)SSystemGlobalEnvironment::GetInstance()->pRenderer + offset_Swapchain); // offset_Swapchain =  0x159e0
+
 	dx_swapchain.vmt = ((void**)pSwapChainVtable);
 
-	phookD3D11Present = (D3D11PresentHook)dx_swapchain.Hook(8, hookD3D11Present);
+	phookD3D11Present = (f_D3D11PresentHook)dx_swapchain.Hook(8, hookD3D11Present);
 
 	char* pEncryptPacket = PatternScan((char*)HdnGetModuleBase("CryNetwork.dll"), 0x100000, "\x4c\x89\x4c\x24\x20\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8d\xac", "xxxxxxxxxxxxxxxxxxx");
 
@@ -175,7 +181,9 @@ DWORD __stdcall InitializeHooks()
 	o_EncryptPacket = (f_EncryptPacket)detours.Hook(o_EncryptPacket, h_EncryptPacket, 14);
 
 	DWORD_PTR* p3DEngineVtable = *(DWORD_PTR**)SSystemGlobalEnvironment::GetInstance()->p3DEngine;
+
 	vGetWaterLevel.vmt = (void**)p3DEngineVtable;
+
 	o_GetWaterLevel = (f_GetWaterLevel)vGetWaterLevel.Hook(71, h_GetWaterLevel);
 	
 
@@ -190,6 +198,7 @@ bool __stdcall Unload()
 		vGetWaterLevel.ClearHooks();
 		SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)OriginalWndProcHandler);
 		FreeLibrary(h_Module);
+		UnmapViewOfFile(h_Module);
 		return true;
 	}
 

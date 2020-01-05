@@ -259,34 +259,6 @@ BYTE* GetProcAddressA(HINSTANCE hDll, const char* szFunc)
 	return pBase + FuncRVA;
 }
 
-/*
-BOOL hook_function(PVOID& t1, PBYTE t2, const char* s = NULL)
-{
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
-	DetourAttach(&t1, t2);
-	if (DetourTransactionCommit() != NO_ERROR) {
-		printf("[Hook] - Failed to hook %s.\n", s);
-		return false;
-	}
-	else {
-		printf("[Hook] - Successfully hooked %s.\n", s);
-		return true;
-	}
-}
-
-BOOL unhook_function(PVOID& t1, PBYTE t2, const char* s = NULL)
-{
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
-	DetourDetach(&t1, t2);
-	if (DetourTransactionCommit() != NO_ERROR) {
-		printf("[Hook] - Failed to unhook %s.\n", s);
-		return false;
-	}
-	return true;
-}*/
-
 
 void* DetourFunction64(void* pSource, void* pDestination, int dwLen)
 {
@@ -325,12 +297,8 @@ void* DetourFunction64(void* pSource, void* pDestination, int dwLen)
 
 char* Scan_Offsets(char* pBase, UINT_PTR RegionSize, const char* szPattern, const char* szMask, uintptr_t szOffset, size_t szSize)
 {
-	printf("pBase %p %p\n", pBase, RegionSize);
-
 	char* result = 0;
 	char* initResult = PatternScan(pBase, RegionSize, szPattern, szMask);
-
-	printf("pattern found %p\n", initResult);
 
 	if ((size_t)initResult)
 	{
