@@ -5,6 +5,7 @@
 #include "Scan.h"
 #include "Helper.h"
 #include "GameClasses.h"
+#include "Hacks.h"
 #include <intrin.h>
 #include <iostream>
 typedef bool(__fastcall* f_EncryptPacket)(__int64* a1, unsigned __int8 a2, __int64 packet, int* a3);
@@ -28,6 +29,7 @@ HWND window = nullptr;
 HWND hWnd = nullptr;
 
 VMTHook dx_swapchain;
+VMTHook vGetWaterLevel;
 
 bool g_ShowMenu = false;
 
@@ -49,15 +51,16 @@ HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** 
 
 float __fastcall h_GetWaterLevel(void* cry3DEngine, void* referencePOS)
 {
-	UINT_PTR address = (UINT_PTR)_AddressOfReturnAddress();
-	UINT_PTR base = (UINT_PTR)HdnGetModuleBase("x2game.dll");
-	if (address > base && address < base + 0x10370000)
+	if (bFlyHack)
 	{
-		std::cout << "caller: " << (void*)address << std::endl;
-		Vec3 pos = LocalPlayerFinder::GetClientEntity()->GetPos();
-		return pos.y + 15;
+		void* address = _ReturnAddress();
+		if (address == (void*)0x3926F9A2)
+		{
+			Vec3 pos = LocalPlayerFinder::GetClientEntity()->GetPos();
+			return pos.y + 15;
+		}
 	}
-
+	
 	return o_GetWaterLevel(cry3DEngine, referencePOS);
 	//return 300.0f;
 }
@@ -171,20 +174,20 @@ DWORD __stdcall InitializeHooks()
 
 	o_EncryptPacket = (f_EncryptPacket)detours.Hook(o_EncryptPacket, h_EncryptPacket, 14);
 
+	DWORD_PTR* p3DEngineVtable = *(DWORD_PTR**)SSystemGlobalEnvironment::GetInstance()->p3DEngine;
+	vGetWaterLevel.vmt = (void**)p3DEngineVtable;
+	o_GetWaterLevel = (f_GetWaterLevel)vGetWaterLevel.Hook(71, h_GetWaterLevel);
 	
-	//o_GetWaterLevel = (f_GetWaterLevel)(GetModuleHandleA("Cry3DEngine.dll") + 0x13E880);
-	o_GetWaterLevel = (f_GetWaterLevel)0x444EE880;
-
-	o_GetWaterLevel = (f_GetWaterLevel)detours.Hook(o_GetWaterLevel, h_GetWaterLevel, 14);
 
 	return NULL;
 }
 
 bool __stdcall Unload()
 {
-	if (detours.Clearhook())
+	if (detours.Unhook(o_EncryptPacket))
 	{
 		dx_swapchain.ClearHooks();
+		vGetWaterLevel.ClearHooks();
 		SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)OriginalWndProcHandler);
 		FreeLibrary(h_Module);
 		return true;

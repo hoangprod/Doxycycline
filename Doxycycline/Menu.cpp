@@ -2,7 +2,7 @@
 #include "Imgui/examples/imgui_memory_editor.h"
 #include "Menu.h"
 #include "GameClasses.h"
-
+#include "Hacks.h"
 MemoryEditor mem_edit;
 Consolelogs console;
 PacketEditor peditor;
@@ -16,6 +16,7 @@ const ImU64 iStep = 1;
 packetCrypto packetinfo;
 
 bool b_displayLocalPlayerInfo = false;
+
 
 typedef bool(__fastcall* f_EncryptPacket)(__int64* buffer, unsigned __int8 isEncrypted, __int64 key, int* cleartextbuffer);
 
@@ -194,6 +195,7 @@ void HackView::Display()
 	}
 
 	ImGui::Checkbox("Display local player debug info", &b_displayLocalPlayerInfo);
+	ImGui::Checkbox("Fly Hack", &bFlyHack);
 
 	if (b_displayLocalPlayerInfo)
 	{

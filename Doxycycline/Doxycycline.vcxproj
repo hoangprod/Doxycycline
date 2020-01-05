@@ -164,6 +164,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="Hacks.cpp" />
     <ClCompile Include="Helper.cpp" />
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="Imgui\examples\imgui_impl_dx11.cpp" />
@@ -177,6 +178,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameClasses.h" />
+    <ClInclude Include="Hacks.h" />
     <ClInclude Include="Helper.h" />
     <ClInclude Include="Hooks.h" />
     <ClInclude Include="Imgui\examples\imgui_impl_dx11.h" />
