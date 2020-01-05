@@ -2,7 +2,6 @@
 #include <tchar.h>
 #include <TlHelp32.h>
 #include <strsafe.h>
-#include <detours.h>
 #include <vector>
 #include "Scan.h"
 #include "Helper.h"

@@ -310,12 +310,19 @@ struct PacketEditor
 
 	void CopyClipboard(std::vector<char*> pVector, BYTE Element)
 	{
+		std::ofstream Stream;
+		Stream.open("C:/Program Files (x86)/Glyph/Games/Archeage/Packet.bin", std::ios::binary | std::ios::out);
+		Stream.write(pVector[Element], 0x400);
+		Stream << "ZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+		Stream.close();
+		/*
 		HGLOBAL glob = GlobalAlloc(GMEM_FIXED, 0x400);
 		memcpy(glob, pVector[Element], 0x400);
 		OpenClipboard(NULL);
 		EmptyClipboard();
 		SetClipboardData(CF_UNICODETEXT, glob);
 		CloseClipboard();
+		*/
 	}
 
 	void HexDump(UINT_PTR DataBuffer, UINT Size)

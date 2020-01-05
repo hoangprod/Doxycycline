@@ -5,9 +5,11 @@
 #include "Scan.h"
 #include "Helper.h"
 #include "GameClasses.h"
-
+#include <intrin.h>
+#include <iostream>
 typedef bool(__fastcall* f_EncryptPacket)(__int64* a1, unsigned __int8 a2, __int64 packet, int* a3);
 typedef HRESULT(__stdcall* D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
+typedef float(__fastcall* f_GetWaterLevel)(void* cry3DEngine, void* referencePOS);
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern packetCrypto packetinfo;
@@ -31,6 +33,8 @@ bool g_ShowMenu = false;
 
 f_EncryptPacket o_EncryptPacket = NULL;
 
+f_GetWaterLevel o_GetWaterLevel = NULL;
+
 Detour64 detours;
 
 HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** ppDevice, ID3D11DeviceContext** ppContext)
@@ -41,6 +45,21 @@ HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** 
 		(*ppDevice)->GetImmediateContext(ppContext);
 
 	return ret;
+}
+
+float __fastcall h_GetWaterLevel(void* cry3DEngine, void* referencePOS)
+{
+	UINT_PTR address = (UINT_PTR)_AddressOfReturnAddress();
+	UINT_PTR base = (UINT_PTR)HdnGetModuleBase("x2game.dll");
+	if (address > base && address < base + 0x10370000)
+	{
+		std::cout << "caller: " << (void*)address << std::endl;
+		Vec3 pos = LocalPlayerFinder::GetClientEntity()->GetPos();
+		return pos.y + 15;
+	}
+
+	return o_GetWaterLevel(cry3DEngine, referencePOS);
+	//return 300.0f;
 }
 
 bool __fastcall h_EncryptPacket(__int64* Buffer, unsigned __int8 isEncrypted, __int64 key, int* cleartextbuffer)
@@ -152,12 +171,18 @@ DWORD __stdcall InitializeHooks()
 
 	o_EncryptPacket = (f_EncryptPacket)detours.Hook(o_EncryptPacket, h_EncryptPacket, 14);
 
+	
+	//o_GetWaterLevel = (f_GetWaterLevel)(GetModuleHandleA("Cry3DEngine.dll") + 0x13E880);
+	o_GetWaterLevel = (f_GetWaterLevel)0x444EE880;
+
+	o_GetWaterLevel = (f_GetWaterLevel)detours.Hook(o_GetWaterLevel, h_GetWaterLevel, 14);
+
 	return NULL;
 }
 
 bool __stdcall Unload()
 {
-	if (detours.Unhook(o_EncryptPacket))
+	if (detours.Clearhook())
 	{
 		dx_swapchain.ClearHooks();
 		SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)OriginalWndProcHandler);
