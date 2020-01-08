@@ -12,6 +12,8 @@
 
 typedef float(__fastcall* f_GetWaterLevel)(void* cry3DEngine, void* referencePOS);
 typedef bool(__fastcall* f_EncryptPacket)(__int64* a1, unsigned __int8 a2, __int64 packet, int* a3);
+typedef void*(__fastcall* f_RequestPathToPipeUser)(void* aiSystem, Vec3& position, void* CAIActor); // the 3rd param might actually be a CPipeUser, but I can't tell because my IDA is messed up.
+typedef void*(__fastcall* f_ClickToMovePlayer)(int a1, int a2, int a3, int a4);
 
 typedef HRESULT(__stdcall* f_D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 
@@ -33,13 +35,18 @@ HWND hWnd = nullptr;
 
 VMTHook dx_swapchain;
 VMTHook vGetWaterLevel;
+VMTHook vRequestPathToPipeUser;
 
 bool g_ShowMenu = false;
 
 f_EncryptPacket o_EncryptPacket = NULL;
 f_GetWaterLevel o_GetWaterLevel = NULL;
+f_RequestPathToPipeUser o_RequestPathToPipeUser = NULL;
+f_ClickToMovePlayer o_ClickToMovePlayer = NULL;
 
 Detour64 detours;
+
+Vec3 pathPosition_DoNotModify;
 
 HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** ppDevice, ID3D11DeviceContext** ppContext)
 {
@@ -51,6 +58,23 @@ HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** 
 	return ret;
 }
 
+void PathToPosition()
+{
+	//pathPosition_DoNotModify = targetPos;
+	o_ClickToMovePlayer(1, 0, 0, 0);
+}
+
+void* __fastcall h_RequestPathToPipeUser(void* aiSystem, Vec3& position, void* CAIActor)
+{
+	position = pathPosition_DoNotModify;
+	/*
+	std::cout << "path requested" << std::endl;
+	std::cout << "target x: " << position.x;
+	std::cout << "target y: " << position.y;
+	std::cout << "target z: " << position.z;
+	*/
+	return o_RequestPathToPipeUser(aiSystem, position, CAIActor);
+}
 
 float __fastcall h_GetWaterLevel(void* cry3DEngine, void* referencePOS)
 {
@@ -178,18 +202,21 @@ DWORD __stdcall InitializeHooks()
 
 	LocateLuaFunctions();
 
+	o_ClickToMovePlayer = (f_ClickToMovePlayer)((UINT_PTR)HdnGetModuleBase("x2game.dll") + 0x1E7920);
+	std::cout << "click to move: " << o_ClickToMovePlayer;
+
 	char* pEncryptPacket = PatternScan((char*)HdnGetModuleBase("CryNetwork.dll"), 0x100000, "\x4c\x89\x4c\x24\x20\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8d\xac", "xxxxxxxxxxxxxxxxxxx");
-
 	o_EncryptPacket = (f_EncryptPacket)pEncryptPacket;
-
 	o_EncryptPacket = (f_EncryptPacket)detours.Hook(o_EncryptPacket, h_EncryptPacket, 14);
 
 	DWORD_PTR* p3DEngineVtable = *(DWORD_PTR**)SSystemGlobalEnvironment::GetInstance()->p3DEngine;
-
 	vGetWaterLevel.vmt = (void**)p3DEngineVtable;
-
 	o_GetWaterLevel = (f_GetWaterLevel)vGetWaterLevel.Hook(71, h_GetWaterLevel);
-	
+
+	DWORD_PTR* pAISystemVtable = *(DWORD_PTR**)SSystemGlobalEnvironment::GetInstance()->pAISystem;
+	vRequestPathToPipeUser.vmt = (void**)pAISystemVtable;
+	o_RequestPathToPipeUser = (f_RequestPathToPipeUser)vRequestPathToPipeUser.Hook(189, h_RequestPathToPipeUser);
+
 
 	return NULL;
 }
@@ -202,6 +229,7 @@ bool __stdcall Unload()
 	{
 		dx_swapchain.ClearHooks();
 		vGetWaterLevel.ClearHooks();
+		vRequestPathToPipeUser.ClearHooks();
 		SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)OriginalWndProcHandler);
 		FreeLibrary(h_Module);
 		UnmapViewOfFile(h_Module);

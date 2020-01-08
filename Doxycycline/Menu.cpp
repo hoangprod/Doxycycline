@@ -176,6 +176,7 @@ void HackView::Display()
 			void* localActor = LocalPlayerFinder::GetClientActor();
 			if (localEnt)
 			{
+				
 				std::stringstream entAddressStrm;
 				std::stringstream actorAddressStrm;
 				std::stringstream positionStrm;
@@ -201,6 +202,14 @@ void HackView::Display()
 				ImGui::Text(rotationStrm.str().c_str());
 			}
 		}
+	}
+
+	ImGui::InputFloat("Path X", &pathPosition_DoNotModify.x);
+	ImGui::InputFloat("Path Y", &pathPosition_DoNotModify.y);
+	ImGui::InputFloat("Path Z", &pathPosition_DoNotModify.z);
+	if (ImGui::Button("Go to path"))
+	{
+		PathToPosition();
 	}
 
 
