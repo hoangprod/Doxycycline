@@ -4,6 +4,7 @@
 #include "GameClasses.h"
 #include "Hacks.h"
 #include "LuaAPI.h"
+
 MemoryEditor mem_edit;
 Consolelogs console;
 PacketEditor peditor;
@@ -209,7 +210,7 @@ void HackView::Display()
 	ImGui::InputFloat("Path Z", &pathPosition_DoNotModify.z);
 	if (ImGui::Button("Go to path"))
 	{
-		PathToPosition();
+		PathToPosition(pathPosition_DoNotModify);
 	}
 
 

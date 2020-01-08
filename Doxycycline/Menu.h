@@ -315,14 +315,6 @@ struct PacketEditor
 		Stream.write(pVector[Element], 0x400);
 		Stream << "ZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 		Stream.close();
-		/*
-		HGLOBAL glob = GlobalAlloc(GMEM_FIXED, 0x400);
-		memcpy(glob, pVector[Element], 0x400);
-		OpenClipboard(NULL);
-		EmptyClipboard();
-		SetClipboardData(CF_UNICODETEXT, glob);
-		CloseClipboard();
-		*/
 	}
 
 	void HexDump(UINT_PTR DataBuffer, UINT Size)
@@ -341,7 +333,7 @@ struct PacketEditor
 
 		Size = 0x400;
 
-		Address = (ImU64*)pVector[Element];
+		Address = (ImU64*)(pVector[Element] + 8);
 	}
 
 	void Replay(std::vector<char*> pVector, BYTE Element);

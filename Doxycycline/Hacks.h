@@ -7,4 +7,4 @@ extern Vec3 pathPosition_DoNotModify;
 
 void SetPlayerSpeed(float speed);
 void ToggleNoFall(bool bEnable);
-void PathToPosition();
+bool PathToPosition(Vec3 vec = {0.0f, 0.0f, 0.0f});
