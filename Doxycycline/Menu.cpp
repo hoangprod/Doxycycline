@@ -47,7 +47,6 @@ void MenuRender()
 	hackView.Display();
 }
 
-
 void PacketEditor::Display()
 {
 	ImGui::Begin("Packet Editor");
@@ -148,7 +147,6 @@ void PacketEditor::Push(UINT_PTR pBody)
 	}
 }
 
-
 void HackView::Display()
 {
 	ImGui::Begin("Hacks");
@@ -222,7 +220,6 @@ void HackView::Display()
 		bool is_selected = (current_lua_item == lua_items[i]);
 		if (ImGui::Selectable(lua_items[i], is_selected))
 			current_lua_item = lua_items[i];
-
 	}
 
 	if (ImGui::Button("Execute Lua Script"))
@@ -235,7 +232,6 @@ void HackView::Display()
 		if (current_lua_item == lua_items[2])
 			currentLuaState = SSystemGlobalEnvironment::GetInstance()->pScriptSysThree->luaState;
 
-		//std::cout << "current lua state: " << currentLuaState << std::endl;
 		lua_c_ExecuteLuaFile(currentLuaState, "script.lua");
 
 	}
