@@ -4,7 +4,6 @@
 #include "GameClasses.h"
 #include "Hacks.h"
 #include "LuaAPI.h"
-
 MemoryEditor mem_edit;
 Consolelogs console;
 PacketEditor peditor;
@@ -15,10 +14,12 @@ ImU64* Address = (ImU64*)Data;
 ImU32 Size = 15;
 const ImU64 iStep = 1;
 
+static const char* lua_items[] = { "Lua State 1", "Lua State 2", "Lua State 3" };
+static const char* current_lua_item = lua_items[0];
+
 packetCrypto packetinfo;
 
 bool b_displayLocalPlayerInfo = false;
-
 
 typedef bool(__fastcall* f_EncryptPacket)(__int64* buffer, unsigned __int8 isEncrypted, __int64 key, int* cleartextbuffer);
 
@@ -213,6 +214,32 @@ void HackView::Display()
 		PathToPosition(pathPosition_DoNotModify);
 	}
 
+	ImGui::Separator();
+
+	ImGui::BeginCombo("", current_lua_item);
+	for (int i = 0; i < IM_ARRAYSIZE(lua_items); i++)
+	{
+		bool is_selected = (current_lua_item == lua_items[i]);
+		if (ImGui::Selectable(lua_items[i], is_selected))
+			current_lua_item = lua_items[i];
+
+	}
+
+	if (ImGui::Button("Execute Lua Script"))
+	{
+		void* currentLuaState;
+		if (current_lua_item == lua_items[0])
+			currentLuaState = SSystemGlobalEnvironment::GetInstance()->pScriptSysOne->luaState;
+		if (current_lua_item == lua_items[1])
+			currentLuaState = SSystemGlobalEnvironment::GetInstance()->pScriptSysTwo->luaState;
+		if (current_lua_item == lua_items[2])
+			currentLuaState = SSystemGlobalEnvironment::GetInstance()->pScriptSysThree->luaState;
+
+		//std::cout << "current lua state: " << currentLuaState << std::endl;
+		lua_c_ExecuteLuaFile(currentLuaState, "script.lua");
+
+	}
+	ImGui::EndCombo();
 
 	ImGui::End();
 }

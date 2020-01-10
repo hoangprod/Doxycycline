@@ -18,6 +18,7 @@ typedef int(__cdecl* f_lua_pushstring)(void* lua_State, const char* s);
 typedef int(__cdecl* f_lua_pushboolean)(void* lua_State, int b);
 typedef int(__cdecl* f_lua_pushvalue)(void* lua_State, int indedx);
 typedef int(__cdecl* f_lua_settop)(void* lua_State, int idx);
+typedef int(__cdecl* f_lua_loadfile)(void* lua_State, const char* fileName);
 
 extern f_lua_gettop lua_gettop;
 extern f_lua_getfield lua_getfield;
@@ -37,9 +38,7 @@ extern f_lua_pushstring lua_pushstring;
 extern f_lua_pushboolean lua_pushboolean;
 extern f_lua_pushvalue lua_pushvalue;
 extern f_lua_settop lua_settop;
-
-extern void* luaState1;
-extern void* luaState2;
+extern f_lua_loadfile lua_loadfile;
 
 #define lua_tostring(L,i)	lua_tolstring(L, (i), NULL)
 #define lua_getglobal(L,s)	lua_getfield(L, -10002, (s))
@@ -49,7 +48,7 @@ extern void* luaState2;
 #define lua_pop(L,n)		lua_settop(L, -(n)-1)
 #define lua_isfunction(L,n)	(lua_type(L, (n)) == 6)
 
-void lua_c_LoadLuaFile(void* lua_State, const char* path);
+void lua_c_ExecuteLuaFile(void* lua_State, const char* path);
 void lua_c_ExecuteLuaString(void* lua_State, const char* buffer);
 
 void LocateLuaFunctions();

@@ -21,6 +21,7 @@ f_lua_pushstring lua_pushstring;
 f_lua_pushboolean lua_pushboolean;
 f_lua_pushvalue lua_pushvalue;
 f_lua_settop lua_settop;
+f_lua_loadfile lua_loadfile;
 
 // this lua state holds shit related to game windows, auction stuff, x2Unit, X2Chat, and other stuff. More information is needed to properly name this lua state
 void* luaState1;
@@ -58,6 +59,7 @@ void LocateLuaFunctions()
 	lua_pushboolean = (f_lua_pushboolean)PatternScan(scriptSysBase, dwLen, "\x4C\x8B\x41\x10\x33\xC0", "xxxxxx");
 	lua_pushvalue = (f_lua_pushvalue)PatternScan(scriptSysBase, dwLen, "\x48\x83\xEC\x28\x4C\x8B\xD1\xE8\x00\x00\x00\x00\x4D\x8B\x42\x10\x48\x8B\x10", "xxxxxxxx????xxxxxxx");
 	lua_settop = (f_lua_settop)PatternScan(scriptSysBase, dwLen, "\x4C\x8B\xC1\x85\xD2\x78\x40", "xxxxxxx");
+	lua_loadfile = (f_lua_loadfile)PatternScan(scriptSysBase, dwLen, "\x48\x89\x6C\x24\x00\x48\x89\x74\x24\x00\x57\x48\x81\xEC\x00\x00\x00\x00\x48\x8B\xEA\x48\x8B\xF9", "xxxx?xxxx?xxxx????xxxxxx");
 
 	if (!lua_gettop)
 	{
@@ -131,10 +133,22 @@ void LocateLuaFunctions()
 	{
 		LuaError("lua_settop");
 	}
+	if (!lua_loadfile)
+	{
+		LuaError("lua_loadfile");
+	}
 }
 
 void lua_c_ExecuteLuaString(void* lua_State, const char* buffer)
 {
 	lua_loadbuffer(lua_State, buffer, strlen(buffer), buffer);
 	lua_pcall(lua_State, 0, 0, 0);
+}
+
+void lua_c_ExecuteLuaFile(void* lua_State, const char* path)
+{
+	if (lua_loadfile(lua_State, path) == 0)
+	{
+		lua_pcall(lua_State, 0, -1, 0);
+	}
 }
