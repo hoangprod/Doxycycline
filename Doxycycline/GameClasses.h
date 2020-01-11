@@ -374,8 +374,8 @@ public:
 
 	static SSystemGlobalEnvironment* GetInstance()
 	{
-		// Pattern scan this
-		return *(SSystemGlobalEnvironment**)((UINT_PTR)HdnGetModuleBase("x2game.dll") + 0x3FAFAC8);
+		extern Addr Patterns;
+		return *(SSystemGlobalEnvironment**)(Patterns.Addr_gEnv);
 	}
 }; //Size: 0x0440
 

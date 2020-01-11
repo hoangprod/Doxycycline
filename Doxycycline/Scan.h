@@ -54,3 +54,4 @@ UINT_PTR ScanMemoryEx(HANDLE hProc, char* pStart, UINT_PTR RegionSize, T Val, UI
 
 	return Count;
 }
+

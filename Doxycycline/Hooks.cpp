@@ -22,28 +22,27 @@ ID3D11Device* pDevice = NULL;
 ID3D11DeviceContext* pContext = NULL;
 
 static IDXGISwapChain* pSwapChain = NULL;
-
 static WNDPROC OriginalWndProcHandler = nullptr;
 
-f_D3D11PresentHook phookD3D11Present = NULL;
 ID3D11RenderTargetView* mainRenderTargetView;
 
 HWND window = nullptr;
 HWND hWnd = nullptr;
+Addr Patterns;
 
 VMTHook dx_swapchain;
 VMTHook vGetWaterLevel;
 
-bool g_ShowMenu = false;
-
 f_EncryptPacket o_EncryptPacket = NULL;
 f_GetWaterLevel o_GetWaterLevel = NULL;
-
-f_GetNavPath_and_Move o_GetNavPath_and_Move = (f_GetNavPath_and_Move)0x39210040; // Pattern scan
+f_D3D11PresentHook phookD3D11Present = NULL;
+f_GetNavPath_and_Move o_GetNavPath_and_Move = NULL;
 
 Detour64 detours;
 
 Vec3 pathPosition_DoNotModify = {4500.0f, 4959.0f, 125.0f};
+
+bool g_ShowMenu = false;
 
 HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** ppDevice, ID3D11DeviceContext** ppContext)
 {
@@ -58,17 +57,10 @@ HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** 
 
 bool PathToPosition(Vec3 Position)
 {
-	char* MenuSettings = *(char**)0x3AB1F940;
+	// Set auto pathing on
+	*Patterns.Addr_isAutoPathing = 1;
 
-	if (!MenuSettings)
-		return false;
-
-	bool* isClicktoWalk = (bool*)(MenuSettings + 0x40);
-
-	// Required to call o_GetNavPath_and_Move but not doing it manually, will fix
-//	*isClicktoWalk = true;
-
-	UINT_PTR LocalUnit = *(UINT_PTR*)(*(UINT_PTR*)0x3A05CAC8 + 0x168);
+	UINT_PTR LocalUnit = *(UINT_PTR*)((*(UINT_PTR*)Patterns.Addr_UnitClass) + Patterns.Offset_LocalUnit);
 
 	if (!LocalUnit)
 	{
@@ -76,7 +68,7 @@ bool PathToPosition(Vec3 Position)
 		return false;
 	}
 
-	UINT_PTR * ActorUnitModel = *(UINT_PTR**)(LocalUnit + 0x3A50);
+	UINT_PTR * ActorUnitModel = *(UINT_PTR**)(LocalUnit + Patterns.Offset_ActorUnitModel);
 	console.AddLog("ActorUnitModel: %p\n", ActorUnitModel);
 
 	if (!ActorUnitModel)
@@ -93,16 +85,11 @@ bool PathToPosition(Vec3 Position)
 
 float __fastcall h_GetWaterLevel(void* cry3DEngine, void* referencePOS)
 {
-	static char* pUpdateSwimCaller = NULL;
 
-	if (!pUpdateSwimCaller) {
-		pUpdateSwimCaller = PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x500000, "\x0f\x28\xc8\xf3\x0f\x5c\xCC\xCC\x00\x00\x00\x41\x0f\x2f\xcc", "xxxxxx??xxxxxxx");
-	}
-
-	if (bFlyHack)
+	if (bFlyHack && Patterns.Func_UpdateSwimCaller)
 	{
 		void* address = _ReturnAddress();
-		if (address == (void*)pUpdateSwimCaller)
+		if (address == (void*)Patterns.Func_UpdateSwimCaller)
 		{
 			Vec3 pos = LocalPlayerFinder::GetClientEntity()->GetPos();
 			return pos.y + 15.f;
@@ -207,14 +194,110 @@ HRESULT __fastcall hookD3D11Present(IDXGISwapChain* pChain, UINT SyncInterval, U
 	return phookD3D11Present(pChain, SyncInterval, Flags);
 }
 
+BOOLEAN __stdcall findPatterns()
+{
+	Patterns.Addr_isAutoPathing = (BYTE*)ptr_offset_Scanner((char*)HdnGetModuleBase("x2game.dll"), 0x300000, "\xc6\x05\xCC\xCC\xCC\x01\x01\xe8\xCC\xCC\xCC\xCC\x84\xc0", 0, 7, 2, "xx???xxx????xx");
+
+	if (!Patterns.Addr_isAutoPathing)
+	{
+		printf("[Error] Patterns.Addr_isAutoPathing failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Addr_isAutoPathing is at %llx\n", (UINT_PTR)Patterns.Addr_isAutoPathing); };
+
+	Patterns.Addr_SpeedModifier = (FLOAT*)ptr_offset_Scanner((char*)HdnGetModuleBase("crysystem.dll"), 0x100000, "\xf3\x44\xCC\xCC\xCC\xCC\xCC\xCC\x00\x84\xc0\x0f\x84\xCC\x00\x00\x00\x48\x8b\x06\x48\x8b\xce", 0, 9, 5, "xx??????xxxxx?xxxxxxxxx");
+
+	if (!Patterns.Addr_SpeedModifier)
+	{
+		printf("[Error] Patterns.Addr_SpeedModifier failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Addr_SpeedModifier is at %llx\n", (UINT_PTR)Patterns.Addr_SpeedModifier); };
+
+	Patterns.Addr_gEnv = (UINT_PTR)ptr_offset_Scanner((char*)HdnGetModuleBase("x2game.dll"), 0x100000, "\x48\x8b\x05\xCC\xCC\xCC\xCC\x80\xb8\xCC\xCC\x00\x00\x00\x74\xCC\x48", 0, 7, 3, "xxx????xx??xxxx?x");
+
+	if (!Patterns.Addr_gEnv)
+	{
+		printf("[Error] Patterns.Addr_gEnv failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Addr_gEnv is at %llx\n", (UINT_PTR)Patterns.Addr_gEnv); };
+
+	Patterns.Addr_UnitClass = (UINT_PTR)ptr_offset_Scanner((char*)HdnGetModuleBase("x2game.dll"), 0x200000, "\x48\x8b\x05\xCC\xCC\xCC\x00\x44\x8b\xf1\x48\x8b\xb0\xCC\xCC\x00\x00", 0, 7, 3, "xxx???xxxxxxx??xx");
+
+	if (!Patterns.Addr_UnitClass)
+	{
+		printf("[Error] Patterns.Addr_UnitClass failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Addr_UnitClass is at %llx\n", (UINT_PTR)Patterns.Addr_UnitClass); };
+
+
+	Patterns.Offset_Swapchain = (DWORD)Scan_Offsets((char*)HdnGetModuleBase("CryRenderD3D10.dll"), 0x200000, "\x48\x8b\x8b\xCC\xCC\xCC\x00\x48\x8b\x01\xff\x50\x40\x8b\xf8\x3d\x21\x00\x7a\x88", "xxx???xxxxxxxxxxxxxx", 3, 4);
+
+	if (!Patterns.Offset_Swapchain)
+	{
+		printf("[Error] Patterns.Offset_Swapchain failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Offset_Swapchain is at %llx\n", (UINT_PTR)Patterns.Offset_Swapchain); };
+
+	Patterns.Offset_LocalUnit = (DWORD)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x200000, "\x48\x8b\xb0\xCC\xCC\x00\x00\x48\x85\xf6\x75\xCC\x32\xc0\x48\x81\xc4", "xxx??xxxxxx?xxxxx", 3, 4);
+
+	if (!Patterns.Offset_LocalUnit)
+	{
+		printf("[Error] Patterns.Offset_LocalUnit failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Offset_LocalUnit is at %llx\n", (UINT_PTR)Patterns.Offset_LocalUnit); };
+
+	Patterns.Offset_ActorUnitModel = (UINT_PTR)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x300000, "\x48\x83\xec\x28\x48\x8b\x89\xCC\xCC\x00\x00\x48\x8b\x01\xff\x90\xCC\xCC\x00\x00\xf3\x0f\x10\x40", "xxxxxxx??xxxxxxx??xxxxxx", 7, 4);
+
+	if (!Patterns.Offset_ActorUnitModel)
+	{
+		printf("[Error] Patterns.Offset_ActorUnitModel failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Offset_ActorUnitModel is at %llx\n", (UINT_PTR)Patterns.Offset_ActorUnitModel); };
+
+	Patterns.Func_EncryptPacket = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("CryNetwork.dll"), 0x100000, "\x4c\x89\x4c\x24\x20\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8d\xac", "xxxxxxxxxxxxxxxxxxx");
+
+	if (!Patterns.Func_EncryptPacket)
+	{
+		printf("[Error] Patterns.Func_EncryptPacket failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_EncryptPacket is at %llx\n", Patterns.Func_EncryptPacket); };
+
+	Patterns.Func_UpdateSwimCaller = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x500000, "\x0f\x28\xc8\xf3\x0f\x5c\xCC\xCC\x00\x00\x00\x41\x0f\x2f\xcc", "xxxxxx??xxxxxxx");
+
+	if (!Patterns.Func_UpdateSwimCaller)
+	{
+		printf("[Error] Patterns.Func_UpdateSwimCaller failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_UpdateSwimCaller is at %llx\n", Patterns.Func_UpdateSwimCaller); };
+
+	Patterns.Func_GetSetNavPath = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x500000, "\x48\x8b\xc4\x57\x48\x83\xec\x60\x48\xc7\x44\x24\x20\xfe\xff\xff\xff\x48\x89\x58\x10\x48\x89\x68\x18\x48\x89\x70\x20\x48\x8b\xf2\x48\x8b\xd9", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+
+	if (!Patterns.Func_GetSetNavPath)
+	{
+		printf("[Error] Patterns.Func_GetSetNavPath failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_GetSetNavPath is at %llx\n", Patterns.Func_GetSetNavPath); };
+
+
+	return TRUE;
+}
 
 DWORD __stdcall InitializeHooks()
 {
 	hWnd = FindWindowEx(0, 0, L"ArcheAge", 0);
 
-	char* offset_Swapchain = Scan_Offsets((char*)HdnGetModuleBase("CryRenderD3D10.dll"), 0x200000, "\x48\x8b\x8b\xCC\xCC\xCC\x00\x48\x8b\x01\xff\x50\x40\x8b\xf8\x3d\x21\x00\x7a\x88", "xxx???xxxxxxxxxxxxxx", 3, 4);
+	findPatterns();
 
-	DWORD_PTR* pSwapChainVtable = **(DWORD_PTR***)((DWORD_PTR)SSystemGlobalEnvironment::GetInstance()->pRenderer + offset_Swapchain); // offset_Swapchain =  0x159e0
+	DWORD_PTR* pSwapChainVtable = **(DWORD_PTR***)((DWORD_PTR)SSystemGlobalEnvironment::GetInstance()->pRenderer + Patterns.Offset_Swapchain); // offset_Swapchain =  0x159e0
 
 	dx_swapchain.vmt = ((void**)pSwapChainVtable);
 
@@ -222,18 +305,14 @@ DWORD __stdcall InitializeHooks()
 
 	LocateLuaFunctions();
 
-	char* pEncryptPacket = PatternScan((char*)HdnGetModuleBase("CryNetwork.dll"), 0x100000, "\x4c\x89\x4c\x24\x20\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8d\xac", "xxxxxxxxxxxxxxxxxxx");
-	o_EncryptPacket = (f_EncryptPacket)pEncryptPacket;
+	o_EncryptPacket = (f_EncryptPacket)Patterns.Func_EncryptPacket;
 	o_EncryptPacket = (f_EncryptPacket)detours.Hook(o_EncryptPacket, h_EncryptPacket, 14);
 
 	DWORD_PTR* p3DEngineVtable = *(DWORD_PTR**)SSystemGlobalEnvironment::GetInstance()->p3DEngine;
 	vGetWaterLevel.vmt = (void**)p3DEngineVtable;
 	o_GetWaterLevel = (f_GetWaterLevel)vGetWaterLevel.Hook(71, h_GetWaterLevel);
 
-//	DWORD_PTR* pAISystemVtable = *(DWORD_PTR**)SSystemGlobalEnvironment::GetInstance()->pAISystem;
-//	vRequestPathToPipeUser.vmt = (void**)pAISystemVtable;
-//	o_RequestPathToPipeUser = (f_RequestPathToPipeUser)vRequestPathToPipeUser.Hook(189, h_RequestPathToPipeUser);
-
+	o_GetNavPath_and_Move = (f_GetNavPath_and_Move)Patterns.Func_GetSetNavPath;
 
 	return NULL;
 }
@@ -242,11 +321,10 @@ bool __stdcall Unload()
 {
 	ToggleNoFall(false);
 	SetPlayerSpeed(1.0f);
-	if (detours.Unhook(o_EncryptPacket))
+	if (detours.Clearhook())
 	{
 		dx_swapchain.ClearHooks();
 		vGetWaterLevel.ClearHooks();
-//		vRequestPathToPipeUser.ClearHooks();
 		SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)OriginalWndProcHandler);
 		FreeLibrary(h_Module);
 		UnmapViewOfFile(h_Module);

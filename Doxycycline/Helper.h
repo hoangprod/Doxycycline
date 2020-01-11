@@ -17,6 +17,22 @@ char* ptr_offset_Scanner(char* pBase, UINT_PTR RegionSize, const char* szPattern
 
 char* Scan_Offsets(char* pBase, UINT_PTR RegionSize, const char* szPattern, const char* szMask, uintptr_t szOffset, size_t szSize);
 
+struct Addr {
+	BYTE* Addr_isAutoPathing;
+	FLOAT* Addr_SpeedModifier;
+	UINT_PTR Addr_gEnv;
+	UINT_PTR Addr_UnitClass;
+
+	DWORD Offset_LocalUnit;
+	DWORD Offset_ActorUnitModel;
+	DWORD Offset_Swapchain;
+
+	UINT_PTR Func_EncryptPacket;
+	UINT_PTR Func_UpdateSwimCaller;
+	UINT_PTR Func_GetSetNavPath;
+	
+};
+
 
 class Detour64
 {

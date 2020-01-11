@@ -394,7 +394,6 @@ bool Detour64::Clearhook()
 		if (*(char*)curHook.origAddr == *curHook.origBytes)
 		{
 			VirtualFree(curHook.origBytes, 0, MEM_RELEASE);
-			hooked_funcs.erase(func_iterator);
 		}
 		else
 		{
