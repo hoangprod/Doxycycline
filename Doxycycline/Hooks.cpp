@@ -14,6 +14,7 @@ typedef float(__fastcall* f_GetWaterLevel)(void* cry3DEngine, void* referencePOS
 typedef bool(__fastcall* f_EncryptPacket)(__int64* a1, unsigned __int8 a2, __int64 packet, int* a3);
 typedef HRESULT(__stdcall* f_D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 typedef __int64(__fastcall* f_GetNavPath_and_Move)(UINT_PTR* ActorUnit, Vec3* EndPosition);
+typedef void*(__fastcall* f_DoodadUpdate)(ClientDoodad* doodad);
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern packetCrypto packetinfo;
@@ -37,6 +38,7 @@ f_EncryptPacket o_EncryptPacket = NULL;
 f_GetWaterLevel o_GetWaterLevel = NULL;
 f_D3D11PresentHook phookD3D11Present = NULL;
 f_GetNavPath_and_Move o_GetNavPath_and_Move = NULL;
+f_DoodadUpdate o_DoodadUpdate = NULL;
 
 Detour64 detours;
 
@@ -81,6 +83,15 @@ bool PathToPosition(Vec3 Position)
 	return true;
 }
 
+void* __fastcall h_DoodadUpdate(ClientDoodad* doodad)
+{
+	if (doodad->ID == 1451)
+	{
+		//std::cout << "found mining vien" << std::endl;
+	}
+
+	return o_DoodadUpdate(doodad);
+}
 
 float __fastcall h_GetWaterLevel(void* cry3DEngine, void* referencePOS)
 {
@@ -312,6 +323,9 @@ DWORD __stdcall InitializeHooks()
 	o_GetWaterLevel = (f_GetWaterLevel)vGetWaterLevel.Hook(71, h_GetWaterLevel);
 
 	o_GetNavPath_and_Move = (f_GetNavPath_and_Move)Patterns.Func_GetSetNavPath;
+
+	o_DoodadUpdate = (f_DoodadUpdate)0x395E4DD0;
+	o_DoodadUpdate = (f_DoodadUpdate)detours.Hook(o_DoodadUpdate, h_DoodadUpdate, 14);
 
 	std::cout << "entity iterator: " << SSystemGlobalEnvironment::GetInstance()->pEntitySystem->GetEntityIterator() << std::endl;
 

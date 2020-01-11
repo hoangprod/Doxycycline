@@ -103,6 +103,29 @@ struct AABB
 	BOOL IsReset() { return min.x > max.x; }
 };
 
+class ClientDoodad
+{
+public:
+	char pad_0008[96]; //0x0008
+	int16_t N00000FD4; //0x0068
+	char pad_006A[2]; //0x006A
+	Vec3 Position; //0x006C
+	char pad_0078[8]; //0x0078
+	int32_t ID; //0x0080
+	char pad_0084[188]; //0x0084
+
+	virtual void Function0();
+	virtual void Function1();
+	virtual void Function2();
+	virtual void Function3();
+	virtual void Function4();
+	virtual void Function5();
+	virtual void Function6();
+	virtual void Function7();
+	virtual void Function8();
+	virtual void Function9();
+}; //Size: 0x0140
+
 class IEntity
 {
 public:
@@ -453,3 +476,5 @@ public:
 		return SSystemGlobalEnvironment::GetInstance()->pEntitySystem->FindEntityById(LocalPlayerFinder::GetClientActorId());
 	}
 };
+
+extern std::vector<ClientDoodad> doodadList;
