@@ -67,7 +67,7 @@ bool PathToPosition(Vec3 Position)
 		console.AddLog("Local Unit failed\n");
 		return false;
 	}
-
+	
 	UINT_PTR * ActorUnitModel = *(UINT_PTR**)(LocalUnit + Patterns.Offset_ActorUnitModel);
 
 	if (!ActorUnitModel)
@@ -75,9 +75,9 @@ bool PathToPosition(Vec3 Position)
 		console.AddLog("ActorUnitModel failed.\n");
 		return false;
 	}
-
-	o_GetNavPath_and_Move(ActorUnitModel, &Position);
 	
+	o_GetNavPath_and_Move(ActorUnitModel, &Position);
+
 	return true;
 }
 
@@ -195,7 +195,7 @@ HRESULT __fastcall hookD3D11Present(IDXGISwapChain* pChain, UINT SyncInterval, U
 
 BOOLEAN __stdcall findPatterns()
 {
-	Patterns.Addr_isAutoPathing = (BYTE*)ptr_offset_Scanner((char*)HdnGetModuleBase("x2game.dll"), 0x300000, "\xc6\x05\xCC\xCC\xCC\x01\x01\xe8\xCC\xCC\xCC\xCC\x84\xc0", 0, 7, 2, "xx???xxx????xx");
+	Patterns.Addr_isAutoPathing = (BYTE*)ptr_offset_Scanner((char*)HdnGetModuleBase("x2game.dll"), 0x300000, "\xc6\x05\xCC\xCC\xCC\x01\x01\xe8\xCC\xCC\xCC\xCC\x84\xc0", 0, 6, 2, "xx???xxx????xx") + 1; // + 1 because its a weird write instruction
 
 	if (!Patterns.Addr_isAutoPathing)
 	{
