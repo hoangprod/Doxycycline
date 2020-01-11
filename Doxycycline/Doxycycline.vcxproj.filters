@@ -19,6 +19,9 @@
     <Filter Include="Schofferhoffer\Header Files">
       <UniqueIdentifier>{b9ffe077-e00d-4487-b8f8-dc97b99cbc51}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Features">
+      <UniqueIdentifier>{082c54f5-bb98-43ee-9f14-19475836d936}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -59,6 +62,9 @@
     </ClCompile>
     <ClCompile Include="LuaAPI.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AARadar.cpp">
+      <Filter>Source Files\Features</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -115,6 +121,9 @@
     </ClInclude>
     <ClInclude Include="LuaAPI.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AARadar.h">
+      <Filter>Source Files\Features</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,7 +1,7 @@
 #pragma once
 #include "Helper.h"
-// This header contains reversed game structures
 
+// This header contains reversed game structures
 class Matrix34
 {
 public:

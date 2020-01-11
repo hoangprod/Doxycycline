@@ -163,6 +163,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AARadar.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Hacks.cpp" />
     <ClCompile Include="Helper.cpp" />
@@ -178,6 +179,7 @@
     <ClCompile Include="Scan.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AARadar.h" />
     <ClInclude Include="GameClasses.h" />
     <ClInclude Include="Hacks.h" />
     <ClInclude Include="Helper.h" />
