@@ -30,9 +30,7 @@ struct Addr {
 	UINT_PTR Func_EncryptPacket;
 	UINT_PTR Func_UpdateSwimCaller;
 	UINT_PTR Func_GetSetNavPath;
-	
 };
-
 
 class Detour64
 {

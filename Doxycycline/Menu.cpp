@@ -4,6 +4,8 @@
 #include "GameClasses.h"
 #include "Hacks.h"
 #include "LuaAPI.h"
+
+
 MemoryEditor mem_edit;
 Consolelogs console;
 PacketEditor peditor;
