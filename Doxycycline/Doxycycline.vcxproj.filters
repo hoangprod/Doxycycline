@@ -63,7 +63,7 @@
     <ClCompile Include="LuaAPI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AARadar.cpp">
+    <ClCompile Include="Radar.cpp">
       <Filter>Source Files\Features</Filter>
     </ClCompile>
   </ItemGroup>
@@ -122,7 +122,7 @@
     <ClInclude Include="LuaAPI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AARadar.h">
+    <ClInclude Include="Radar.h">
       <Filter>Source Files\Features</Filter>
     </ClInclude>
   </ItemGroup>

@@ -5,7 +5,7 @@
 bool bFlyHack = false;
 bool bNoFallDamage;
 float speedMultiplier = 1.0;
-
+bool bRadar = true;
 extern Addr Patterns;
 
 void SetPlayerSpeed(float speed)

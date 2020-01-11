@@ -163,7 +163,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AARadar.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Hacks.cpp" />
     <ClCompile Include="Helper.cpp" />
@@ -176,10 +175,10 @@
     <ClCompile Include="Imgui\imgui_widgets.cpp" />
     <ClCompile Include="LuaAPI.cpp" />
     <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="Radar.cpp" />
     <ClCompile Include="Scan.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AARadar.h" />
     <ClInclude Include="GameClasses.h" />
     <ClInclude Include="Hacks.h" />
     <ClInclude Include="Helper.h" />
@@ -196,6 +195,7 @@
     <ClInclude Include="LuaAPI.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Radar.h" />
     <ClInclude Include="Scan.h" />
     <ClInclude Include="vmt.h" />
   </ItemGroup>

@@ -1,6 +1,6 @@
 #pragma once
 
-struct AARadar
+struct Radar
 {
 	void Render();
 };

@@ -58,7 +58,7 @@ HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** 
 bool PathToPosition(Vec3 Position)
 {
 	// Set auto pathing on
-	*Patterns.Addr_isAutoPathing = 1;
+	*Patterns.Addr_isAutoPathing = (BYTE)1;
 
 	UINT_PTR LocalUnit = *(UINT_PTR*)((*(UINT_PTR*)Patterns.Addr_UnitClass) + Patterns.Offset_LocalUnit);
 
@@ -69,7 +69,6 @@ bool PathToPosition(Vec3 Position)
 	}
 
 	UINT_PTR * ActorUnitModel = *(UINT_PTR**)(LocalUnit + Patterns.Offset_ActorUnitModel);
-	console.AddLog("ActorUnitModel: %p\n", ActorUnitModel);
 
 	if (!ActorUnitModel)
 	{
@@ -313,6 +312,8 @@ DWORD __stdcall InitializeHooks()
 	o_GetWaterLevel = (f_GetWaterLevel)vGetWaterLevel.Hook(71, h_GetWaterLevel);
 
 	o_GetNavPath_and_Move = (f_GetNavPath_and_Move)Patterns.Func_GetSetNavPath;
+
+	std::cout << "entity iterator: " << SSystemGlobalEnvironment::GetInstance()->pEntitySystem->GetEntityIterator() << std::endl;
 
 	return NULL;
 }

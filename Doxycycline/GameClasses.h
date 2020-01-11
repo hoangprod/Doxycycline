@@ -1,5 +1,6 @@
 #pragma once
 #include "Helper.h"
+# define m_PI 3.14159265358979323846
 
 // This header contains reversed game structures
 class Matrix34
@@ -28,6 +29,60 @@ public:
 	float z; //0x0004
 	float y; //0x0008
 }; //Size: 0x000C
+
+class Vec2
+{
+public:
+	float x;
+	float y;
+
+	Vec2()
+	{
+
+	}
+
+	Vec2(float X, float Y)
+	{
+		x = X;
+		y = Y;
+	}
+
+	// equality
+	bool operator==(const Vec2& v) const;
+	bool operator!=(const Vec2& v) const;
+
+	// arithmetic operations
+	Vec2&	operator+=(const Vec2 &v)
+	{
+		x += v.x;
+		y += v.y;
+		return *this;
+	}
+
+	Vec2&	operator-=(const Vec2 &v)
+	{
+		x -= v.x;
+		y -= v.y;
+		return *this;
+	}
+	Vec2&	operator*=(const Vec2 &v);
+	Vec2&	operator*=(float s);
+	Vec2&	operator/=(const Vec2 &v);
+	Vec2&	operator/=(float s);
+
+	float length()
+	{
+		return sqrt((x * x) + (y * y));
+	}
+
+	void Normalize()
+	{
+		float vecLength = length();
+		float multiplier = 1 / vecLength;
+		x = x * multiplier;
+		y = y * multiplier;
+	}
+};
 
 class Quat
 {
@@ -147,7 +202,8 @@ public:
 			angles.y = 6.28319 + angles.y;
 		}
 
-		angles.y = angles.y * (180.0 / 3.14159265358979323846);
+		float rad2deg = angles.y * (180.0 / m_PI);
+		angles.y = 360 - rad2deg;
 		return angles;
 	}
 }; //Size: 0x0240
@@ -157,11 +213,11 @@ class IEntityIt // allows you to iterate through entities - basically the entity
 public:
 	char pad_0008[56]; //0x0008
 
-	virtual void Function0();
-	virtual void Function1();
+	virtual void Constructor();
+	virtual void AddRef();
 	virtual bool IsEnd(); // works
-	virtual void Function3();
 	virtual IEntity* Next(); // works
+	virtual IEntity* MoveFirst(); // works
 	virtual void Release();
 	virtual void Function6();
 	virtual void Function7();

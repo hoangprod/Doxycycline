@@ -33,7 +33,6 @@ struct Addr {
 	
 };
 
-
 class Detour64
 {
 public:

@@ -18,6 +18,7 @@
 #include <DXGI.h>
 #include <mutex>
 #include <algorithm>
+#include <math.h>
 
 // reference additional headers your program requires here
 #include "Imgui/imgui.h"

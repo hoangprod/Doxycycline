@@ -4,10 +4,14 @@
 #include "GameClasses.h"
 #include "Hacks.h"
 #include "LuaAPI.h"
+#include "Radar.h"
+
+
 MemoryEditor mem_edit;
 Consolelogs console;
 PacketEditor peditor;
 HackView hackView;
+Radar radar;
 
 const char* Data = "PlaceholderData";
 ImU64* Address = (ImU64*)Data;
@@ -45,6 +49,7 @@ void MenuRender()
 
 	peditor.Display();
 	hackView.Display();
+	radar.Render();
 }
 
 void PacketEditor::Display()
