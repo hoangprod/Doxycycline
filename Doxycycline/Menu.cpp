@@ -141,7 +141,7 @@ void PacketEditor::Display()
 void PacketEditor::Push(UINT_PTR pBody)
 {
 	if (toLogPacket) {
-		if (PacketsArr.size() > 15) {
+		if (PacketsArr.size() > 100) {
 			Pop();
 		}
 		WORD pSize = 0x400;

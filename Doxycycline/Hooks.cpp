@@ -10,6 +10,9 @@
 #include <intrin.h>
 #include <iostream>
 
+typedef void(__fastcall* f_CallUI)(__int64 skillClass, int a2);
+f_CallUI callUI = (f_CallUI)(0x393a20b0);
+
 typedef float(__fastcall* f_GetWaterLevel)(void* cry3DEngine, void* referencePOS);
 typedef bool(__fastcall* f_EncryptPacket)(__int64* a1, unsigned __int8 a2, __int64 packet, int* a3);
 typedef HRESULT(__stdcall* f_D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
@@ -56,6 +59,50 @@ HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** 
 	return ret;
 }
 
+
+void TestMovementSpeed()
+{
+	// Set auto pathing on
+	*Patterns.Addr_isAutoPathing = (BYTE)1;
+
+	UINT_PTR LocalUnit = *(UINT_PTR*)((*(UINT_PTR*)Patterns.Addr_UnitClass) + Patterns.Offset_LocalUnit);
+
+	if (!LocalUnit)
+	{
+		console.AddLog("Local Unit failed\n");
+		return;
+	}
+
+	UINT_PTR* ActorUnitModel = *(UINT_PTR**)(LocalUnit + Patterns.Offset_ActorUnitModel);
+
+	auto v5 = (*(__int64(__fastcall**)(__int64))(*(INT64*)ActorUnitModel + 0x470))((__int64)ActorUnitModel);
+	auto v6 = (float*)v5;
+
+	if (!v6)
+	{
+		console.AddLog("v6 is not valid\n");
+		return;
+	}
+
+	__int64 v8;
+
+	auto v7 = *(int*)(v5 + 128);
+	if ((unsigned int)v7 > 9)
+		v8 = (__int64)(v6 + 336);
+	else
+		v8 = (__int64)&v6[21 * v7 + 357];
+
+	float BaseSpeed = v6[295];
+
+	v6[295] = 20.0f;
+
+	float bonusSPeed = *(float*)(v8 + 0x2C);
+
+	auto totalSpeed = BaseSpeed * bonusSPeed;
+
+	console.AddLog("base %f  bonus %f  total %f\n", BaseSpeed, bonusSPeed, totalSpeed);
+
+}
 
 bool PathToPosition(Vec3 Position)
 {
@@ -140,7 +187,7 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		if (wParam == VK_NUMPAD1)
 		{
-
+			TestMovementSpeed();
 		}
 
 		if (wParam == VK_HOME)
