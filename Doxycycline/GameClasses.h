@@ -360,53 +360,67 @@ class IScriptSystem
 public:
 	char pad_0008[16]; //0x0008
 	void *luaState; //0x0018
-	int32_t PlaceHolderIgnore; //0x0020
-	void *InvalidPlaceHolder; //0x0024
-	char pad_002C[24]; //0x002C
+	char pad_0020[32]; //0x0020
 
 	virtual void Function0();
 	virtual void Function1();
 	virtual void Function2();
-	virtual void Function3();
-	virtual void Function4();
-	virtual void ExecuteFile();
-	virtual void ExecuteBuffer();
-	virtual void Function7();
-	virtual void Function8();
-	virtual void Function9();
-	virtual void Function10();
-	virtual void Function11();
-	virtual void Function12();
-	virtual void BeginCallOne();
-	virtual void BeginCallTwo();
-	virtual void BeginCallThree();
-	virtual void BeginCallFour();
+	virtual void Update();
+	virtual void SetGCFrequency();
+	virtual void ExecuteFile(const char* sFileName, bool bRaiseError, bool bForceReload); // Don't call this function because it only loads files from the game pak
+	virtual void ExecuteBuffer(const char* sBuffer, unsigned long nSize, const char* sBufferDescription);
+	virtual void UnloadScript(); // This and the next 3 functions below might not work
+	virtual void UnloadScripts();
+	virtual void ReloadScript();
+	virtual void ReloadScripts();
+	virtual void DumpLoadedScripts();
+	virtual void CreateTable();
+	virtual void BeginCallOne(void* pTable, const char* sFuncName);
+	virtual void BeginCallTwo(const char* sTableName, const char* sFuncName);
+	virtual void BeginCallThree(const char* sFuncName);
+	virtual void BeginCallFour(void* hFunc);
 	virtual void EndCall();
-	virtual void Function18();
-	virtual void Function19();
-	virtual void Function20();
-	virtual void Function21();
-	virtual void Function22();
-	virtual void Function23();
-	virtual void Function24();
-	virtual void Function25();
-	virtual void Function26();
-	virtual void Function27();
-	virtual void Function28();
-	virtual void Function29();
-	virtual void Function30();
-	virtual void Function31();
-	virtual void Function32();
-	virtual void Function33();
-	virtual void Function34();
-	virtual void Function35();
+	virtual void EndCallAny();
+	virtual void EndCallAnyN();
+	virtual void GetFunctionPtr1();
+	virtual void GetFunctionPtr2();
+	virtual void CompareFuncRef();
+	virtual void CloneAny();
+	virtual void ReleaseAny();
+	virtual void SetGlobalAny();
+	virtual void GetGlobalAny();
+	virtual void PushFuncParamAny();
+	virtual void CreateUserData();
+	virtual void ForceGarbageCollection();
+	virtual void GetGCCount();
+	virtual void nullsub1();
+	virtual void Release();
+	virtual void ShowDebugger();
+	virtual void AddBreakpoint();
+	virtual void GetLocalVariables();
 	virtual void Function36();
 	virtual void Function37();
 	virtual void Function38();
 	virtual void Function39();
 	virtual void Function40();
 	virtual void Function41();
-}; //Size: 0x0044
+	virtual void Function42();
+	virtual void Function43();
+	virtual void Function44();
+	virtual void Function45();
+	virtual void Function46();
+	virtual void Function47();
+	virtual void Function48();
+	virtual void Function49();
+	virtual void RetrieveLuaStateAndCallSomeOtherFunc();
+	virtual void Function51();
+	virtual void Function52();
+	virtual void Function53();
+	virtual void Function54();
+	virtual void Function55();
+	virtual void Function56();
+	virtual void Function57();
+}; //Size: 0x0040
 
 class IGame
 {
