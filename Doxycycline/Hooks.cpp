@@ -14,7 +14,7 @@ typedef float(__fastcall* f_GetWaterLevel)(void* cry3DEngine, void* referencePOS
 typedef bool(__fastcall* f_EncryptPacket)(__int64* a1, unsigned __int8 a2, __int64 packet, int* a3);
 typedef HRESULT(__stdcall* f_D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 typedef __int64(__fastcall* f_GetNavPath_and_Move)(UINT_PTR* ActorUnit, Vec3* EndPosition);
-typedef void*(__fastcall* f_DoodadUpdate)(ClientDoodad* doodad);
+typedef void*(__fastcall* f_RetrieveDoodadPosition)(ClientDoodad* doodad, void* unk1, void* newPosition, void* unk2);
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern packetCrypto packetinfo;
@@ -38,13 +38,14 @@ f_EncryptPacket o_EncryptPacket = NULL;
 f_GetWaterLevel o_GetWaterLevel = NULL;
 f_D3D11PresentHook phookD3D11Present = NULL;
 f_GetNavPath_and_Move o_GetNavPath_and_Move = NULL;
-f_DoodadUpdate o_DoodadUpdate = NULL;
+f_RetrieveDoodadPosition o_RetrieveDoodadPosition = NULL;
 
 Detour64 detours;
 
 Vec3 pathPosition_DoNotModify = {4500.0f, 4959.0f, 125.0f};
 
 bool g_ShowMenu = false;
+std::vector<int32_t> idList;
 
 HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** ppDevice, ID3D11DeviceContext** ppContext)
 {
@@ -70,7 +71,7 @@ bool PathToPosition(Vec3 Position)
 		return false;
 	}
 	
-	UINT_PTR * ActorUnitModel = *(UINT_PTR**)(LocalUnit + Patterns.Offset_ActorUnitModel);
+	UINT_PTR * ActorUnitModel = *(UINT_PTR**)(LocalUnit + Patterns.Offset_ActorUnitModel);	
 
 	if (!ActorUnitModel)
 	{
@@ -83,14 +84,20 @@ bool PathToPosition(Vec3 Position)
 	return true;
 }
 
-void* __fastcall h_DoodadUpdate(ClientDoodad* doodad)
+void* h_RetrieveDoodadPosition(ClientDoodad* doodad, void* unk1, void* newPosition, void* unk2)
 {
-	if (doodad->ID == 1451)
+	void* returnValue = o_RetrieveDoodadPosition(doodad, unk1, newPosition, unk2);
+	if (std::find(idList.begin(), idList.end(), doodad->ID) != idList.end())
 	{
-		//std::cout << "found mining vien" << std::endl;
+		
 	}
 
-	return o_DoodadUpdate(doodad);
+	else
+	{
+		std::cout << "doodad ID: " << doodad->ID << std::endl;
+		idList.push_back(doodad->ID);
+	}
+	return returnValue;
 }
 
 float __fastcall h_GetWaterLevel(void* cry3DEngine, void* referencePOS)
@@ -313,7 +320,7 @@ DWORD __stdcall InitializeHooks()
 
 	phookD3D11Present = (f_D3D11PresentHook)dx_swapchain.Hook(8, hookD3D11Present);
 
-	LocateLuaFunctions();
+	LocateLuaFunctions();	
 
 	o_EncryptPacket = (f_EncryptPacket)Patterns.Func_EncryptPacket;
 	o_EncryptPacket = (f_EncryptPacket)detours.Hook(o_EncryptPacket, h_EncryptPacket, 14);
@@ -324,10 +331,8 @@ DWORD __stdcall InitializeHooks()
 
 	o_GetNavPath_and_Move = (f_GetNavPath_and_Move)Patterns.Func_GetSetNavPath;
 
-	o_DoodadUpdate = (f_DoodadUpdate)0x395E4DD0;
-	o_DoodadUpdate = (f_DoodadUpdate)detours.Hook(o_DoodadUpdate, h_DoodadUpdate, 14);
-
-	std::cout << "entity iterator: " << SSystemGlobalEnvironment::GetInstance()->pEntitySystem->GetEntityIterator() << std::endl;
+	o_RetrieveDoodadPosition = (f_RetrieveDoodadPosition)0x399DCC90;
+	o_RetrieveDoodadPosition = (f_RetrieveDoodadPosition)detours.Hook(o_RetrieveDoodadPosition, h_RetrieveDoodadPosition, 15);
 
 	return NULL;
 }

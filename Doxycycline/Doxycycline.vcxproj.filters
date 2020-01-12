@@ -66,6 +66,9 @@
     <ClCompile Include="Radar.cpp">
       <Filter>Source Files\Features</Filter>
     </ClCompile>
+    <ClCompile Include="PathFinder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Imgui\imconfig.h">
@@ -124,6 +127,9 @@
     </ClInclude>
     <ClInclude Include="Radar.h">
       <Filter>Source Files\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="PathFinder.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

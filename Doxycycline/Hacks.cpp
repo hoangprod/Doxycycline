@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Helper.h"
 #include "GameClasses.h"
+#include "Hacks.h"
 
 bool bFlyHack = false;
 bool bNoFallDamage;
