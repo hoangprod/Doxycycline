@@ -366,6 +366,8 @@ struct PacketEditor
 struct HackView
 {
 	void Display();
+	void LuaScript();
+	void DisplayMemEdit();
 };
 
 extern PacketEditor peditor;

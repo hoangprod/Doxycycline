@@ -23,6 +23,7 @@ static const char* current_lua_item = lua_items[0];
 packetCrypto packetinfo;
 
 bool b_displayLocalPlayerInfo = false;
+bool b_Console = true, b_MemoryEditor = true, b_PacketEditor = true, b_Radar = true, b_LuaMenu = true;
 
 typedef bool(__fastcall* f_EncryptPacket)(__int64* buffer, unsigned __int8 isEncrypted, __int64 key, int* cleartextbuffer);
 
@@ -35,21 +36,149 @@ void PacketEditor::Replay(std::vector<char*> pVector, BYTE Element)
 
 void MenuRender()
 {
-	static bool p_open = true;
-	console.Draw("Console Logs", &p_open);
+	hackView.Display();
 
+	if (b_LuaMenu)
+		hackView.LuaScript();
+
+	if(b_Console)
+		console.Draw("Console Logs", &b_Console);
+
+	if (b_MemoryEditor)
+		hackView.DisplayMemEdit();
+
+	if(b_PacketEditor)
+		peditor.Display();
+
+	if(b_Radar)
+		radar.Render();
+}
+
+void HackView::LuaScript()
+{
+	ImGui::Begin("Lua Executor");
+
+	ImGui::BeginCombo("", current_lua_item);
+	for (int i = 0; i < IM_ARRAYSIZE(lua_items); i++)
 	{
-		ImGui::Begin("Memory Editor");
-		ImGui::InputScalar(" Address", ImGuiDataType_S64, &Address, &iStep, NULL, "%016X", ImGuiInputTextFlags_CharsHexadecimal);
-		ImGui::InputScalar(" Size", ImGuiDataType_U32, &Size, &iStep, NULL, "%x");
-		mem_edit.DrawContents(Address, Size);
-		ImGui::End();
+		bool is_selected = (current_lua_item == lua_items[i]);
+		if (ImGui::Selectable(lua_items[i], is_selected))
+			current_lua_item = lua_items[i];
 	}
 
-	peditor.Display();
-	hackView.Display();
-	radar.Render();
+	if (ImGui::Button("Execute Lua Script"))
+	{
+		void* currentLuaState;
+		if (current_lua_item == lua_items[0])
+			currentLuaState = SSystemGlobalEnvironment::GetInstance()->pScriptSysOne->luaState;
+		if (current_lua_item == lua_items[1])
+			currentLuaState = SSystemGlobalEnvironment::GetInstance()->pScriptSysTwo->luaState;
+		if (current_lua_item == lua_items[2])
+			currentLuaState = SSystemGlobalEnvironment::GetInstance()->pScriptSysThree->luaState;
+
+		lua_c_ExecuteLuaFile(currentLuaState, "script.lua");
+	}
+
+	ImGui::End();
 }
+
+void HackView::DisplayMemEdit()
+{
+	ImGui::Begin("Memory Editor");
+	ImGui::InputScalar(" Address", ImGuiDataType_S64, &Address, &iStep, NULL, "%016X", ImGuiInputTextFlags_CharsHexadecimal);
+	ImGui::InputScalar(" Size", ImGuiDataType_U32, &Size, &iStep, NULL, "%x");
+	mem_edit.DrawContents(Address, Size);
+	ImGui::End();
+}
+
+void HackView::Display()
+{
+	ImGui::Begin("Hacks");
+
+	ImGui::Checkbox("Fly Hack", &bFlyHack); ImGui::SameLine();
+	if (ImGui::Checkbox("No Fall Damage", &bNoFallDamage))
+	{
+		ToggleNoFall(bNoFallDamage);
+	}
+
+	ImGui::Checkbox("Memory Editor", &b_MemoryEditor); ImGui::SameLine();
+	ImGui::Checkbox("Log Console", &b_Console); ImGui::SameLine();
+	ImGui::Checkbox("Lua Executor", &b_LuaMenu); ImGui::SameLine();
+	ImGui::Checkbox("Radar", &b_Radar); ImGui::SameLine();
+	ImGui::Checkbox("Packet Editor", &b_PacketEditor);
+
+	if (ImGui::SliderFloat("Player Speed", &speedMultiplier, 1.0f, 50.0f))
+	{
+		SetPlayerStatSpeed(speedMultiplier);
+	}
+
+	if (ImGui::SliderFloat("Player Animation Speed", &animationMultiplier, 1.0f, 50.0f))
+	{
+		SetPlayerAnimationSpeed(animationMultiplier);
+	}
+
+	/*
+	if (ImGui::Button("Test lua"))
+	{
+		lua_c_ExecuteLuaString(SSystemGlobalEnvironment::GetInstance()->pScriptSysTwo->luaState, "X2Chat:DispatchChatMessage(CMF_LOOT_METHOD_CHANGED,\"Executing \")");
+	}
+	*/
+
+	ImGui::InputFloat("Path X", &pathPosition_DoNotModify.x);
+	ImGui::InputFloat("Path Y", &pathPosition_DoNotModify.y);
+	ImGui::InputFloat("Path Z", &pathPosition_DoNotModify.z);
+	if (ImGui::Button("Go to path"))
+	{
+		PathToPosition(pathPosition_DoNotModify);
+	}
+
+	ImGui::SameLine();
+
+	ImGui::Checkbox("Display local player debug info", &b_displayLocalPlayerInfo);
+
+	if (b_displayLocalPlayerInfo)
+	{
+		if (LocalPlayerFinder::GetClientActorId())
+		{
+			IEntity* localEnt = LocalPlayerFinder::GetClientEntity();
+			void* localActor = LocalPlayerFinder::GetClientActor();
+			if (localEnt)
+			{
+
+				std::stringstream entAddressStrm;
+				std::stringstream actorAddressStrm;
+				std::stringstream positionStrm;
+				std::stringstream angleStrm;
+				std::stringstream rotationStrm;
+
+				actorAddressStrm << "Local Actor: 0x" << localActor;
+				ImGui::Text(actorAddressStrm.str().c_str());
+
+				entAddressStrm << "Local Entity: 0x" << localEnt;
+				ImGui::Text(entAddressStrm.str().c_str());
+
+				Vec3 pos = localEnt->GetWorldPos();
+				positionStrm << "Your position - X: " << pos.x << ", Y: " << pos.y << ", Z: " << pos.z;
+				ImGui::Text(positionStrm.str().c_str());
+
+				Vec3 angles = localEnt->GetFixedAngles();
+				angleStrm << "Your angles - X: " << angles.x << ", Y: " << angles.y << ", Z: " << angles.z;
+				ImGui::Text(angleStrm.str().c_str());
+
+				Quat rotation = localEnt->GetRotation();
+				rotationStrm << "Your rotation - X: " << rotation.v.x << ", Y: " << rotation.v.y << ", Z: " << rotation.v.z << ", W: " << rotation.w;
+				ImGui::Text(rotationStrm.str().c_str());
+			}
+		}
+	}
+
+	ImGui::EndCombo();
+
+	ImGui::End();
+}
+
+
+
 
 void PacketEditor::Display()
 {
@@ -149,99 +278,4 @@ void PacketEditor::Push(UINT_PTR pBody)
 		memcpy(packet, (void*)pBody, pSize);
 		PacketsArr.push_back(packet);
 	}
-}
-
-void HackView::Display()
-{
-	ImGui::Begin("Hacks");
-
-	ImGui::Checkbox("Fly Hack", &bFlyHack);
-	if (ImGui::Checkbox("No Fall Damage", &bNoFallDamage))
-	{
-		ToggleNoFall(bNoFallDamage);
-	}
-
-	if (ImGui::SliderFloat("Player Speed", &speedMultiplier, 1.0f, 50.0f))
-	{
-		SetPlayerSpeed(speedMultiplier);
-	}
-
-	if (ImGui::Button("Test lua"))
-	{
-		lua_c_ExecuteLuaString(SSystemGlobalEnvironment::GetInstance()->pScriptSysTwo->luaState, "X2Chat:DispatchChatMessage(CMF_LOOT_METHOD_CHANGED,\"Executing \")");
-	}
-
-	ImGui::Checkbox("Display local player debug info", &b_displayLocalPlayerInfo);
-	if (b_displayLocalPlayerInfo)
-	{
-		if (LocalPlayerFinder::GetClientActorId())
-		{
-			IEntity* localEnt = LocalPlayerFinder::GetClientEntity();
-			void* localActor = LocalPlayerFinder::GetClientActor();
-			if (localEnt)
-			{
-				
-				std::stringstream entAddressStrm;
-				std::stringstream actorAddressStrm;
-				std::stringstream positionStrm;
-				std::stringstream angleStrm;
-				std::stringstream rotationStrm;
-
-				actorAddressStrm << "Local Actor: 0x" << localActor;
-				ImGui::Text(actorAddressStrm.str().c_str());
-
-				entAddressStrm << "Local Entity: 0x" << localEnt;
-				ImGui::Text(entAddressStrm.str().c_str());
-
-				Vec3 pos = localEnt->GetWorldPos();
-				positionStrm << "Your position - X: " << pos.x << ", Y: " << pos.y << ", Z: " << pos.z;
-				ImGui::Text(positionStrm.str().c_str());
-
-				Vec3 angles = localEnt->GetFixedAngles();
-				angleStrm << "Your angles - X: " << angles.x << ", Y: " << angles.y << ", Z: " << angles.z;
-				ImGui::Text(angleStrm.str().c_str());
-
-				Quat rotation = localEnt->GetRotation();
-				rotationStrm << "Your rotation - X: " << rotation.v.x << ", Y: " << rotation.v.y << ", Z: " << rotation.v.z << ", W: " << rotation.w;
-				ImGui::Text(rotationStrm.str().c_str());
-			}
-		}
-	}
-
-	ImGui::InputFloat("Path X", &pathPosition_DoNotModify.x);
-	ImGui::InputFloat("Path Y", &pathPosition_DoNotModify.y);
-	ImGui::InputFloat("Path Z", &pathPosition_DoNotModify.z);
-	if (ImGui::Button("Go to path"))
-	{
-		PathToPosition(pathPosition_DoNotModify);
-	}
-
-	if(ImGui::Button("Test Entty"))
-
-	ImGui::Separator();
-
-	ImGui::BeginCombo("", current_lua_item);
-	for (int i = 0; i < IM_ARRAYSIZE(lua_items); i++)
-	{
-		bool is_selected = (current_lua_item == lua_items[i]);
-		if (ImGui::Selectable(lua_items[i], is_selected))
-			current_lua_item = lua_items[i];
-	}
-
-	if (ImGui::Button("Execute Lua Script"))
-	{
-		void* currentLuaState;
-		if (current_lua_item == lua_items[0])
-			currentLuaState = SSystemGlobalEnvironment::GetInstance()->pScriptSysOne->luaState;
-		if (current_lua_item == lua_items[1])
-			currentLuaState = SSystemGlobalEnvironment::GetInstance()->pScriptSysTwo->luaState;
-		if (current_lua_item == lua_items[2])
-			currentLuaState = SSystemGlobalEnvironment::GetInstance()->pScriptSysThree->luaState;
-
-		lua_c_ExecuteLuaFile(currentLuaState, "script.lua");
-
-	}
-	ImGui::EndCombo();
-
-	ImGui::End();
 }

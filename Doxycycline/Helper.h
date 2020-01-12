@@ -26,6 +26,8 @@ struct Addr {
 	DWORD Offset_LocalUnit;
 	DWORD Offset_ActorUnitModel;
 	DWORD Offset_Swapchain;
+	DWORD Offset_UserStats;
+	DWORD Offset_SpeedStat;
 
 	UINT_PTR Func_EncryptPacket;
 	UINT_PTR Func_UpdateSwimCaller;

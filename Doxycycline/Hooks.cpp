@@ -10,9 +10,6 @@
 #include <intrin.h>
 #include <iostream>
 
-typedef void(__fastcall* f_CallUI)(__int64 skillClass, int a2);
-f_CallUI callUI = (f_CallUI)(0x393a20b0);
-
 typedef float(__fastcall* f_GetWaterLevel)(void* cry3DEngine, void* referencePOS);
 typedef bool(__fastcall* f_EncryptPacket)(__int64* a1, unsigned __int8 a2, __int64 packet, int* a3);
 typedef HRESULT(__stdcall* f_D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
@@ -48,6 +45,8 @@ Detour64 detours;
 Vec3 pathPosition_DoNotModify = {4500.0f, 4959.0f, 125.0f};
 
 bool g_ShowMenu = false;
+bool g_HijackCtrl = false;
+
 std::vector<int32_t> idList;
 
 HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** ppDevice, ID3D11DeviceContext** ppContext)
@@ -58,51 +57,6 @@ HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** 
 		(*ppDevice)->GetImmediateContext(ppContext);
 
 	return ret;
-}
-
-
-void TestMovementSpeed()
-{
-	// Set auto pathing on
-	*Patterns.Addr_isAutoPathing = (BYTE)1;
-
-	UINT_PTR LocalUnit = *(UINT_PTR*)((*(UINT_PTR*)Patterns.Addr_UnitClass) + Patterns.Offset_LocalUnit);
-
-	if (!LocalUnit)
-	{
-		console.AddLog("Local Unit failed\n");
-		return;
-	}
-
-	UINT_PTR* ActorUnitModel = *(UINT_PTR**)(LocalUnit + Patterns.Offset_ActorUnitModel);
-
-	auto v5 = (*(__int64(__fastcall**)(__int64))(*(INT64*)ActorUnitModel + 0x470))((__int64)ActorUnitModel);
-	auto v6 = (float*)v5;
-
-	if (!v6)
-	{
-		console.AddLog("v6 is not valid\n");
-		return;
-	}
-
-	__int64 v8;
-
-	auto v7 = *(int*)(v5 + 128);
-	if ((unsigned int)v7 > 9)
-		v8 = (__int64)(v6 + 336);
-	else
-		v8 = (__int64)&v6[21 * v7 + 357];
-
-	float BaseSpeed = v6[295];
-
-	v6[295] = 20.0f;
-
-	float bonusSPeed = *(float*)(v8 + 0x2C);
-
-	auto totalSpeed = BaseSpeed * bonusSPeed;
-
-	console.AddLog("base %f  bonus %f  total %f\n", BaseSpeed, bonusSPeed, totalSpeed);
-
 }
 
 bool PathToPosition(Vec3 Position)
@@ -187,14 +141,14 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	if (uMsg == WM_KEYUP)
 	{
-		if (wParam == VK_INSERT)
+		if (wParam == VK_OEM_3)
 		{
 			g_ShowMenu = !g_ShowMenu;
 		}
 
-		if (wParam == VK_NUMPAD1)
+		if (wParam == VK_CONTROL)
 		{
-			TestMovementSpeed();
+			g_HijackCtrl = !g_HijackCtrl;
 		}
 
 		if (wParam == VK_HOME)
@@ -204,7 +158,9 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	if (g_ShowMenu)
 	{
 		ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam);
-		//return true;
+
+		if (g_HijackCtrl)
+			return true;
 	}
 
 	return CallWindowProc(OriginalWndProcHandler, hWnd, uMsg, wParam, lParam);
@@ -260,6 +216,9 @@ HRESULT __fastcall hookD3D11Present(IDXGISwapChain* pChain, UINT SyncInterval, U
 
 BOOLEAN __stdcall findPatterns()
 {
+	//////////////////////////////////////////////////////////////////[ STATIC ADDRESSES ]///////////////////////////////////////////////////////////////////////////////
+
+
 	Patterns.Addr_isAutoPathing = (BYTE*)ptr_offset_Scanner((char*)HdnGetModuleBase("x2game.dll"), 0x300000, "\xc6\x05\xCC\xCC\xCC\x01\x01\xe8\xCC\xCC\xCC\xCC\x84\xc0", 0, 6, 2, "xx???xxx????xx") + 1; // + 1 because its a weird write instruction
 
 	if (!Patterns.Addr_isAutoPathing)
@@ -297,6 +256,11 @@ BOOLEAN __stdcall findPatterns()
 	else { printf("[Pattern Scan]  Patterns.Addr_UnitClass is at %llx\n", (UINT_PTR)Patterns.Addr_UnitClass); };
 
 
+
+	//////////////////////////////////////////////////////////////////[ OFFSETS ]///////////////////////////////////////////////////////////////////////////////
+
+
+
 	Patterns.Offset_Swapchain = (DWORD)Scan_Offsets((char*)HdnGetModuleBase("CryRenderD3D10.dll"), 0x200000, "\x48\x8b\x8b\xCC\xCC\xCC\x00\x48\x8b\x01\xff\x50\x40\x8b\xf8\x3d\x21\x00\x7a\x88", "xxx???xxxxxxxxxxxxxx", 3, 4);
 
 	if (!Patterns.Offset_Swapchain)
@@ -323,6 +287,30 @@ BOOLEAN __stdcall findPatterns()
 		return FALSE;
 	}
 	else { printf("[Pattern Scan]  Patterns.Offset_ActorUnitModel is at %llx\n", (UINT_PTR)Patterns.Offset_ActorUnitModel); };
+
+	Patterns.Offset_UserStats = (UINT_PTR)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x300000, "\x48\x83\xec\x38\x48\x8b\x89\xCC\xCC\x00\x00\xf3\x0f\x11\x4c\xCC\xCC\xf3\x0f\x11\x4c", "xxxxxxx??xxxxxx??xxxx", 7, 4);
+
+	if (!Patterns.Offset_UserStats)
+	{
+		printf("[Error] Patterns.Offset_UserStats failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Offset_UserStats is at %llx\n", (UINT_PTR)Patterns.Offset_UserStats); };
+
+
+	Patterns.Offset_SpeedStat = (UINT_PTR)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x300000, "\xF3\x0F\x10\xB3\xCC\xCC\x00\x00\x48\x8B\xCB\xF3\x0F\x59\xCC\xCC\xE8", "xxxx??xxxxxxxx??x ", 4, 4);
+
+	if (!Patterns.Offset_SpeedStat)
+	{
+		printf("[Error] Patterns.Offset_SpeedStat failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Offset_SpeedStat is at %llx\n", (UINT_PTR)Patterns.Offset_SpeedStat); };
+
+
+	//////////////////////////////////////////////////////////////////[ FUNCTIONS ]///////////////////////////////////////////////////////////////////////////////
+
+
 
 	Patterns.Func_EncryptPacket = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("CryNetwork.dll"), 0x100000, "\x4c\x89\x4c\x24\x20\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8d\xac", "xxxxxxxxxxxxxxxxxxx");
 
@@ -387,7 +375,8 @@ DWORD __stdcall InitializeHooks()
 bool __stdcall Unload()
 {
 	ToggleNoFall(false);
-	SetPlayerSpeed(1.0f);
+	SetPlayerStatSpeed(1.0f);
+	SetPlayerAnimationSpeed(1.0f);
 	if (detours.Clearhook())
 	{
 		dx_swapchain.ClearHooks();
