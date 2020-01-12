@@ -175,6 +175,7 @@
     <ClCompile Include="Imgui\imgui_widgets.cpp" />
     <ClCompile Include="LuaAPI.cpp" />
     <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="PathFinder.cpp" />
     <ClCompile Include="Radar.cpp" />
     <ClCompile Include="Scan.cpp" />
   </ItemGroup>
@@ -194,6 +195,7 @@
     <ClInclude Include="Imgui\imstb_truetype.h" />
     <ClInclude Include="LuaAPI.h" />
     <ClInclude Include="Menu.h" />
+    <ClInclude Include="PathFinder.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Radar.h" />
     <ClInclude Include="Scan.h" />

@@ -6,7 +6,6 @@
 #include "LuaAPI.h"
 #include "Radar.h"
 
-
 MemoryEditor mem_edit;
 Consolelogs console;
 PacketEditor peditor;
@@ -216,6 +215,8 @@ void HackView::Display()
 	{
 		PathToPosition(pathPosition_DoNotModify);
 	}
+
+	if(ImGui::Button("Test Entty"))
 
 	ImGui::Separator();
 
