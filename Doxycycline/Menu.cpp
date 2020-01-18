@@ -144,12 +144,15 @@ void HackView::Display()
 			void* localActor = LocalPlayerFinder::GetClientActor();
 			if (localEnt)
 			{
-
+				std::stringstream idStrm;
 				std::stringstream entAddressStrm;
 				std::stringstream actorAddressStrm;
 				std::stringstream positionStrm;
 				std::stringstream angleStrm;
 				std::stringstream rotationStrm;
+
+				idStrm << "Local Actor and Entity ID: 0x" << std::hex << LocalPlayerFinder::GetClientActorId() << std::endl;
+				ImGui::Text(idStrm.str().c_str());
 
 				actorAddressStrm << "Local Actor: 0x" << localActor;
 				ImGui::Text(actorAddressStrm.str().c_str());
@@ -176,9 +179,6 @@ void HackView::Display()
 
 	ImGui::End();
 }
-
-
-
 
 void PacketEditor::Display()
 {
