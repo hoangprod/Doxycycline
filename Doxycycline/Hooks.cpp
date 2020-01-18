@@ -402,13 +402,6 @@ DWORD __stdcall InitializeHooks()
 
 	o_GetNavPath_and_Move = (f_GetNavPath_and_Move)Patterns.Func_GetSetNavPath;
 
-	//o_RetrieveDoodadPosition = (f_RetrieveDoodadPosition)0x399DCC90;
-	//o_RetrieveDoodadPosition = (f_RetrieveDoodadPosition)detours.Hook(o_RetrieveDoodadPosition, h_RetrieveDoodadPosition, 15);
-
-	//std::cout << "IActorSystem: " << SSystemGlobalEnvironment::GetInstance()->pGame->pGameFramework->GetIActorSystem() << std::endl;
-	//void* actorIterator = SSystemGlobalEnvironment::GetInstance()->pGame->pGameFramework->GetIActorSystem()->CreateActorIterator();
-	//std::cout << "actor it: " << actorIterator << std::endl;
-	LocalPlayerFinder::GetActorList();
 	return NULL;
 }
 
