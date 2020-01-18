@@ -7,6 +7,7 @@
 #include "GameClasses.h"
 #include "Hacks.h"
 #include "LuaAPI.h"
+#include "Combat.h"
 #include <intrin.h>
 #include <iostream>
 
@@ -14,12 +15,8 @@ typedef float(__fastcall* f_GetWaterLevel)(void* cry3DEngine, void* referencePOS
 typedef bool(__fastcall* f_EncryptPacket)(__int64* a1, unsigned __int8 a2, __int64 packet, int* a3);
 typedef HRESULT(__stdcall* f_D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 typedef __int64(__fastcall* f_GetNavPath_and_Move)(UINT_PTR* ActorUnit, Vec3* EndPosition);
-typedef void*(__fastcall* f_RetrieveDoodadPosition)(ClientDoodad* doodad, void* unk1, void* newPosition, void* unk2);
-typedef char(__fastcall* f_CastSpell)(__int64 localPlayerActor, __int64 Target, int SkillId, DWORD* SomeStruct);
-typedef __int64(__fastcall* f_GetClientUnit)(unsigned int UnitId);
 
-f_CastSpell o_CastSpell = (f_CastSpell)0x395D1E70;
-f_GetClientUnit o_GetClientUnit = (f_GetClientUnit)0x39575110;
+typedef void*(__fastcall* f_RetrieveDoodadPosition)(ClientDoodad* doodad, void* unk1, void* newPosition, void* unk2);
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern packetCrypto packetinfo;
@@ -135,6 +132,8 @@ bool __fastcall h_EncryptPacket(__int64* Buffer, unsigned __int8 isEncrypted, __
 	return o_EncryptPacket(Buffer, isEncrypted, key, cleartextbuffer);
 }
 
+Combat combat;
+
 LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	ImGuiIO& io = ImGui::GetIO();
@@ -151,20 +150,9 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			g_ShowMenu = !g_ShowMenu;
 		}
 
-		if (wParam == VK_NUMPAD3)
+		if (wParam == VK_NUMPAD6)
 		{
-			UINT_PTR LocalUnit = *(UINT_PTR*)((*(UINT_PTR*)Patterns.Addr_UnitClass) + Patterns.Offset_LocalUnit);
-			DWORD TargetId = *(DWORD*)(LocalUnit + 0x19a4);
-			printf("Current Target id %d\n", TargetId);
-		}
-
-		if (wParam == VK_NUMPAD2)
-		{
-			printf("Attacking!\n");
-			UINT_PTR LocalUnit = *(UINT_PTR*)((*(UINT_PTR*)Patterns.Addr_UnitClass) + Patterns.Offset_LocalUnit);
-			DWORD TargetId = *(DWORD*)(LocalUnit + 0x19a4);
-			__int64 Target = o_GetClientUnit(TargetId); //12293
-			o_CastSpell(LocalUnit, Target, 0x2A00, 0);
+			combat.cast_skill_on_self(0x28f1);
 		}
 
 		if (wParam == VK_CONTROL)
@@ -282,7 +270,7 @@ BOOLEAN __stdcall findPatterns()
 
 
 
-	Patterns.Offset_Swapchain = (DWORD)Scan_Offsets((char*)HdnGetModuleBase("CryRenderD3D10.dll"), 0x200000, "\x48\x8b\x8b\xCC\xCC\xCC\x00\x48\x8b\x01\xff\x50\x40\x8b\xf8\x3d\x21\x00\x7a\x88", "xxx???xxxxxxxxxxxxxx", 3, 4);
+	Patterns.Offset_Swapchain = (DWORD)Scan_Offsets((char*)HdnGetModuleBase("CryRenderD3D10.dll"), 0x300000, "\x48\x8b\x8b\xCC\xCC\xCC\x00\x48\x8b\x01\xff\x50\x40\x8b\xf8\x3d\x21\x00\x7a\x88", "xxx???xxxxxxxxxxxxxx", 3, 4);
 
 	if (!Patterns.Offset_Swapchain)
 	{
@@ -291,7 +279,7 @@ BOOLEAN __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Offset_Swapchain is at %llx\n", (UINT_PTR)Patterns.Offset_Swapchain); };
 
-	Patterns.Offset_LocalUnit = (DWORD)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x200000, "\x48\x8b\xb0\xCC\xCC\x00\x00\x48\x85\xf6\x75\xCC\x32\xc0\x48\x81\xc4", "xxx??xxxxxx?xxxxx", 3, 4);
+	Patterns.Offset_LocalUnit = (DWORD)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x48\x8b\xb0\xCC\xCC\x00\x00\x48\x85\xf6\x75\xCC\x32\xc0\x48\x81\xc4", "xxx??xxxxxx?xxxxx", 3, 4);
 
 	if (!Patterns.Offset_LocalUnit)
 	{
@@ -300,7 +288,7 @@ BOOLEAN __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Offset_LocalUnit is at %llx\n", (UINT_PTR)Patterns.Offset_LocalUnit); };
 
-	Patterns.Offset_ActorUnitModel = (UINT_PTR)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x300000, "\x48\x83\xec\x28\x48\x8b\x89\xCC\xCC\x00\x00\x48\x8b\x01\xff\x90\xCC\xCC\x00\x00\xf3\x0f\x10\x40", "xxxxxxx??xxxxxxx??xxxxxx", 7, 4);
+	Patterns.Offset_ActorUnitModel = (UINT_PTR)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x48\x83\xec\x28\x48\x8b\x89\xCC\xCC\x00\x00\x48\x8b\x01\xff\x90\xCC\xCC\x00\x00\xf3\x0f\x10\x40", "xxxxxxx??xxxxxxx??xxxxxx", 7, 4);
 
 	if (!Patterns.Offset_ActorUnitModel)
 	{
@@ -309,7 +297,7 @@ BOOLEAN __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Offset_ActorUnitModel is at %llx\n", (UINT_PTR)Patterns.Offset_ActorUnitModel); };
 
-	Patterns.Offset_UserStats = (UINT_PTR)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x300000, "\x48\x83\xec\x38\x48\x8b\x89\xCC\xCC\x00\x00\xf3\x0f\x11\x4c\xCC\xCC\xf3\x0f\x11\x4c", "xxxxxxx??xxxxxx??xxxx", 7, 4);
+	Patterns.Offset_UserStats = (UINT_PTR)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x48\x83\xec\x38\x48\x8b\x89\xCC\xCC\x00\x00\xf3\x0f\x11\x4c\xCC\xCC\xf3\x0f\x11\x4c", "xxxxxxx??xxxxxx??xxxx", 7, 4);
 
 	if (!Patterns.Offset_UserStats)
 	{
@@ -319,7 +307,7 @@ BOOLEAN __stdcall findPatterns()
 	else { printf("[Pattern Scan]  Patterns.Offset_UserStats is at %llx\n", (UINT_PTR)Patterns.Offset_UserStats); };
 
 
-	Patterns.Offset_SpeedStat = (UINT_PTR)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x300000, "\xF3\x0F\x10\xB3\xCC\xCC\x00\x00\x48\x8B\xCB\xF3\x0F\x59\xCC\xCC\xE8", "xxxx??xxxxxxxx??x ", 4, 4);
+	Patterns.Offset_SpeedStat = (UINT_PTR)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\xF3\x0F\x10\xB3\xCC\xCC\x00\x00\x48\x8B\xCB\xF3\x0F\x59\xCC\xCC\xE8", "xxxx??xxxxxxxx??x", 4, 4);
 
 	if (!Patterns.Offset_SpeedStat)
 	{
@@ -327,6 +315,15 @@ BOOLEAN __stdcall findPatterns()
 		return FALSE;
 	}
 	else { printf("[Pattern Scan]  Patterns.Offset_SpeedStat is at %llx\n", (UINT_PTR)Patterns.Offset_SpeedStat); };
+
+	Patterns.Offset_CurrentTargetId = (UINT_PTR)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x8b\x80\xCC\xCC\x00\x00\xeb\xCC\x40\x32\xf6\x8b\x05\xCC\xCC\xCC\x03", "xx??xxx?xxxxx???x", 2, 4);
+
+	if (!Patterns.Offset_CurrentTargetId)
+	{
+		printf("[Error] Patterns.Offset_CurrentTargetId failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Offset_CurrentTargetId is at %llx\n", (UINT_PTR)Patterns.Offset_CurrentTargetId); };
 
 
 	//////////////////////////////////////////////////////////////////[ FUNCTIONS ]///////////////////////////////////////////////////////////////////////////////
@@ -342,7 +339,7 @@ BOOLEAN __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_EncryptPacket is at %llx\n", Patterns.Func_EncryptPacket); };
 
-	Patterns.Func_UpdateSwimCaller = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x500000, "\x0f\x28\xc8\xf3\x0f\x5c\xCC\xCC\x00\x00\x00\x41\x0f\x2f\xcc", "xxxxxx??xxxxxxx");
+	Patterns.Func_UpdateSwimCaller = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x0f\x28\xc8\xf3\x0f\x5c\xCC\xCC\x00\x00\x00\x41\x0f\x2f\xcc", "xxxxxx??xxxxxxx");
 
 	if (!Patterns.Func_UpdateSwimCaller)
 	{
@@ -351,7 +348,7 @@ BOOLEAN __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_UpdateSwimCaller is at %llx\n", Patterns.Func_UpdateSwimCaller); };
 
-	Patterns.Func_GetSetNavPath = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x500000, "\x48\x8b\xc4\x57\x48\x83\xec\x60\x48\xc7\x44\x24\x20\xfe\xff\xff\xff\x48\x89\x58\x10\x48\x89\x68\x18\x48\x89\x70\x20\x48\x8b\xf2\x48\x8b\xd9", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+	Patterns.Func_GetSetNavPath = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x48\x8b\xc4\x57\x48\x83\xec\x60\x48\xc7\x44\x24\x20\xfe\xff\xff\xff\x48\x89\x58\x10\x48\x89\x68\x18\x48\x89\x70\x20\x48\x8b\xf2\x48\x8b\xd9", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 
 	if (!Patterns.Func_GetSetNavPath)
 	{
@@ -359,6 +356,24 @@ BOOLEAN __stdcall findPatterns()
 		return FALSE;
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_GetSetNavPath is at %llx\n", Patterns.Func_GetSetNavPath); };
+
+	Patterns.Func_GetClientUnit = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x3b\x0d\xCC\xCC\xCC\xCC\x74\xCC\x4c\x8b\x05\xCC\xCC\xCC\x03\x49\x8b\xd0", "xx????x?xxx???xxxx");
+
+	if (!Patterns.Func_GetClientUnit)
+	{
+		printf("[Error] Patterns.Func_GetClientUnit failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_GetClientUnit is at %llx\n", Patterns.Func_GetClientUnit); };
+
+	Patterns.Func_CastSkillWrapper = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x48\x89\x5c\x24\x18\x48\x89\x74\x24\x20\x89\x54\x24\x10\x55\x57\x41\x54", "xxxxxxxxxxxxxxxxxx");
+
+	if (!Patterns.Func_CastSkillWrapper)
+	{
+		printf("[Error] Patterns.Func_CastSkillWrapper failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_CastSkillWrapper is at %llx\n", Patterns.Func_CastSkillWrapper); };
 
 
 	return TRUE;

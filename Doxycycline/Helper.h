@@ -28,10 +28,13 @@ struct Addr {
 	DWORD Offset_Swapchain;
 	DWORD Offset_UserStats;
 	DWORD Offset_SpeedStat;
+	DWORD Offset_CurrentTargetId;
 
 	UINT_PTR Func_EncryptPacket;
 	UINT_PTR Func_UpdateSwimCaller;
 	UINT_PTR Func_GetSetNavPath;
+	UINT_PTR Func_GetClientUnit;
+	UINT_PTR Func_CastSkillWrapper;
 };
 
 class Detour64
