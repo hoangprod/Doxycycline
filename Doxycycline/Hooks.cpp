@@ -15,6 +15,11 @@ typedef bool(__fastcall* f_EncryptPacket)(__int64* a1, unsigned __int8 a2, __int
 typedef HRESULT(__stdcall* f_D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 typedef __int64(__fastcall* f_GetNavPath_and_Move)(UINT_PTR* ActorUnit, Vec3* EndPosition);
 typedef void*(__fastcall* f_RetrieveDoodadPosition)(ClientDoodad* doodad, void* unk1, void* newPosition, void* unk2);
+typedef char(__fastcall* f_CastSpell)(__int64 localPlayerActor, __int64 Target, int SkillId, DWORD* SomeStruct);
+typedef __int64(__fastcall* f_GetClientUnit)(unsigned int UnitId);
+
+f_CastSpell o_CastSpell = (f_CastSpell)0x395D1E70;
+f_GetClientUnit o_GetClientUnit = (f_GetClientUnit)0x39575110;
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern packetCrypto packetinfo;
@@ -144,6 +149,22 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		if (wParam == VK_OEM_3)
 		{
 			g_ShowMenu = !g_ShowMenu;
+		}
+
+		if (wParam == VK_NUMPAD3)
+		{
+			UINT_PTR LocalUnit = *(UINT_PTR*)((*(UINT_PTR*)Patterns.Addr_UnitClass) + Patterns.Offset_LocalUnit);
+			DWORD TargetId = *(DWORD*)(LocalUnit + 0x19a4);
+			printf("Current Target id %d\n", TargetId);
+		}
+
+		if (wParam == VK_NUMPAD2)
+		{
+			printf("Attacking!\n");
+			UINT_PTR LocalUnit = *(UINT_PTR*)((*(UINT_PTR*)Patterns.Addr_UnitClass) + Patterns.Offset_LocalUnit);
+			DWORD TargetId = *(DWORD*)(LocalUnit + 0x19a4);
+			__int64 Target = o_GetClientUnit(TargetId); //12293
+			o_CastSpell(LocalUnit, Target, 0x2A00, 0);
 		}
 
 		if (wParam == VK_CONTROL)
@@ -366,8 +387,8 @@ DWORD __stdcall InitializeHooks()
 
 	o_GetNavPath_and_Move = (f_GetNavPath_and_Move)Patterns.Func_GetSetNavPath;
 
-	o_RetrieveDoodadPosition = (f_RetrieveDoodadPosition)0x399DCC90;
-	o_RetrieveDoodadPosition = (f_RetrieveDoodadPosition)detours.Hook(o_RetrieveDoodadPosition, h_RetrieveDoodadPosition, 15);
+	//o_RetrieveDoodadPosition = (f_RetrieveDoodadPosition)0x399DCC90;
+	//o_RetrieveDoodadPosition = (f_RetrieveDoodadPosition)detours.Hook(o_RetrieveDoodadPosition, h_RetrieveDoodadPosition, 15);
 
 	return NULL;
 }
