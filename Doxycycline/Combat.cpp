@@ -175,8 +175,35 @@ BOOL Combat::isChanneling()
 	return o_AI_IsChanneling(NULL, LocalPlayerFinder::GetClientActor()->NetworkID);
 }
 
+BOOL Combat::isInCombat()
+{
+	UINT_PTR LocalUnit = get_local_unit();
+	return *(BYTE*)(LocalUnit + 0x34F0);
+}
+
 BOOL Combat::stop_casting() // not sure what this is supposed to return
 {
 	o_AI_StopCasting(NULL, LocalPlayerFinder::GetClientActor()->NetworkID);
 	return true;
+}
+
+BOOL Stealth::is_player_nearby(float range)
+{
+	std::map<IActor*, float> viableActors;
+	Vec3 localPos = LocalPlayerFinder::GetClientEntity()->GetWorldPos();
+	auto actorList = LocalPlayerFinder::GetActorList();
+	for (auto actor : actorList)
+	{
+		if (actor && actor->Entity && EntityHelper::isPlayer(actor->Entity))
+		{
+			Vec3 actorPos = actor->Entity->GetWorldPos();
+			float totalDistance = abs(actorPos.x - localPos.x) + abs(actorPos.z - localPos.z);
+			if (totalDistance <= range)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
 }

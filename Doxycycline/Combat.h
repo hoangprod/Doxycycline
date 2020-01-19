@@ -60,7 +60,7 @@ class Inventory {
 };
 
 class Stealth {
-	BOOL is_player_nearby(DWORD range);
+	BOOL is_player_nearby(float range);
 	BOOL escape_from_player();
 };
 
