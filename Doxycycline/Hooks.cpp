@@ -15,8 +15,8 @@ typedef float(__fastcall* f_GetWaterLevel)(void* cry3DEngine, void* referencePOS
 typedef bool(__fastcall* f_EncryptPacket)(__int64* a1, unsigned __int8 a2, __int64 packet, int* a3);
 typedef HRESULT(__stdcall* f_D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 typedef __int64(__fastcall* f_GetNavPath_and_Move)(UINT_PTR* ActorUnit, Vec3* EndPosition);
-
 typedef void*(__fastcall* f_RetrieveDoodadPosition)(ClientDoodad* doodad, void* unk1, void* newPosition, void* unk2);
+typedef void*(__fastcall* f_EndCall)(IScriptSystem* scriptSys);
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern packetCrypto packetinfo;
@@ -35,12 +35,14 @@ Addr Patterns;
 
 VMTHook dx_swapchain;
 VMTHook vGetWaterLevel;
+VMTHook vEndCall;
 
 f_EncryptPacket o_EncryptPacket = NULL;
 f_GetWaterLevel o_GetWaterLevel = NULL;
 f_D3D11PresentHook phookD3D11Present = NULL;
 f_GetNavPath_and_Move o_GetNavPath_and_Move = NULL;
 f_RetrieveDoodadPosition o_RetrieveDoodadPosition = NULL;
+f_EndCall o_EndCall = NULL;
 
 Detour64 detours;
 
@@ -85,6 +87,11 @@ bool PathToPosition(Vec3 Position)
 	o_GetNavPath_and_Move(ActorUnitModel, &Position);
 
 	return true;
+}
+
+void* h_EndCall(IScriptSystem* scriptSys) // this is the method where we will exeucte lua
+{
+	return o_EndCall(scriptSys);
 }
 
 void* h_RetrieveDoodadPosition(ClientDoodad* doodad, void* unk1, void* newPosition, void* unk2)
@@ -411,6 +418,11 @@ BOOLEAN __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_AI_GetGlobalCooldown is at %llx\n", Patterns.Func_AI_GetGlobalCooldown); };
 
+
+	std::cout << "script sys one: " << SSystemGlobalEnvironment::GetInstance()->pScriptSysOne << std::endl;
+	std::cout << "script sys two: " << SSystemGlobalEnvironment::GetInstance()->pScriptSysTwo << std::endl;
+	std::cout << "script sys three: " << SSystemGlobalEnvironment::GetInstance()->pScriptSysThree << std::endl;
+
 	return TRUE;
 }
 
@@ -435,6 +447,10 @@ DWORD __stdcall InitializeHooks()
 	vGetWaterLevel.vmt = (void**)p3DEngineVtable;
 	o_GetWaterLevel = (f_GetWaterLevel)vGetWaterLevel.Hook(71, h_GetWaterLevel);
 
+	DWORD_PTR* pScriptSysVtable = *(DWORD_PTR**)SSystemGlobalEnvironment::GetInstance()->pScriptSysOne;
+	vEndCall.vmt = (void**)pScriptSysVtable;
+	o_EndCall = (f_EndCall)vEndCall.Hook(17, h_EndCall);
+
 	o_GetNavPath_and_Move = (f_GetNavPath_and_Move)Patterns.Func_GetSetNavPath;
 
 	return NULL;
@@ -449,6 +465,7 @@ bool __stdcall Unload()
 	{
 		dx_swapchain.ClearHooks();
 		vGetWaterLevel.ClearHooks();
+		vEndCall.ClearHooks();
 		SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)OriginalWndProcHandler);
 		FreeLibrary(h_Module);
 		UnmapViewOfFile(h_Module);
