@@ -5,7 +5,8 @@
 #include "Hacks.h"
 #include "LuaAPI.h"
 #include "Radar.h"
-
+#include "Combat.h"
+#include <iostream>
 MemoryEditor mem_edit;
 Consolelogs console;
 PacketEditor peditor;
@@ -28,6 +29,7 @@ bool b_Console = true, b_MemoryEditor = true, b_PacketEditor = true, b_Radar = t
 typedef bool(__fastcall* f_EncryptPacket)(__int64* buffer, unsigned __int8 isEncrypted, __int64 key, int* cleartextbuffer);
 
 extern f_EncryptPacket o_EncryptPacket;
+
 
 void PacketEditor::Replay(std::vector<char*> pVector, BYTE Element)
 {

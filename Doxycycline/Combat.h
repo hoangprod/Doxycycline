@@ -27,6 +27,7 @@ public:
 	UINT_PTR get_entitylist_ptr();
 	UINT_PTR get_local_unit();
 
+	IActor* get_closest_actor(float maxRange);
 	DWORD get_closest_targetid(float maxRange);
 	DWORD get_closest_target_with_type(DWORD TargetType, float maxRange);
 	DWORD get_targets_with_name(char * TargetName, float maxRange);

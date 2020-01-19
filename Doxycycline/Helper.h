@@ -35,6 +35,11 @@ struct Addr {
 	UINT_PTR Func_GetSetNavPath;
 	UINT_PTR Func_GetClientUnit;
 	UINT_PTR Func_CastSkillWrapper;
+
+	UINT_PTR Func_AI_IsCasting;
+	UINT_PTR Func_AI_StopCasting;
+	UINT_PTR Func_AI_IsChanneling;
+	UINT_PTR Func_AI_GetGlobalCooldown;
 };
 
 class Detour64

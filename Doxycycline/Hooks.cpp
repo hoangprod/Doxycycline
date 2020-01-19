@@ -375,6 +375,41 @@ BOOLEAN __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_CastSkillWrapper is at %llx\n", Patterns.Func_CastSkillWrapper); };
 
+	Patterns.Func_AI_IsCasting = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x48\x83\xEC\x28\x8B\xCA\xE8\x00\x00\x00\x00\x4C\x8B\xD8\x48\x85\xC0\x75\x05\x48\x83\xC4\x28\xC3\x8B\x05\x00\x00\x00\x00\x41\x39\x83\x00\x00\x00\x00\x75\x16", "xxxxxxx????xxxxxxxxxxxxxxx????xxx????xx");
+
+	if (!Patterns.Func_AI_IsCasting)
+	{
+		printf("[Error] Patterns.Func_AI_IsCasting failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_AI_IsCasting is at %llx\n", Patterns.Func_AI_IsCasting); };
+
+	Patterns.Func_AI_StopCasting = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x89\x54\x24\x10\x48\x83\xEC\x28\x8B\xCA\xE8\x00\x00\x00\x00\x48\x85\xC0\x74\x51\x48\x8B\x05\x00\x00\x00\x00\x48\x83\xB8\x00\x00\x00\x00\x00\x74\x15\x48\x8B\x80\x00\x00\x00\x00\x8B\x48\x08\x48\x8D\x44\x24\x00\x89\x4C\x24\x40", "xxxxxxxxxxx????xxxxxxxx????xxx?????xxxxx????xxxxxxx?xxxx");
+
+	if (!Patterns.Func_AI_StopCasting)
+	{
+		printf("[Error] Patterns.Func_AI_StopCasting failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_AI_StopCasting is at %llx\n", Patterns.Func_AI_StopCasting); };
+
+	Patterns.Func_AI_IsChanneling = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x48\x83\xEC\x28\x8B\xCA\xE8\x00\x00\x00\x00\x4C\x8B\xD8\x48\x85\xC0\x75\x05\x48\x83\xC4\x28\xC3\x8B\x80\x00\x00\x00\x00", "xxxxxxx????xxxxxxxxxxxxxxx????");
+
+	if (!Patterns.Func_AI_IsChanneling)
+	{
+		printf("[Error] Patterns.Func_AI_IsChanneling failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_AI_IsChanneling is at %llx\n", Patterns.Func_AI_IsChanneling); };
+
+	Patterns.Func_AI_GetGlobalCooldown = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x44\x89\x44\x24\x00\x48\x83\xEC\x38\x8B\xCA", "xxxx?xxxxxx");
+
+	if (!Patterns.Func_AI_GetGlobalCooldown)
+	{
+		printf("[Error] Patterns.Func_AI_GetGlobalCooldown failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_AI_GetGlobalCooldown is at %llx\n", Patterns.Func_AI_GetGlobalCooldown); };
 
 	return TRUE;
 }

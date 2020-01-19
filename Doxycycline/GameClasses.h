@@ -370,8 +370,10 @@ class IActor
 {
 public:
 	char pad_0008[16]; //0x0008
-	IEntity* Entity; //0x0018
-	char pad_0020[608]; //0x0020
+	IEntity *Entity; //0x0018
+	char pad_0020[64]; //0x0020
+	int32_t NetworkID; //0x0060
+	char pad_0064[540]; //0x0064
 
 	virtual void Function0();
 	virtual void Function1();
@@ -468,28 +470,28 @@ public:
 	virtual void Function92();
 	virtual void Function93();
 	virtual void Function94();
-	virtual void Function95();
+	virtual void UpdateScriptStats();
 	virtual void Function96();
 	virtual void CreateScriptEvent();
 	virtual void Function98();
 	virtual void Function99();
 	virtual void Function100();
 	virtual void Function101();
-	virtual void Function102();
-	virtual void Function103();
-	virtual void Function104();
-	virtual void Function105();
+	virtual void DumpActorInfo();
+	virtual void LikelyIsFriendlyEntity();
+	virtual void SetIK();
+	virtual void ProcessFrameMovementRotation();
 	virtual void ProcessFrameMovement();
 	virtual void UpdateSwimStats();
 	virtual void Function108();
 	virtual void Function109();
 	virtual void Function110();
-	virtual void Function111();
+	virtual void PrePhysicsUpdate();
 	virtual void Function112();
-	virtual void Function113();
+	virtual void OnStanceChanged();
 	virtual void Function114();
-	virtual void Function115();
-	virtual void Function116();
+	virtual void PossibleIsFriendly();
+	virtual void DrawIK();
 	virtual void Function117();
 	virtual void Function118();
 	virtual void Function119();
@@ -739,37 +741,6 @@ public:
 	}
 }; //Size: 0x0440
 
-
-class EntityHelper
-{
-public:
-	static bool isHostile(IEntity* entity)
-	{
-		return LocalPlayerFinder::GetClientEntity()->GetAI()->IsHostile(entity->GetAI(), true);
-	}
-
-	static bool isPlayer(IEntity* entity)
-	{
-		if (entity->GetEntityClass()->flags == 33)
-			return true;
-		return false;
-	}
-
-	static bool isNpcMob(IEntity* entity)
-	{
-		if (entity->GetEntityClass()->flags == 41)
-			return true;
-		return false;
-	}
-
-	static bool isMount(IEntity* entity)
-	{
-		if (entity->GetEntityClass()->flags == 57)
-			return true;
-		return false;
-	}
-};
-
 class LocalPlayerFinder
 {
 public:
@@ -806,12 +777,42 @@ public:
 						actorList.push_back(actor);
 					}
 				}
-				
 			}
 		}
 
 		return actorList;
 	}
 };
+
+class EntityHelper
+{
+public:
+	static bool isHostile(IEntity* entity)
+	{
+		return LocalPlayerFinder::GetClientEntity()->GetAI()->IsHostile(entity->GetAI(), true);
+	}
+
+	static bool isPlayer(IEntity* entity)
+	{
+		if (entity->GetEntityClass()->flags == 33)
+			return true;
+		return false;
+	}
+
+	static bool isNpcMob(IEntity* entity)
+	{
+		if (entity->GetEntityClass()->flags == 41)
+			return true;
+		return false;
+	}
+
+	static bool isMount(IEntity* entity)
+	{
+		if (entity->GetEntityClass()->flags == 57)
+			return true;
+		return false;
+	}
+};
+
 
 extern std::vector<ClientDoodad> doodadList;
