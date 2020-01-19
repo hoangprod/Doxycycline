@@ -370,7 +370,7 @@ class IActor
 {
 public:
 	char pad_0008[16]; //0x0008
-	void *Entity; //0x0018
+	IEntity* Entity; //0x0018
 	char pad_0020[608]; //0x0020
 
 	virtual void Function0();
@@ -610,7 +610,7 @@ public:
 	virtual void Function38();
 	virtual void Function39();
 	virtual void Function40();
-	virtual void* GetClientActor(); // works
+	virtual IActor* GetClientActor();
 	virtual uint32_t GetClientActorId(); // works. This ID is also the same as the client entity ID, so it can be used to grab local entity.
 	virtual void Function43();
 	virtual void GetServerTime();
@@ -739,6 +739,37 @@ public:
 	}
 }; //Size: 0x0440
 
+
+class EntityHelper
+{
+public:
+	static bool isHostile(IEntity* entity)
+	{
+		return LocalPlayerFinder::GetClientEntity()->GetAI()->IsHostile(entity->GetAI(), true);
+	}
+
+	static bool isPlayer(IEntity* entity)
+	{
+		if (entity->GetEntityClass()->flags == 33)
+			return true;
+		return false;
+	}
+
+	static bool isNpcMob(IEntity* entity)
+	{
+		if (entity->GetEntityClass()->flags == 41)
+			return true;
+		return false;
+	}
+
+	static bool isMount(IEntity* entity)
+	{
+		if (entity->GetEntityClass()->flags == 57)
+			return true;
+		return false;
+	}
+};
+
 class LocalPlayerFinder
 {
 public:
@@ -747,7 +778,7 @@ public:
 		return SSystemGlobalEnvironment::GetInstance()->pGame->pGameFramework->GetClientActorId();
 	}
 
-	static void* GetClientActor()
+	static IActor* GetClientActor()
 	{
 		return SSystemGlobalEnvironment::GetInstance()->pGame->pGameFramework->GetClientActor();
 	}
@@ -770,6 +801,8 @@ public:
 					IActor* actor = SSystemGlobalEnvironment::GetInstance()->pGame->pGameFramework->GetIActorSystem()->GetActor(ent->GetId());
 					if (actor)
 					{
+						GetClientActor()->Entity->GetAI()->IsHostile(ent->GetAI(), true);
+
 						actorList.push_back(actor);
 					}
 				}

@@ -152,7 +152,7 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		if (wParam == VK_NUMPAD6)
 		{
-			combat.cast_skill_on_self(0x28f1);
+			LocalPlayerFinder::GetActorList();
 		}
 
 		if (wParam == VK_CONTROL)
@@ -385,7 +385,7 @@ DWORD __stdcall InitializeHooks()
 
 	findPatterns();
 
-	DWORD_PTR* pSwapChainVtable = **(DWORD_PTR***)((DWORD_PTR)SSystemGlobalEnvironment::GetInstance()->pRenderer + Patterns.Offset_Swapchain); // offset_Swapchain =  0x159e0
+	DWORD_PTR* pSwapChainVtable = **(DWORD_PTR***)((DWORD_PTR)SSystemGlobalEnvironment::GetInstance()->pRenderer + Patterns.Offset_Swapchain);
 
 	dx_swapchain.vmt = ((void**)pSwapChainVtable);
 
