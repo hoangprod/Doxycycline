@@ -29,12 +29,14 @@ struct Addr {
 	DWORD Offset_UserStats;
 	DWORD Offset_SpeedStat;
 	DWORD Offset_CurrentTargetId;
+	DWORD Offset_isInCombat;
 
 	UINT_PTR Func_EncryptPacket;
 	UINT_PTR Func_UpdateSwimCaller;
 	UINT_PTR Func_GetSetNavPath;
 	UINT_PTR Func_GetClientUnit;
 	UINT_PTR Func_CastSkillWrapper;
+	UINT_PTR Func_GetIndexVelocity;
 
 	UINT_PTR Func_AI_IsCasting;
 	UINT_PTR Func_AI_StopCasting;

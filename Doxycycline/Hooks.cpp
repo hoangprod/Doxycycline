@@ -132,7 +132,6 @@ bool __fastcall h_EncryptPacket(__int64* Buffer, unsigned __int8 isEncrypted, __
 	return o_EncryptPacket(Buffer, isEncrypted, key, cleartextbuffer);
 }
 
-Combat combat;
 
 LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -152,9 +151,16 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		if (wParam == VK_NUMPAD6)
 		{
-			LocalPlayerFinder::GetActorList();
-		}
+			Combat combat;
 
+			printf("isCombat: %d\n", combat.isInCombat());
+		}
+		if (wParam == VK_NUMPAD7)
+		{
+			Combat combat;
+
+			printf("isRunning: %d\n", combat.isRunning());
+		}
 		if (wParam == VK_CONTROL)
 		{
 			g_HijackCtrl = !g_HijackCtrl;
@@ -225,8 +231,11 @@ HRESULT __fastcall hookD3D11Present(IDXGISwapChain* pChain, UINT SyncInterval, U
 
 BOOLEAN __stdcall findPatterns()
 {
+	printf("------------------ [ START PATTERN SCAN ] ------------------\n\n");
+
 	//////////////////////////////////////////////////////////////////[ STATIC ADDRESSES ]///////////////////////////////////////////////////////////////////////////////
 
+	printf("------------------ [ STATIC ADDRESSES ] ------------------\n\n");
 
 	Patterns.Addr_isAutoPathing = (BYTE*)ptr_offset_Scanner((char*)HdnGetModuleBase("x2game.dll"), 0x300000, "\xc6\x05\xCC\xCC\xCC\x01\x01\xe8\xCC\xCC\xCC\xCC\x84\xc0", 0, 6, 2, "xx???xxx????xx") + 1; // + 1 because its a weird write instruction
 
@@ -268,6 +277,7 @@ BOOLEAN __stdcall findPatterns()
 
 	//////////////////////////////////////////////////////////////////[ OFFSETS ]///////////////////////////////////////////////////////////////////////////////
 
+	printf("\n------------------ [ OFFSETS ] ------------------\n\n");
 
 
 	Patterns.Offset_Swapchain = (DWORD)Scan_Offsets((char*)HdnGetModuleBase("CryRenderD3D10.dll"), 0x300000, "\x48\x8b\x8b\xCC\xCC\xCC\x00\x48\x8b\x01\xff\x50\x40\x8b\xf8\x3d\x21\x00\x7a\x88", "xxx???xxxxxxxxxxxxxx", 3, 4);
@@ -325,9 +335,18 @@ BOOLEAN __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Offset_CurrentTargetId is at %llx\n", (UINT_PTR)Patterns.Offset_CurrentTargetId); };
 
+	Patterns.Offset_isInCombat = (UINT_PTR)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x0f\xb6\x81\xCC\xCC\x00\x00\xc7\x44\x24\x28\x02\x00\x00\x00", "xxx??xxxxxxxxxx", 3, 4);
+
+	if (!Patterns.Offset_isInCombat)
+	{
+		printf("[Error] Patterns.Offset_isInCombat failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Offset_isInCombat is at %llx\n", (UINT_PTR)Patterns.Offset_isInCombat); };
 
 	//////////////////////////////////////////////////////////////////[ FUNCTIONS ]///////////////////////////////////////////////////////////////////////////////
 
+	printf("\n------------------ [ FUNCTIONS ] ------------------\n\n");
 
 
 	Patterns.Func_EncryptPacket = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("CryNetwork.dll"), 0x100000, "\x4c\x89\x4c\x24\x20\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8d\xac", "xxxxxxxxxxxxxxxxxxx");
@@ -411,6 +430,18 @@ BOOLEAN __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_AI_GetGlobalCooldown is at %llx\n", Patterns.Func_AI_GetGlobalCooldown); };
 
+
+	Patterns.Func_GetIndexVelocity = (UINT_PTR)ptr_offset_Scanner((char*)HdnGetModuleBase("x2game.dll"), 0x200000, "\xe8\xCC\xCC\xCC\x00\x0f\x57\xf6\xf3\x0f\x59\x05\xCC\xCC\xCC\x00", 0, 5, 1, "x???xxxxxxxx???x");
+
+	if (!Patterns.Func_GetIndexVelocity)
+	{
+		printf("[Error] Patterns.Func_GetIndexVelocity failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_GetIndexVelocity is at %llx\n", (UINT_PTR)Patterns.Func_GetIndexVelocity); };
+
+	printf("\n------------------ [ END PATTERN SCAN ] ------------------\n\n");
+
 	return TRUE;
 }
 
@@ -447,6 +478,7 @@ bool __stdcall Unload()
 	SetPlayerAnimationSpeed(1.0f);
 	if (detours.Clearhook())
 	{
+		//FreeConsole();
 		dx_swapchain.ClearHooks();
 		vGetWaterLevel.ClearHooks();
 		SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)OriginalWndProcHandler);

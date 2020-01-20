@@ -5,9 +5,6 @@ class CombatSettings {
 };
 
 class Navigation {
-	BOOL is_Moving();
-	BOOL is_Stuck();
-
 	BOOL move_to_shop();
 	BOOL move_to_next_target(DWORD TargetId);
 	BOOL move_to_repair();
@@ -42,6 +39,8 @@ public:
 	BOOL  isCasting();
 	BOOL  isChanneling();
 	BOOL  isInCombat();
+	BOOL  isRunning();
+	BOOL  isStuck();
 
 	BOOL  need_heal();
 

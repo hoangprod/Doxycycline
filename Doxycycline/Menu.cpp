@@ -24,7 +24,7 @@ static const char* current_lua_item = lua_items[0];
 packetCrypto packetinfo;
 
 bool b_displayLocalPlayerInfo = false;
-bool b_Console = true, b_MemoryEditor = true, b_PacketEditor = true, b_Radar = true, b_LuaMenu = true;
+bool b_Console = true, b_MemoryEditor = false, b_PacketEditor = false, b_Radar = false, b_LuaMenu = true;
 
 typedef bool(__fastcall* f_EncryptPacket)(__int64* buffer, unsigned __int8 isEncrypted, __int64 key, int* cleartextbuffer);
 

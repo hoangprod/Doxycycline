@@ -8,6 +8,7 @@ extern Addr Patterns;
 
 typedef __int64(__fastcall* f_GetClientUnit)(unsigned int UnitId);
 typedef char(__fastcall* f_UseSkillWrapper)(__int64 null, unsigned int skillId, __int64 Struct, char null_1, char null_2, char null_3);
+typedef float(__fastcall* f_VelocityOfIndex)(int index);
 
 typedef BOOL(__fastcall* f_AI_IsCasting)(void* nullParam, int networkID);
 typedef void*(__fastcall* f_AI_StopCasting)(void* nullParam, int networkID);
@@ -17,6 +18,7 @@ typedef void*(__fastcall* f_AI_GetGlobalCooldown)(void* nullParam, int networkID
 
 f_GetClientUnit o_GetClientUnit = NULL;
 f_UseSkillWrapper o_UseSkillWrapper = NULL;
+f_VelocityOfIndex o_VelocityOfIndex = NULL;
 
 f_AI_IsCasting o_AI_IsCasting;
 f_AI_StopCasting o_AI_StopCasting;
@@ -28,7 +30,9 @@ Combat::Combat()
 {
 	o_GetClientUnit = (f_GetClientUnit)Patterns.Func_GetClientUnit;
 	o_UseSkillWrapper = (f_UseSkillWrapper)Patterns.Func_CastSkillWrapper;
-	
+	o_VelocityOfIndex = (f_VelocityOfIndex)Patterns.Func_GetIndexVelocity;
+
+
 	o_AI_IsCasting = (f_AI_IsCasting)Patterns.Func_AI_IsCasting;
 	o_AI_StopCasting = (f_AI_StopCasting)Patterns.Func_AI_StopCasting;
 	o_AI_IsChanneling = (f_AI_IsChanneling)Patterns.Func_AI_IsChanneling;
@@ -178,13 +182,27 @@ BOOL Combat::isChanneling()
 BOOL Combat::isInCombat()
 {
 	UINT_PTR LocalUnit = get_local_unit();
-	return *(BYTE*)(LocalUnit + 0x34F0);
+
+	if(LocalUnit)
+		return *(BYTE*)(LocalUnit + Patterns.Offset_isInCombat);
+
+	return false;
 }
 
 BOOL Combat::stop_casting() // not sure what this is supposed to return
 {
 	o_AI_StopCasting(NULL, LocalPlayerFinder::GetClientActor()->NetworkID);
 	return true;
+}
+
+BOOL Combat::isRunning()
+{
+	for (int i = 0; i < 6; i++)
+	{
+		if (o_VelocityOfIndex(i) > 0.0f)
+			return true;
+	}
+	return false;
 }
 
 BOOL Stealth::is_player_nearby(float range)
@@ -207,3 +225,5 @@ BOOL Stealth::is_player_nearby(float range)
 
 	return false;
 }
+
+
