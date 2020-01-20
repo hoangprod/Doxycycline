@@ -4,9 +4,10 @@
 #include "Helper.h"
 #include <map>
 #include <iterator>
+
 extern Addr Patterns;
 
-typedef __int64(__fastcall* f_GetClientUnit)(unsigned int UnitId);
+typedef UINT_PTR(__fastcall* f_GetClientUnit)(unsigned int UnitId);
 typedef char(__fastcall* f_UseSkillWrapper)(__int64 null, unsigned int skillId, __int64 Struct, char null_1, char null_2, char null_3);
 typedef float(__fastcall* f_VelocityOfIndex)(int index);
 
@@ -74,7 +75,7 @@ IActor* get_closest_actor_from_map(std::map<IActor*, float> viableActors)
 	return NULL;
 }
 
-IActor* Combat::get_closest_actor(float maxRange)
+IActor* Combat::get_closest_monster_npc(float maxRange)
 {
 	std::map<IActor*, float> viableActors;
 	Vec3 localPos = LocalPlayerFinder::GetClientEntity()->GetWorldPos();
@@ -94,8 +95,43 @@ IActor* Combat::get_closest_actor(float maxRange)
 	}
 
 	return get_closest_actor_from_map(viableActors);
+}
 
-	return NULL;
+IActor* Combat::get_closest_player(float maxRange)
+{
+	std::map<IActor*, float> viableActors;
+	Vec3 localPos = LocalPlayerFinder::GetClientEntity()->GetWorldPos();
+	auto actorList = LocalPlayerFinder::GetActorList();
+	for (auto actor : actorList)
+	{
+		if (actor && actor->Entity && EntityHelper::isPlayer(actor->Entity))
+		{
+			Vec3 actorPos = actor->Entity->GetWorldPos();
+			float heightDistance = abs(actorPos.y - localPos.y);
+			float totalDistance = abs(actorPos.x - localPos.x) + abs(actorPos.z - localPos.z) + heightDistance;
+			if (totalDistance <= maxRange && heightDistance <= 35.f)
+			{
+				viableActors.insert(std::make_pair(actor, totalDistance));
+			}
+		}
+	}
+
+	return get_closest_actor_from_map(viableActors);
+}
+
+std::vector<IActor*> Combat::get_aggro_mob_list()
+{
+	std::vector<IActor*> Aggro_Actors;
+	auto actorList = LocalPlayerFinder::GetActorList();
+	for (auto actor : actorList)
+	{
+		if (actor && actor->Entity && EntityHelper::isNpcMob(actor->Entity) && EntityHelper::isHostile(actor->Entity) && is_targeting_me(actor->NetworkID))
+		{
+			Aggro_Actors.push_back(actor);
+		}
+	}
+
+	return Aggro_Actors;
 }
 
 DWORD Combat::get_current_target_id()
@@ -193,6 +229,17 @@ BOOL Combat::is_in_combat()
 	if(LocalUnit)
 		return *(BYTE*)(LocalUnit + Patterns.Offset_isInCombat);
 
+	return false;
+}
+
+BOOL Combat::is_targeting_me(DWORD NetworkID)
+{
+	DWORD local_NetworkId = LocalPlayerFinder::GetClientActor()->NetworkID;
+	UINT_PTR MobUnit = o_GetClientUnit(NetworkID);
+	DWORD unitCurrentTarget = *(DWORD*)((UINT_PTR)MobUnit + (UINT_PTR)Patterns.Offset_CurrentTargetId);
+
+	if (unitCurrentTarget == local_NetworkId)
+		return true;
 	return false;
 }
 

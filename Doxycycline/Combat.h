@@ -35,10 +35,14 @@ public:
 	UINT_PTR get_entitylist_ptr();
 	UINT_PTR get_local_unit();
 
-	IActor* get_closest_actor(float maxRange);
+	IActor* get_closest_monster_npc(float maxRange);
+	IActor* get_closest_player(float maxRange);
+
 	DWORD get_closest_targetid(float maxRange);
 	DWORD get_closest_target_with_type(DWORD TargetType, float maxRange);
 	DWORD get_targets_with_name(char * TargetName, float maxRange);
+
+	std::vector<IActor*> get_aggro_mob_list();
 
 	DWORD get_current_target_id();
 	BOOL  set_current_target(DWORD targetId);
@@ -47,14 +51,12 @@ public:
 	BOOL  cast_skill_on_current_target(DWORD SkillId);
 	BOOL  cast_skill_on_self(DWORD SkillId);
 
-	BOOL  isChanneling();
-	BOOL  isInCombat();
 	BOOL  isRunning();
 	BOOL  isStuck();
 	BOOL  is_casting();
 	BOOL  is_channeling();
 	BOOL  is_in_combat();
-
+	BOOL  is_targeting_me(DWORD NetworkId);
 
 	BOOL  need_heal();
 

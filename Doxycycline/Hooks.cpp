@@ -140,6 +140,7 @@ bool __fastcall h_EncryptPacket(__int64* Buffer, unsigned __int8 isEncrypted, __
 }
 
 
+
 LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	ImGuiIO& io = ImGui::GetIO();
@@ -163,6 +164,9 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		if (wParam == VK_NUMPAD7)
 		{
 			Combat combat;
+			auto list = combat.get_aggro_mob_list();
+
+			printf("list count: %d\n", list.size());
 
 		}
 		if (wParam == VK_CONTROL)
