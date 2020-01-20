@@ -12,6 +12,13 @@ void Grinding::Idle()
 		auto fp = std::bind(&Grinding::Hide, this);
 		Ai.setState(fp);
 	}
+
+	else if (false) // if ready to go bank
+	{
+		auto fp = std::bind(&Grinding::Bank, this);
+		Ai.setState(fp);
+	}
+
 	else
 	{
 		auto fp = std::bind(&Grinding::Wander, this);
@@ -29,15 +36,24 @@ void Grinding::Wander()
 		Ai.setState(fp);
 	}
 
-	if (false) 	// if low health, go to heal
+	else if (false) 	// if low health, go to heal
 	{
-		// low health logic, use settings
+		auto fp = std::bind(&Grinding::Heal, this);
+		Ai.setState(fp);
 	}
+
+	else if (false)   // if ready to go bank
+	{
+		auto fp = std::bind(&Grinding::Bank, this);
+		Ai.setState(fp);
+	}
+
 	else if (combat.get_closest_monster_npc(60.0f)) // Use setting as well as integrate whitelist/blacklist later
 	{
 		auto fp = std::bind(&Grinding::Fight, this);
 		Ai.setState(fp);
 	}
+
 	else
 	{
 		// perform wandering logic, walk around, etc
@@ -55,7 +71,8 @@ void Grinding::Fight()
 	}
 	else if (false) // check if low health
 	{
-
+		auto fp = std::bind(&Grinding::Heal, this);
+		Ai.setState(fp);
 	}
 	else if(IActor* target = combat.get_closest_monster_npc(60.0f))
 	{
@@ -72,12 +89,15 @@ void Grinding::Fight()
 
 void Grinding::Bank()
 {
+
 }
 
 void Grinding::Heal()
 {
+
 }
 
 void Grinding::Hide()
 {
+
 }
