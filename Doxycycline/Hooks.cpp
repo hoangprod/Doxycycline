@@ -17,6 +17,7 @@ typedef HRESULT(__stdcall* f_D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT
 typedef __int64(__fastcall* f_GetNavPath_and_Move)(UINT_PTR* ActorUnit, Vec3* EndPosition);
 typedef void*(__fastcall* f_RetrieveDoodadPosition)(ClientDoodad* doodad, void* unk1, void* newPosition, void* unk2);
 typedef void*(__fastcall* f_EndCall)(IScriptSystem* scriptSys);
+typedef char(__fastcall* f_lootall)(unsigned int null);
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern packetCrypto packetinfo;
@@ -42,6 +43,7 @@ f_GetWaterLevel o_GetWaterLevel = NULL;
 f_D3D11PresentHook phookD3D11Present = NULL;
 f_GetNavPath_and_Move o_GetNavPath_and_Move = NULL;
 f_RetrieveDoodadPosition o_RetrieveDoodadPosition = NULL;
+f_lootall o_lootall = NULL;
 f_EndCall o_EndCall = NULL;
 
 Detour64 detours;
@@ -163,11 +165,7 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		if (wParam == VK_NUMPAD7)
 		{
-			Combat combat;
-			auto list = combat.get_aggro_mob_list();
-
-			printf("list count: %d\n", list.size());
-
+			o_lootall(0);
 		}
 		if (wParam == VK_CONTROL)
 		{
@@ -353,10 +351,6 @@ BOOLEAN __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Offset_isInCombat is at %llx\n", (UINT_PTR)Patterns.Offset_isInCombat); };
 
-	//////////////////////////////////////////////////////////////////[ FUNCTIONS ]///////////////////////////////////////////////////////////////////////////////
-
-	printf("\n------------------ [ FUNCTIONS ] ------------------\n\n");
-
 	Patterns.Offset_IsUnitInCombat = (UINT_PTR)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x80\xB9\x00\x00\x00\x00\x00\x75\x12\x48\x8B\x01", "xx?????xxxxx", 2, 4);
 
 	if (!Patterns.Offset_IsUnitInCombat)
@@ -365,6 +359,15 @@ BOOLEAN __stdcall findPatterns()
 		return FALSE;
 	}
 	else { printf("[Pattern Scan]  Patterns.Offset_IsUnitInCombat is at %llx\n", (UINT_PTR)Patterns.Offset_IsUnitInCombat); };
+
+	Patterns.Offset_isDead = (UINT_PTR)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x80\xbb\xCC\xCC\x00\x00\x00\x0f\xCC\xCC\xCC\x00\x00\x45\x33\xc0\x33\xd2", "xx??xxxx???xxxxxxx", 2, 4);
+
+	if (!Patterns.Offset_isDead)
+	{
+		printf("[Error] Patterns.Offset_isDead failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Offset_isDead is at %llx\n", (UINT_PTR)Patterns.Offset_isDead); };
 
 	//////////////////////////////////////////////////////////////////[ FUNCTIONS ]///////////////////////////////////////////////////////////////////////////////
 
@@ -413,6 +416,18 @@ BOOLEAN __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_CastSkillWrapper is at %llx\n", Patterns.Func_CastSkillWrapper); };
 
+
+	Patterns.Func_LootAll = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x48\x89\x5c\x24\x18\x57\x48\x83\xec\xCC\x48\x8b\x05\xCC\xCC\xCC\x03", "xxxxxxxxx?xxx???x");
+
+	if (!Patterns.Func_LootAll)
+	{
+		printf("[Error] Patterns.Func_LootAll failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_LootAll is at %llx\n", Patterns.Func_LootAll); };
+
+
+
 	Patterns.Func_AI_IsCasting = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x48\x83\xEC\x28\x8B\xCA\xE8\x00\x00\x00\x00\x4C\x8B\xD8\x48\x85\xC0\x75\x05\x48\x83\xC4\x28\xC3\x8B\x05\x00\x00\x00\x00\x41\x39\x83\x00\x00\x00\x00\x75\x16", "xxxxxxx????xxxxxxxxxxxxxxx????xxx????xx");
 
 	if (!Patterns.Func_AI_IsCasting)
@@ -459,7 +474,6 @@ BOOLEAN __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_GetIndexVelocity is at %llx\n", (UINT_PTR)Patterns.Func_GetIndexVelocity); };
 
-	printf("\n------------------ [ END PATTERN SCAN ] ------------------\n\n");
 
 	Patterns.Func_AI_CheckBuff = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x44\x89\x44\x24\x00\x48\x83\xEC\x28\x8B\xCA", "xxxx?xxxxxx");
 
@@ -469,6 +483,9 @@ BOOLEAN __stdcall findPatterns()
 		return FALSE;
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_AI_CheckBuff is at %llx\n", Patterns.Func_AI_CheckBuff); };
+
+
+	printf("\n------------------ [ END PATTERN SCAN ] ------------------\n\n");
 
 	return TRUE;
 }
@@ -497,9 +514,8 @@ DWORD __stdcall InitializeHooks()
 	DWORD_PTR* pScriptSysVtable = *(DWORD_PTR**)SSystemGlobalEnvironment::GetInstance()->pScriptSysOne;
 	vEndCall.vmt = (void**)pScriptSysVtable;
 	o_EndCall = (f_EndCall)vEndCall.Hook(17, h_EndCall);
-
 	o_GetNavPath_and_Move = (f_GetNavPath_and_Move)Patterns.Func_GetSetNavPath;
-
+	o_lootall = (f_lootall)Patterns.Func_LootAll;
 	return NULL;
 }
 

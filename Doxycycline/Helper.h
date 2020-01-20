@@ -31,6 +31,7 @@ struct Addr {
 	DWORD Offset_CurrentTargetId;
 	DWORD Offset_isInCombat;
 	DWORD Offset_IsUnitInCombat;
+	DWORD Offset_isDead;
 
 	UINT_PTR Func_EncryptPacket;
 	UINT_PTR Func_UpdateSwimCaller;
@@ -38,6 +39,7 @@ struct Addr {
 	UINT_PTR Func_GetClientUnit;
 	UINT_PTR Func_CastSkillWrapper;
 	UINT_PTR Func_GetIndexVelocity;
+	UINT_PTR Func_LootAll;
 
 	UINT_PTR Func_AI_IsCasting;
 	UINT_PTR Func_AI_StopCasting;

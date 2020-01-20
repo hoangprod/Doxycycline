@@ -37,6 +37,7 @@ public:
 
 	IActor* get_closest_monster_npc(float maxRange);
 	IActor* get_closest_player(float maxRange);
+	IActor* get_closest_lootable(float maxRange);
 
 	DWORD get_closest_targetid(float maxRange);
 	DWORD get_closest_target_with_type(DWORD TargetType, float maxRange);
@@ -56,6 +57,7 @@ public:
 	BOOL  is_casting();
 	BOOL  is_channeling();
 	BOOL  is_in_combat();
+	BOOL  is_dead(DWORD NetworkID);
 	BOOL  is_targeting_me(DWORD NetworkId);
 
 	BOOL  need_heal();

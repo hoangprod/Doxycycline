@@ -119,6 +119,28 @@ IActor* Combat::get_closest_player(float maxRange)
 	return get_closest_actor_from_map(viableActors);
 }
 
+IActor* Combat::get_closest_lootable(float maxRange)
+{
+	std::map<IActor*, float> viableActors;
+	Vec3 localPos = LocalPlayerFinder::GetClientEntity()->GetWorldPos();
+	auto actorList = LocalPlayerFinder::GetActorList();
+	for (auto actor : actorList)
+	{
+		if (actor && actor->Entity && EntityHelper::isNpcMob(actor->Entity) && is_dead(actor->NetworkID))
+		{
+			Vec3 actorPos = actor->Entity->GetWorldPos();
+			float heightDistance = abs(actorPos.y - localPos.y);
+			float totalDistance = abs(actorPos.x - localPos.x) + abs(actorPos.z - localPos.z) + heightDistance;
+			if (totalDistance <= maxRange && heightDistance <= 35.f)
+			{
+				viableActors.insert(std::make_pair(actor, totalDistance));
+			}
+		}
+	}
+
+	return get_closest_actor_from_map(viableActors);
+}
+
 std::vector<IActor*> Combat::get_aggro_mob_list()
 {
 	std::vector<IActor*> Aggro_Actors;
@@ -230,6 +252,12 @@ BOOL Combat::is_in_combat()
 		return *(BYTE*)(LocalUnit + Patterns.Offset_isInCombat);
 
 	return false;
+}
+
+BOOL Combat::is_dead(DWORD NetworkID)
+{
+	UINT_PTR Unit = o_GetClientUnit(NetworkID);
+	return *(bool*)((UINT_PTR)Unit + (UINT_PTR)Patterns.Offset_isDead);
 }
 
 BOOL Combat::is_targeting_me(DWORD NetworkID)
