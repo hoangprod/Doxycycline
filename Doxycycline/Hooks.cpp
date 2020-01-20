@@ -332,10 +332,16 @@ BOOLEAN __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Offset_CurrentTargetId is at %llx\n", (UINT_PTR)Patterns.Offset_CurrentTargetId); };
 
+	Patterns.Offset_IsUnitInCombat = (UINT_PTR)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x80\xB9\x00\x00\x00\x00\x00\x75\x12\x48\x8B\x01", "xx?????xxxxx", 2, 4);
+
+	if (!Patterns.Offset_IsUnitInCombat)
+	{
+		printf("[Error] Patterns.Offset_IsUnitInCombat failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Offset_IsUnitInCombat is at %llx\n", (UINT_PTR)Patterns.Offset_IsUnitInCombat); };
 
 	//////////////////////////////////////////////////////////////////[ FUNCTIONS ]///////////////////////////////////////////////////////////////////////////////
-
-
 
 	Patterns.Func_EncryptPacket = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("CryNetwork.dll"), 0x100000, "\x4c\x89\x4c\x24\x20\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8d\xac", "xxxxxxxxxxxxxxxxxxx");
 
@@ -418,10 +424,14 @@ BOOLEAN __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_AI_GetGlobalCooldown is at %llx\n", Patterns.Func_AI_GetGlobalCooldown); };
 
+	Patterns.Func_AI_CheckBuff = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x44\x89\x44\x24\x00\x48\x83\xEC\x28\x8B\xCA", "xxxx?xxxxxx");
 
-	std::cout << "script sys one: " << SSystemGlobalEnvironment::GetInstance()->pScriptSysOne << std::endl;
-	std::cout << "script sys two: " << SSystemGlobalEnvironment::GetInstance()->pScriptSysTwo << std::endl;
-	std::cout << "script sys three: " << SSystemGlobalEnvironment::GetInstance()->pScriptSysThree << std::endl;
+	if (!Patterns.Func_AI_CheckBuff)
+	{
+		printf("[Error] Patterns.Func_AI_CheckBuff failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_AI_CheckBuff is at %llx\n", Patterns.Func_AI_CheckBuff); };
 
 	return TRUE;
 }
