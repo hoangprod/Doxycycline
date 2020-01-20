@@ -14,7 +14,7 @@ typedef BOOL(__fastcall* f_AI_IsCasting)(void* nullParam, int networkID);
 typedef void*(__fastcall* f_AI_StopCasting)(void* nullParam, int networkID);
 typedef BOOL(__fastcall* f_AI_IsChanneling)(void* nullParam, int networkID);
 typedef void*(__fastcall* f_AI_GetGlobalCooldown)(void* nullParam, int networkID); // not sure if this returns a 4 byte or 8 byte value
-
+typedef bool(__fastcall* f_AI_CheckBuff)(void* nullParam, int networkID, uint32_t buffID);
 
 f_GetClientUnit o_GetClientUnit = NULL;
 f_UseSkillWrapper o_UseSkillWrapper = NULL;
@@ -24,7 +24,12 @@ f_AI_IsCasting o_AI_IsCasting;
 f_AI_StopCasting o_AI_StopCasting;
 f_AI_IsChanneling o_AI_IsChanneling;
 f_AI_GetGlobalCooldown o_AI_GetGlobalCooldown;
+f_AI_CheckBuff o_AI_CheckBuff;
 
+BOOL Stats::has_buff(uint32_t buffID)
+{
+	return o_AI_CheckBuff(NULL, LocalPlayerFinder::GetClientActor()->NetworkID, buffID);
+}
 
 Combat::Combat()
 {
@@ -36,8 +41,10 @@ Combat::Combat()
 	o_AI_IsCasting = (f_AI_IsCasting)Patterns.Func_AI_IsCasting;
 	o_AI_StopCasting = (f_AI_StopCasting)Patterns.Func_AI_StopCasting;
 	o_AI_IsChanneling = (f_AI_IsChanneling)Patterns.Func_AI_IsChanneling;
-	o_AI_GetGlobalCooldown = (f_AI_GetGlobalCooldown)Patterns.Func_AI_StopCasting;
+	o_AI_GetGlobalCooldown = (f_AI_GetGlobalCooldown)Patterns.Func_AI_GetGlobalCooldown;
+	o_AI_CheckBuff = (f_AI_CheckBuff)Patterns.Func_AI_CheckBuff;
 }
+
 
 UINT_PTR Combat::get_local_unit()
 {
@@ -91,7 +98,7 @@ IActor* Combat::get_closest_actor(float maxRange)
 	return NULL;
 }
 
-DWORD Combat::get_current_target()
+DWORD Combat::get_current_target_id()
 {
 	UINT_PTR LocalUnit = get_local_unit();
 
@@ -135,7 +142,7 @@ BOOL Combat::cast_skill_on_targetId(DWORD targetId, DWORD SkillId)
 
 BOOL Combat::cast_skill_on_current_target(DWORD SkillId)
 {
-	if (get_current_target())
+	if (get_current_target_id())
 	{
 		UINT_PTR LocalUnit = get_local_unit();
 
@@ -169,17 +176,17 @@ BOOL Combat::cast_skill_on_self(DWORD SkillId)
 	}
 }
 
-BOOL Combat::isCasting()
+BOOL Combat::is_casting()
 {
 	return o_AI_IsCasting(NULL, LocalPlayerFinder::GetClientActor()->NetworkID);
 }
 
-BOOL Combat::isChanneling()
+BOOL Combat::is_channeling()
 {
 	return o_AI_IsChanneling(NULL, LocalPlayerFinder::GetClientActor()->NetworkID);
 }
 
-BOOL Combat::isInCombat()
+BOOL Combat::is_in_combat()
 {
 	UINT_PTR LocalUnit = get_local_unit();
 

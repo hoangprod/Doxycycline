@@ -15,8 +15,8 @@ typedef float(__fastcall* f_GetWaterLevel)(void* cry3DEngine, void* referencePOS
 typedef bool(__fastcall* f_EncryptPacket)(__int64* a1, unsigned __int8 a2, __int64 packet, int* a3);
 typedef HRESULT(__stdcall* f_D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 typedef __int64(__fastcall* f_GetNavPath_and_Move)(UINT_PTR* ActorUnit, Vec3* EndPosition);
-
 typedef void*(__fastcall* f_RetrieveDoodadPosition)(ClientDoodad* doodad, void* unk1, void* newPosition, void* unk2);
+typedef void*(__fastcall* f_EndCall)(IScriptSystem* scriptSys);
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern packetCrypto packetinfo;
@@ -35,12 +35,14 @@ Addr Patterns;
 
 VMTHook dx_swapchain;
 VMTHook vGetWaterLevel;
+VMTHook vEndCall;
 
 f_EncryptPacket o_EncryptPacket = NULL;
 f_GetWaterLevel o_GetWaterLevel = NULL;
 f_D3D11PresentHook phookD3D11Present = NULL;
 f_GetNavPath_and_Move o_GetNavPath_and_Move = NULL;
 f_RetrieveDoodadPosition o_RetrieveDoodadPosition = NULL;
+f_EndCall o_EndCall = NULL;
 
 Detour64 detours;
 
@@ -85,6 +87,11 @@ bool PathToPosition(Vec3 Position)
 	o_GetNavPath_and_Move(ActorUnitModel, &Position);
 
 	return true;
+}
+
+void* h_EndCall(IScriptSystem* scriptSys) // this is the method where we will exeucte lua
+{
+	return o_EndCall(scriptSys);
 }
 
 void* h_RetrieveDoodadPosition(ClientDoodad* doodad, void* unk1, void* newPosition, void* unk2)
@@ -151,15 +158,12 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		if (wParam == VK_NUMPAD6)
 		{
-			Combat combat;
 
-			printf("isCombat: %d\n", combat.isInCombat());
 		}
 		if (wParam == VK_NUMPAD7)
 		{
 			Combat combat;
 
-			printf("isRunning: %d\n", combat.isRunning());
 		}
 		if (wParam == VK_CONTROL)
 		{
@@ -335,6 +339,7 @@ BOOLEAN __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Offset_CurrentTargetId is at %llx\n", (UINT_PTR)Patterns.Offset_CurrentTargetId); };
 
+
 	Patterns.Offset_isInCombat = (UINT_PTR)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x0f\xb6\x81\xCC\xCC\x00\x00\xc7\x44\x24\x28\x02\x00\x00\x00", "xxx??xxxxxxxxxx", 3, 4);
 
 	if (!Patterns.Offset_isInCombat)
@@ -348,6 +353,16 @@ BOOLEAN __stdcall findPatterns()
 
 	printf("\n------------------ [ FUNCTIONS ] ------------------\n\n");
 
+	Patterns.Offset_IsUnitInCombat = (UINT_PTR)Scan_Offsets((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x80\xB9\x00\x00\x00\x00\x00\x75\x12\x48\x8B\x01", "xx?????xxxxx", 2, 4);
+
+	if (!Patterns.Offset_IsUnitInCombat)
+	{
+		printf("[Error] Patterns.Offset_IsUnitInCombat failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Offset_IsUnitInCombat is at %llx\n", (UINT_PTR)Patterns.Offset_IsUnitInCombat); };
+
+	//////////////////////////////////////////////////////////////////[ FUNCTIONS ]///////////////////////////////////////////////////////////////////////////////
 
 	Patterns.Func_EncryptPacket = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("CryNetwork.dll"), 0x100000, "\x4c\x89\x4c\x24\x20\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8d\xac", "xxxxxxxxxxxxxxxxxxx");
 
@@ -442,6 +457,15 @@ BOOLEAN __stdcall findPatterns()
 
 	printf("\n------------------ [ END PATTERN SCAN ] ------------------\n\n");
 
+	Patterns.Func_AI_CheckBuff = (UINT_PTR)PatternScan((char*)HdnGetModuleBase("x2game.dll"), 0x800000, "\x44\x89\x44\x24\x00\x48\x83\xEC\x28\x8B\xCA", "xxxx?xxxxxx");
+
+	if (!Patterns.Func_AI_CheckBuff)
+	{
+		printf("[Error] Patterns.Func_AI_CheckBuff failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_AI_CheckBuff is at %llx\n", Patterns.Func_AI_CheckBuff); };
+
 	return TRUE;
 }
 
@@ -466,6 +490,10 @@ DWORD __stdcall InitializeHooks()
 	vGetWaterLevel.vmt = (void**)p3DEngineVtable;
 	o_GetWaterLevel = (f_GetWaterLevel)vGetWaterLevel.Hook(71, h_GetWaterLevel);
 
+	DWORD_PTR* pScriptSysVtable = *(DWORD_PTR**)SSystemGlobalEnvironment::GetInstance()->pScriptSysOne;
+	vEndCall.vmt = (void**)pScriptSysVtable;
+	o_EndCall = (f_EndCall)vEndCall.Hook(17, h_EndCall);
+
 	o_GetNavPath_and_Move = (f_GetNavPath_and_Move)Patterns.Func_GetSetNavPath;
 
 	return NULL;
@@ -481,6 +509,7 @@ bool __stdcall Unload()
 		//FreeConsole();
 		dx_swapchain.ClearHooks();
 		vGetWaterLevel.ClearHooks();
+		vEndCall.ClearHooks();
 		SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)OriginalWndProcHandler);
 		FreeLibrary(h_Module);
 		UnmapViewOfFile(h_Module);

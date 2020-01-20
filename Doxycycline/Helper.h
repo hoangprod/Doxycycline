@@ -30,6 +30,7 @@ struct Addr {
 	DWORD Offset_SpeedStat;
 	DWORD Offset_CurrentTargetId;
 	DWORD Offset_isInCombat;
+	DWORD Offset_IsUnitInCombat;
 
 	UINT_PTR Func_EncryptPacket;
 	UINT_PTR Func_UpdateSwimCaller;
@@ -42,6 +43,7 @@ struct Addr {
 	UINT_PTR Func_AI_StopCasting;
 	UINT_PTR Func_AI_IsChanneling;
 	UINT_PTR Func_AI_GetGlobalCooldown;
+	UINT_PTR Func_AI_CheckBuff;
 };
 
 class Detour64

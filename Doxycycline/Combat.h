@@ -17,6 +17,17 @@ class Interaction {
 	BOOL is_interacting();
 };
 
+class Stats
+{
+public:
+	int get_health();
+	int get_max_health();
+	int get_mana();
+	int get_max_mana();
+
+	BOOL has_buff(uint32_t buffID);
+};
+
 class Combat {
 public:
 	Combat();
@@ -29,18 +40,21 @@ public:
 	DWORD get_closest_target_with_type(DWORD TargetType, float maxRange);
 	DWORD get_targets_with_name(char * TargetName, float maxRange);
 
-	DWORD get_current_target();
+	DWORD get_current_target_id();
 	BOOL  set_current_target(DWORD targetId);
 
 	BOOL  cast_skill_on_targetId(DWORD TargetId, DWORD SkillId);
 	BOOL  cast_skill_on_current_target(DWORD SkillId);
 	BOOL  cast_skill_on_self(DWORD SkillId);
 
-	BOOL  isCasting();
 	BOOL  isChanneling();
 	BOOL  isInCombat();
 	BOOL  isRunning();
 	BOOL  isStuck();
+	BOOL  is_casting();
+	BOOL  is_channeling();
+	BOOL  is_in_combat();
+
 
 	BOOL  need_heal();
 
