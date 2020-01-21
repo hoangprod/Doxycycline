@@ -26,7 +26,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 		h_Module = hModule;
 		Initialize();
     case DLL_THREAD_ATTACH:
-    case DLL_THREAD_DETACH:
+    case DLL_THREAD_DETACH:	
     case DLL_PROCESS_DETACH:
         break;
     }

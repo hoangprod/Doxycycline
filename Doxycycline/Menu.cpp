@@ -30,7 +30,6 @@ typedef bool(__fastcall* f_EncryptPacket)(__int64* buffer, unsigned __int8 isEnc
 
 extern f_EncryptPacket o_EncryptPacket;
 
-
 void PacketEditor::Replay(std::vector<char*> pVector, BYTE Element)
 {
 	o_EncryptPacket(packetinfo.sUnknown, 1, (__int64)pVector[Element], packetinfo.sClear);
@@ -118,13 +117,6 @@ void HackView::Display()
 	{
 		SetPlayerAnimationSpeed(animationMultiplier);
 	}
-
-	/*
-	if (ImGui::Button("Test lua"))
-	{
-		lua_c_ExecuteLuaString(SSystemGlobalEnvironment::GetInstance()->pScriptSysTwo->luaState, "X2Chat:DispatchChatMessage(CMF_LOOT_METHOD_CHANGED,\"Executing \")");
-	}
-	*/
 
 	ImGui::InputFloat("Path X", &pathPosition_DoNotModify.x);
 	ImGui::InputFloat("Path Y", &pathPosition_DoNotModify.y);

@@ -207,7 +207,7 @@ public:
 	char *Name; //0x0028
 	char pad_0030[528]; //0x0030
 
-	virtual uint32_t GetId();
+	virtual uint32_t GetEntityID();
 	virtual void Function1();
 	virtual IEntityClass* GetEntityClass();
 	virtual void Function3();
@@ -372,7 +372,7 @@ public:
 	char pad_0008[16]; //0x0008
 	IEntity *Entity; //0x0018
 	char pad_0020[64]; //0x0020
-	int32_t NetworkID; //0x0060
+	int32_t unitID; //0x0060
 	char pad_0064[540]; //0x0064
 
 	virtual void Function0();
@@ -769,7 +769,7 @@ public:
 			{
 				if (IEntity* ent = entIt->Next())
 				{
-					IActor* actor = SSystemGlobalEnvironment::GetInstance()->pGame->pGameFramework->GetIActorSystem()->GetActor(ent->GetId());
+					IActor* actor = SSystemGlobalEnvironment::GetInstance()->pGame->pGameFramework->GetIActorSystem()->GetActor(ent->GetEntityID());
 					if (actor)
 					{
 						GetClientActor()->Entity->GetAI()->IsHostile(ent->GetAI(), true);

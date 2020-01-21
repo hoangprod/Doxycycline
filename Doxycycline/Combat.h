@@ -45,6 +45,7 @@ public:
 
 	std::vector<IActor*> get_aggro_mob_list();
 
+	void* get_unit_by_id(DWORD targetId);
 	DWORD get_current_target_id();
 	BOOL  set_current_target(DWORD targetId);
 
@@ -57,8 +58,8 @@ public:
 	BOOL  is_casting();
 	BOOL  is_channeling();
 	BOOL  is_in_combat();
-	BOOL  is_dead(DWORD NetworkID);
-	BOOL  is_targeting_me(DWORD NetworkId);
+	BOOL  is_dead(DWORD unitID);
+	BOOL  is_targeting_me(DWORD unitID);
 
 	BOOL  need_heal();
 
