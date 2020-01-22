@@ -67,6 +67,11 @@ public:
 	BOOL  stop_channeling();
 };
 
+class Loot {
+	static BOOL is_lootable(DWORD unitId);
+	static BOOL loot_all();
+};
+
 class Inventory {
 	DWORD find_item_slot_by_name(char* itemName);
 	BOOL  use_item(DWORD slotId);

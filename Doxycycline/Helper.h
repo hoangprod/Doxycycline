@@ -22,6 +22,7 @@ struct Addr {
 	FLOAT* Addr_SpeedModifier;
 	UINT_PTR Addr_gEnv;
 	UINT_PTR Addr_UnitClass;
+	UINT_PTR Addr_LootClass;
 
 	DWORD Offset_LocalUnit;
 	DWORD Offset_ActorUnitModel;
@@ -34,12 +35,14 @@ struct Addr {
 	DWORD Offset_isDead;
 
 	UINT_PTR Func_EncryptPacket;
+	UINT_PTR Func_SendEncryptPacket;
 	UINT_PTR Func_UpdateSwimCaller;
 	UINT_PTR Func_GetSetNavPath;
 	UINT_PTR Func_GetClientUnit;
 	UINT_PTR Func_CastSkillWrapper;
 	UINT_PTR Func_GetIndexVelocity;
 	UINT_PTR Func_LootAll;
+	UINT_PTR Func_isLootable;
 
 	UINT_PTR Func_AI_IsCasting;
 	UINT_PTR Func_AI_StopCasting;

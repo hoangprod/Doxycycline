@@ -10,13 +10,15 @@ extern Addr Patterns;
 typedef UINT_PTR(__fastcall* f_GetClientUnit)(unsigned int UnitId);
 typedef char(__fastcall* f_UseSkillWrapper)(__int64 null, unsigned int skillId, __int64 Struct, char null_1, char null_2, char null_3);
 typedef float(__fastcall* f_VelocityOfIndex)(int index);
+typedef bool(__fastcall* f_isLootable)(__int64 lootClass, unsigned int NetworkId);
+typedef char(__fastcall* f_loot_all)(unsigned int null);
+
 
 typedef BOOL(__fastcall* f_AI_IsCasting)(void* nullParam, int unitID);
 typedef void*(__fastcall* f_AI_StopCasting)(void* nullParam, int unitID);
 typedef BOOL(__fastcall* f_AI_IsChanneling)(void* nullParam, int unitID);
 typedef void*(__fastcall* f_AI_GetGlobalCooldown)(void* nullParam, int unitID); // not sure if this returns a 4 byte or 8 byte value
 typedef bool(__fastcall* f_AI_CheckBuff)(void* nullParam, int unitID, uint32_t buffID);
-	
 
 f_GetClientUnit o_GetClientUnit = NULL;
 f_UseSkillWrapper o_UseSkillWrapper = NULL;
@@ -27,7 +29,8 @@ f_AI_StopCasting o_AI_StopCasting;
 f_AI_IsChanneling o_AI_IsChanneling;
 f_AI_GetGlobalCooldown o_AI_GetGlobalCooldown;
 f_AI_CheckBuff o_AI_CheckBuff;
-
+f_isLootable o_isLootable;
+f_loot_all o_loot_all;
 
 BOOL Stats::has_buff(uint32_t buffID)
 {
@@ -39,7 +42,8 @@ Combat::Combat()
 	o_GetClientUnit = (f_GetClientUnit)Patterns.Func_GetClientUnit;
 	o_UseSkillWrapper = (f_UseSkillWrapper)Patterns.Func_CastSkillWrapper;
 	o_VelocityOfIndex = (f_VelocityOfIndex)Patterns.Func_GetIndexVelocity;
-
+	o_loot_all = (f_loot_all)Patterns.Func_LootAll;
+	o_isLootable = (f_isLootable)Patterns.Func_isLootable;
 
 	o_AI_IsCasting = (f_AI_IsCasting)Patterns.Func_AI_IsCasting;
 	o_AI_StopCasting = (f_AI_StopCasting)Patterns.Func_AI_StopCasting;
@@ -315,4 +319,13 @@ BOOL Stealth::is_player_nearby(float range)
 	return false;
 }
 
+BOOL Loot::is_lootable(DWORD unitId)
+{
+	UINT_PTR lootClass = *(UINT_PTR*)Patterns.Addr_LootClass;
+	return o_isLootable(lootClass, unitId);
+}
 
+BOOL Loot::loot_all()
+{
+	return o_loot_all(0);
+}
