@@ -81,6 +81,12 @@
     <ClCompile Include="Grinder.cpp">
       <Filter>Source Files\Combat</Filter>
     </ClCompile>
+    <ClCompile Include="Patterns.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Imgui\imconfig.h">
@@ -107,16 +113,7 @@
     <ClInclude Include="Imgui\examples\imgui_impl_dx11.h">
       <Filter>Schofferhoffer\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vmt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Hooks.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Scan.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Menu.h">
@@ -148,6 +145,21 @@
     </ClInclude>
     <ClInclude Include="Grinder.h">
       <Filter>Source Files\Combat\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="vmt.h">
+      <Filter>Schofferhoffer\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scan.h">
+      <Filter>Schofferhoffer\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Patterns.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

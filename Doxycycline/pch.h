@@ -20,6 +20,10 @@
 #include <algorithm>
 #include <math.h>
 #include <functional>
+#include <intrin.h>
+#include <iostream>
+#include <map>
+#include <iterator>
 
 // reference additional headers your program requires here
 #include "Imgui/imgui.h"

@@ -165,6 +165,7 @@
   <ItemGroup>
     <ClCompile Include="Combat.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="Grinder.cpp" />
     <ClCompile Include="Hacks.cpp" />
     <ClCompile Include="Helper.cpp" />
@@ -178,11 +179,13 @@
     <ClCompile Include="LuaAPI.cpp" />
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="PathFinder.cpp" />
+    <ClCompile Include="Patterns.cpp" />
     <ClCompile Include="Radar.cpp" />
     <ClCompile Include="Scan.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Combat.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="GameClasses.h" />
     <ClInclude Include="Grinder.h" />
     <ClInclude Include="Hacks.h" />
@@ -200,6 +203,7 @@
     <ClInclude Include="LuaAPI.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="PathFinder.h" />
+    <ClInclude Include="Patterns.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Radar.h" />
     <ClInclude Include="Scan.h" />

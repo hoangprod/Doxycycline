@@ -2,54 +2,13 @@
 #include "GameClasses.h"
 #include "Combat.h"
 #include "Helper.h"
-#include <map>
-#include <iterator>
+#include "Game.h"
 
-extern Addr Patterns;
-
-typedef UINT_PTR(__fastcall* f_GetClientUnit)(unsigned int UnitId);
-typedef char(__fastcall* f_UseSkillWrapper)(__int64 null, unsigned int skillId, __int64 Struct, char null_1, char null_2, char null_3);
-typedef float(__fastcall* f_VelocityOfIndex)(int index);
-typedef bool(__fastcall* f_isLootable)(__int64 lootClass, unsigned int NetworkId);
-typedef char(__fastcall* f_loot_all)(unsigned int null);
-
-
-typedef BOOL(__fastcall* f_AI_IsCasting)(void* nullParam, int unitID);
-typedef void*(__fastcall* f_AI_StopCasting)(void* nullParam, int unitID);
-typedef BOOL(__fastcall* f_AI_IsChanneling)(void* nullParam, int unitID);
-typedef void*(__fastcall* f_AI_GetGlobalCooldown)(void* nullParam, int unitID); // not sure if this returns a 4 byte or 8 byte value
-typedef bool(__fastcall* f_AI_CheckBuff)(void* nullParam, int unitID, uint32_t buffID);
-
-f_GetClientUnit o_GetClientUnit = NULL;
-f_UseSkillWrapper o_UseSkillWrapper = NULL;
-f_VelocityOfIndex o_VelocityOfIndex = NULL;
-
-f_AI_IsCasting o_AI_IsCasting;
-f_AI_StopCasting o_AI_StopCasting;
-f_AI_IsChanneling o_AI_IsChanneling;
-f_AI_GetGlobalCooldown o_AI_GetGlobalCooldown;
-f_AI_CheckBuff o_AI_CheckBuff;
-f_isLootable o_isLootable;
-f_loot_all o_loot_all;
+X2 x2;  extern Addr Patterns;
 
 BOOL Stats::has_buff(uint32_t buffID)
 {
-	return o_AI_CheckBuff(NULL, LocalPlayerFinder::GetClientActor()->unitID, buffID);
-}
-
-Combat::Combat()
-{
-	o_GetClientUnit = (f_GetClientUnit)Patterns.Func_GetClientUnit;
-	o_UseSkillWrapper = (f_UseSkillWrapper)Patterns.Func_CastSkillWrapper;
-	o_VelocityOfIndex = (f_VelocityOfIndex)Patterns.Func_GetIndexVelocity;
-	o_loot_all = (f_loot_all)Patterns.Func_LootAll;
-	o_isLootable = (f_isLootable)Patterns.Func_isLootable;
-
-	o_AI_IsCasting = (f_AI_IsCasting)Patterns.Func_AI_IsCasting;
-	o_AI_StopCasting = (f_AI_StopCasting)Patterns.Func_AI_StopCasting;
-	o_AI_IsChanneling = (f_AI_IsChanneling)Patterns.Func_AI_IsChanneling;
-	o_AI_GetGlobalCooldown = (f_AI_GetGlobalCooldown)Patterns.Func_AI_GetGlobalCooldown;
-	o_AI_CheckBuff = (f_AI_CheckBuff)Patterns.Func_AI_CheckBuff;
+	return x2.o_AI_CheckBuff(NULL, LocalPlayerFinder::GetClientActor()->unitID, buffID);
 }
 
 
@@ -164,7 +123,7 @@ std::vector<IActor*> Combat::get_aggro_mob_list()
 
 void* Combat::get_unit_by_id(DWORD targetId)
 {
-	return (void*)o_GetClientUnit(targetId);
+	return (void*)x2.o_GetClientUnit(targetId);
 }
 
 DWORD Combat::get_current_target_id()
@@ -202,7 +161,7 @@ BOOL Combat::cast_skill_on_targetId(DWORD targetId, DWORD SkillId)
 			if (info)
 			{
 				SkillCastInformation Info(info);
-				return o_UseSkillWrapper(0, SkillId, (long long)&Info, 0, 0, 0);
+				return x2.o_UseSkillWrapper(0, SkillId, (long long)&Info, 0, 0, 0);
 			}
 		}
 	}
@@ -222,7 +181,7 @@ BOOL Combat::cast_skill_on_current_target(DWORD SkillId)
 			if (info)
 			{
 				SkillCastInformation Info(info);
-				return o_UseSkillWrapper(0, SkillId, (long long)&Info, 0, 0, 0);
+				return x2.o_UseSkillWrapper(0, SkillId, (long long)&Info, 0, 0, 0);
 			}
 		}
 	}
@@ -240,19 +199,19 @@ BOOL Combat::cast_skill_on_self(DWORD SkillId)
 		if (info)
 		{
 			SkillCastInformation Info(info);
-			return o_UseSkillWrapper(0, SkillId, (long long)&Info, 0, 0, 0);
+			return x2.o_UseSkillWrapper(0, SkillId, (long long)&Info, 0, 0, 0);
 		}
 	}
 }
 
 BOOL Combat::is_casting()
 {
-	return o_AI_IsCasting(NULL, LocalPlayerFinder::GetClientActor()->unitID);
+	return x2.o_AI_IsCasting(NULL, LocalPlayerFinder::GetClientActor()->unitID);
 }
 
 BOOL Combat::is_channeling()
 {
-	return o_AI_IsChanneling(NULL, LocalPlayerFinder::GetClientActor()->unitID);
+	return x2.o_AI_IsChanneling(NULL, LocalPlayerFinder::GetClientActor()->unitID);
 }
 
 BOOL Combat::is_in_combat()
@@ -267,14 +226,14 @@ BOOL Combat::is_in_combat()
 
 BOOL Combat::is_dead(DWORD unitID)
 {
-	UINT_PTR Unit = o_GetClientUnit(unitID);
+	UINT_PTR Unit = x2.o_GetClientUnit(unitID);
 	return *(bool*)((UINT_PTR)Unit + (UINT_PTR)Patterns.Offset_isDead);
 }
 
 BOOL Combat::is_targeting_me(DWORD unitID)
 {
 	DWORD local_UnitId = LocalPlayerFinder::GetClientActor()->unitID;
-	UINT_PTR MobUnit = o_GetClientUnit(unitID);
+	UINT_PTR MobUnit = x2.o_GetClientUnit(unitID);
 	DWORD unitCurrentTarget = *(DWORD*)((UINT_PTR)MobUnit + (UINT_PTR)Patterns.Offset_CurrentTargetId);
 
 	if (unitCurrentTarget == local_UnitId)
@@ -284,7 +243,7 @@ BOOL Combat::is_targeting_me(DWORD unitID)
 
 BOOL Combat::stop_casting() // not sure what this is supposed to return
 {
-	o_AI_StopCasting(NULL, LocalPlayerFinder::GetClientActor()->unitID);
+	x2.o_AI_StopCasting(NULL, LocalPlayerFinder::GetClientActor()->unitID);
 	return true;
 }
 
@@ -292,7 +251,7 @@ BOOL Combat::isRunning()
 {
 	for (int i = 0; i < 6; i++)
 	{
-		if (o_VelocityOfIndex(i) > 0.0f)
+		if (x2.o_VelocityOfIndex(i) > 0.0f)
 			return true;
 	}
 	return false;
@@ -322,10 +281,10 @@ BOOL Stealth::is_player_nearby(float range)
 BOOL Loot::is_lootable(DWORD unitId)
 {
 	UINT_PTR lootClass = *(UINT_PTR*)Patterns.Addr_LootClass;
+
 	if (lootClass)
 	{
-		printf("Loot Class %p | %p  isLootable %p\n", lootClass, Patterns.Addr_LootClass, o_isLootable);
-		return o_isLootable(lootClass, unitId);
+		return x2.o_isLootable(lootClass, unitId);
 	}
 	else
 		return false;
@@ -333,5 +292,5 @@ BOOL Loot::is_lootable(DWORD unitId)
 
 BOOL Loot::loot_all()
 {
-	return o_loot_all(0);
+	return x2.o_loot_all(0);
 }

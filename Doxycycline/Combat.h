@@ -5,66 +5,65 @@ class CombatSettings {
 };
 
 class Navigation {
-	BOOL move_to_shop();
-	BOOL move_to_next_target(DWORD TargetId);
-	BOOL move_to_repair();
-	BOOL move_to_bank();
+	static BOOL move_to_shop();
+	static BOOL move_to_next_target(DWORD TargetId);
+	static BOOL move_to_repair();
+	static BOOL move_to_bank();
 };
 
 class Interaction {
-	BOOL interact_with_npc_id(DWORD npcId);
-	BOOL uninteract_with_npc();
-	BOOL is_interacting();
+	static BOOL interact_with_npc_id(DWORD npcId);
+	static BOOL uninteract_with_npc();
+	static BOOL is_interacting();
 };
 
 class Stats
 {
 public:
-	int get_health();
-	int get_max_health();
-	int get_mana();
-	int get_max_mana();
+	static int get_health();
+	static int get_max_health();
+	static int get_mana();
+	static int get_max_mana();
 
-	BOOL has_buff(uint32_t buffID);
+	static BOOL has_buff(uint32_t buffID);
 };
 
 class Combat {
 public:
-	Combat();
 
-	UINT_PTR get_entitylist_ptr();
-	UINT_PTR get_local_unit();
+	static UINT_PTR get_entitylist_ptr();
+	static UINT_PTR get_local_unit();
 
-	IActor* get_closest_monster_npc(float maxRange);
-	IActor* get_closest_player(float maxRange);
-	IActor* get_closest_lootable(float maxRange);
+	static IActor* get_closest_monster_npc(float maxRange);
+	static IActor* get_closest_player(float maxRange);
+	static IActor* get_closest_lootable(float maxRange);
 
-	DWORD get_closest_targetid(float maxRange);
-	DWORD get_closest_target_with_type(DWORD TargetType, float maxRange);
-	DWORD get_targets_with_name(char * TargetName, float maxRange);
+	static DWORD get_closest_targetid(float maxRange);
+	static DWORD get_closest_target_with_type(DWORD TargetType, float maxRange);
+	static DWORD get_targets_with_name(char * TargetName, float maxRange);
 
-	std::vector<IActor*> get_aggro_mob_list();
+	static std::vector<IActor*> get_aggro_mob_list();
 
-	void* get_unit_by_id(DWORD targetId);
-	DWORD get_current_target_id();
-	BOOL  set_current_target(DWORD targetId);
+	static void* get_unit_by_id(DWORD targetId);
+	static DWORD get_current_target_id();
+	static BOOL  set_current_target(DWORD targetId);
 
-	BOOL  cast_skill_on_targetId(DWORD TargetId, DWORD SkillId);
-	BOOL  cast_skill_on_current_target(DWORD SkillId);
-	BOOL  cast_skill_on_self(DWORD SkillId);
+	static BOOL  cast_skill_on_targetId(DWORD TargetId, DWORD SkillId);
+	static BOOL  cast_skill_on_current_target(DWORD SkillId);
+	static BOOL  cast_skill_on_self(DWORD SkillId);
 
-	BOOL  isRunning();
-	BOOL  isStuck();
-	BOOL  is_casting();
-	BOOL  is_channeling();
-	BOOL  is_in_combat();
-	BOOL  is_dead(DWORD unitID);
-	BOOL  is_targeting_me(DWORD unitID);
+	static BOOL  isRunning();
+	static BOOL  isStuck();
+	static BOOL  is_casting();
+	static BOOL  is_channeling();
+	static BOOL  is_in_combat();
+	static BOOL  is_dead(DWORD unitID);
+	static BOOL  is_targeting_me(DWORD unitID);
 
-	BOOL  need_heal();
+	static BOOL  need_heal();
 
-	BOOL  stop_casting();
-	BOOL  stop_channeling();
+	static BOOL  stop_casting();
+	static BOOL  stop_channeling();
 };
 
 class Loot {
@@ -74,27 +73,27 @@ public:
 };
 
 class Inventory {
-	DWORD find_item_slot_by_name(char* itemName);
-	BOOL  use_item(DWORD slotId);
-	BOOL  move_item(DWORD from_slot, DWORD to_slot);
-	BOOL  move_to_bank(DWORD slotId);
-	BOOL  withdraw_from_bank(DWORD slotId);
-	BOOL  sell_to_npc(DWORD npcId, DWORD slot);
-	BOOL  buy_from_npc(DWORD npcId, DWORD itemId);
+	static DWORD find_item_slot_by_name(char* itemName);
+	static BOOL  use_item(DWORD slotId);
+	static BOOL  move_item(DWORD from_slot, DWORD to_slot);
+	static BOOL  move_to_bank(DWORD slotId);
+	static BOOL  withdraw_from_bank(DWORD slotId);
+	static BOOL  sell_to_npc(DWORD npcId, DWORD slot);
+	static BOOL  buy_from_npc(DWORD npcId, DWORD itemId);
 };
 
 class Stealth {
-	BOOL is_player_nearby(float range);
-	BOOL escape_from_player();
+	static BOOL is_player_nearby(float range);
+	static BOOL escape_from_player();
 };
 
 class Skill {
-	DWORD * get_learned_skills_list();
-	DWORD   get_skill_id_by_name(char* skillName);
+	static DWORD * get_learned_skills_list();
+	static DWORD   get_skill_id_by_name(char* skillName);
 	
-	BOOL is_skill_on_cooldown(DWORD skillId);
-	BOOL is_skill_useable(DWORD skillId);
-	BOOL is_skill_learned(DWORD skillId);
+	static BOOL is_skill_on_cooldown(DWORD skillId);
+	static BOOL is_skill_useable(DWORD skillId);
+	static 	BOOL is_skill_learned(DWORD skillId);
 };
 
 class SkillCastInformation {

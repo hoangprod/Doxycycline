@@ -6,7 +6,7 @@
 #include "LuaAPI.h"
 #include "Radar.h"
 #include "Combat.h"
-#include <iostream>
+
 MemoryEditor mem_edit;
 Consolelogs console;
 PacketEditor peditor;
