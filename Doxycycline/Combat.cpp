@@ -132,7 +132,7 @@ IActor* Combat::get_closest_lootable(float maxRange)
 	auto actorList = LocalPlayerFinder::GetActorList();
 	for (auto actor : actorList)
 	{
-		if (actor && actor->Entity && EntityHelper::isNpcMob(actor->Entity) && is_dead(actor->unitID))
+		if (actor && actor->Entity && EntityHelper::isNpcMob(actor->Entity) && is_dead(actor->unitID) && Loot::is_lootable(actor->unitID))
 		{
 			Vec3 actorPos = actor->Entity->GetWorldPos();
 			float heightDistance = abs(actorPos.y - localPos.y);
@@ -322,7 +322,13 @@ BOOL Stealth::is_player_nearby(float range)
 BOOL Loot::is_lootable(DWORD unitId)
 {
 	UINT_PTR lootClass = *(UINT_PTR*)Patterns.Addr_LootClass;
-	return o_isLootable(lootClass, unitId);
+	if (lootClass)
+	{
+		printf("Loot Class %p | %p  isLootable %p\n", lootClass, Patterns.Addr_LootClass, o_isLootable);
+		return o_isLootable(lootClass, unitId);
+	}
+	else
+		return false;
 }
 
 BOOL Loot::loot_all()

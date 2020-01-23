@@ -26,6 +26,8 @@ packetCrypto packetinfo;
 bool b_displayLocalPlayerInfo = false;
 bool b_Console = true, b_MemoryEditor = false, b_PacketEditor = false, b_Radar = false, b_LuaMenu = true;
 
+bool b_AutoLoot = false;
+
 typedef bool(__fastcall* f_EncryptPacket)(__int64* buffer, unsigned __int8 isEncrypted, __int64 key, int* cleartextbuffer);
 
 extern f_EncryptPacket o_EncryptPacket;
@@ -53,6 +55,11 @@ void MenuRender()
 
 	if(b_Radar)
 		radar.Render();
+
+	if (b_AutoLoot)
+	{
+
+	}
 }
 
 void HackView::LuaScript()
@@ -101,6 +108,9 @@ void HackView::Display()
 	{
 		ToggleNoFall(bNoFallDamage);
 	}
+
+	ImGui::SameLine(); 
+	ImGui::Checkbox("Auto Loot", &b_AutoLoot);
 
 	ImGui::Checkbox("Memory Editor", &b_MemoryEditor); ImGui::SameLine();
 	ImGui::Checkbox("Log Console", &b_Console); ImGui::SameLine();

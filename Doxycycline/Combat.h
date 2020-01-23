@@ -68,6 +68,7 @@ public:
 };
 
 class Loot {
+public:
 	static BOOL is_lootable(DWORD unitId);
 	static BOOL loot_all();
 };

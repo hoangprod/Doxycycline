@@ -158,7 +158,13 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		if (wParam == VK_NUMPAD6)
 		{
-
+			Combat combat;
+			auto loot = combat.get_closest_lootable(40.0f);
+			if (loot)
+			{
+				printf("looting\n");
+				Loot::loot_all();
+			}
 		}
 		if (wParam == VK_NUMPAD7)
 		{
@@ -166,9 +172,11 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			auto actor = combat.get_closest_lootable(40.0f);
 			if (actor)
 			{
-				__int64 someList = *(__int64*)0x3A059BB8;
+				//__int64 someList = *(__int64*)0x3A059BB8;
 				//bool isLootable = o_isLootable(someList, actor->unitID);
 				//printf("%s is %d lootable\n", actor->Entity->GetName(), isLootable);
+
+
 			}
 
 		}
