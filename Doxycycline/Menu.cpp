@@ -6,6 +6,7 @@
 #include "LuaAPI.h"
 #include "Radar.h"
 #include "Combat.h"
+#include "Helper.h"
 
 MemoryEditor mem_edit;
 Consolelogs console;

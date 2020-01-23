@@ -166,6 +166,7 @@
     <ClCompile Include="Combat.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameClasses.cpp" />
     <ClCompile Include="Grinder.cpp" />
     <ClCompile Include="Hacks.cpp" />
     <ClCompile Include="Helper.cpp" />

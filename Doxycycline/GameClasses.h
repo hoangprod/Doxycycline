@@ -1,5 +1,4 @@
 #pragma once
-#include "Helper.h"
 # define m_PI 3.14159265358979323846
 // This header contains reversed game structures
 class Matrix34
@@ -286,18 +285,10 @@ public:
 	virtual void Function76();
 	virtual void Function77();
 
-	Vec3 GetFixedAngles()
-	{
-		Vec3 angles = GetWorldAngles();
-		if (angles.y < 0)
-		{
-			angles.y = 6.28319 + angles.y;
-		}
+	// Custom
+	Vec3 GetFixedAngles();
 
-		float rad2deg = angles.y * (180.0 / m_PI);
-		angles.y = 360 - rad2deg;
-		return angles;
-	}
+
 }; //Size: 0x0240
 
 class IEntityIt // allows you to iterate through entities - basically the entity list
@@ -734,11 +725,7 @@ public:
 	void *pCryPak; //0x0098
 	char pad_00A0[928]; //0x00A0
 
-	static SSystemGlobalEnvironment* GetInstance()
-	{
-		extern Addr Patterns;
-		return *(SSystemGlobalEnvironment**)(Patterns.Addr_gEnv);
-	}
+	static SSystemGlobalEnvironment* GetInstance();
 }; //Size: 0x0440
 
 class LocalPlayerFinder

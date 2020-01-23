@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "Helper.h"
 #include "GameClasses.h"
 #include "Game.h"
 

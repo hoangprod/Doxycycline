@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "GameClasses.h"
 #include "Game.h"
+#include "Helper.h"
 #include "PathFinder.h"
 
 extern X2 x2;
