@@ -27,7 +27,7 @@ packetCrypto packetinfo;
 bool b_displayLocalPlayerInfo = false;
 bool b_Console = true, b_MemoryEditor = false, b_PacketEditor = false, b_Radar = false, b_LuaMenu = true;
 
-bool b_AutoLoot = false;
+void* LuaStateRun = 0;
 
 typedef bool(__fastcall* f_EncryptPacket)(__int64* buffer, unsigned __int8 isEncrypted, __int64 key, int* cleartextbuffer);
 
@@ -57,10 +57,6 @@ void MenuRender()
 	if(b_Radar)
 		radar.Render();
 
-	if (b_AutoLoot)
-	{
-
-	}
 }
 
 void HackView::LuaScript()
@@ -79,13 +75,13 @@ void HackView::LuaScript()
 	{
 		void* currentLuaState;
 		if (current_lua_item == lua_items[0])
-			currentLuaState = SSystemGlobalEnvironment::GetInstance()->pScriptSysOne->luaState;
+			LuaStateRun = currentLuaState = SSystemGlobalEnvironment::GetInstance()->pScriptSysOne->luaState;
 		if (current_lua_item == lua_items[1])
-			currentLuaState = SSystemGlobalEnvironment::GetInstance()->pScriptSysTwo->luaState;
+			LuaStateRun = currentLuaState = SSystemGlobalEnvironment::GetInstance()->pScriptSysTwo->luaState;
 		if (current_lua_item == lua_items[2])
-			currentLuaState = SSystemGlobalEnvironment::GetInstance()->pScriptSysThree->luaState;
+			LuaStateRun = currentLuaState = SSystemGlobalEnvironment::GetInstance()->pScriptSysThree->luaState;
 
-		lua_c_ExecuteLuaFile(currentLuaState, "script.lua");
+		//lua_c_ExecuteLuaFile(currentLuaState, "script.lua");
 	}
 
 	ImGui::End();
@@ -110,8 +106,6 @@ void HackView::Display()
 		ToggleNoFall(bNoFallDamage);
 	}
 
-	ImGui::SameLine(); 
-	ImGui::Checkbox("Auto Loot", &b_AutoLoot);
 
 	ImGui::Checkbox("Memory Editor", &b_MemoryEditor); ImGui::SameLine();
 	ImGui::Checkbox("Log Console", &b_Console); ImGui::SameLine();
@@ -134,7 +128,7 @@ void HackView::Display()
 	ImGui::InputFloat("Path Z", &pathPosition_DoNotModify.z);
 	if (ImGui::Button("Go to path"))
 	{
-		PathToPosition(pathPosition_DoNotModify);
+		Navigation::move_to_position(pathPosition_DoNotModify);
 	}
 
 	ImGui::SameLine();

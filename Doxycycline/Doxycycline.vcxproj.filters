@@ -72,9 +72,6 @@
     <ClCompile Include="Radar.cpp">
       <Filter>Source Files\Features</Filter>
     </ClCompile>
-    <ClCompile Include="PathFinder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Combat.cpp">
       <Filter>Source Files\Combat</Filter>
     </ClCompile>
@@ -139,9 +136,6 @@
     </ClInclude>
     <ClInclude Include="Radar.h">
       <Filter>Source Files\Features</Filter>
-    </ClInclude>
-    <ClInclude Include="PathFinder.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Combat.h">
       <Filter>Source Files\Combat\Headers</Filter>

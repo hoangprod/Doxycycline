@@ -1,17 +1,16 @@
 #pragma once
 
-class CombatSettings {
-	float min_health_percentage;
-};
-
 class Navigation {
+public:
 	static BOOL move_to_shop();
 	static BOOL move_to_next_target(DWORD TargetId);
 	static BOOL move_to_repair();
 	static BOOL move_to_bank();
+	static BOOL move_to_position(Vec3 position);
 };
 
 class Interaction {
+public:
 	static BOOL interact_with_npc_id(DWORD npcId);
 	static BOOL uninteract_with_npc();
 	static BOOL is_interacting();
@@ -64,6 +63,44 @@ public:
 
 	static BOOL  stop_casting();
 	static BOOL  stop_channeling();
+
+	// Settings
+	static bool grinding_bot_on;
+	static bool deposit_items;
+	static bool send_to_mule;
+	static bool go_back_to_beginning;
+	static bool resurrect_after_death;
+	static bool loot_items;
+	static bool teleport_to_next_mob;
+
+	static Vec3 start_origin;
+	static Vec3 storage_npc_location;
+	static Vec3 mail_box_location;
+
+	static std::string mule_character_name;
+	static std::vector<Vec3> wander_path_list;
+
+	static std::vector<std::string> whitelist_monsters;
+	static std::vector<std::string> blacklist_monsters;
+	static std::vector<std::string> open_item_list;
+
+	static std::vector<unsigned int> attack_spell_list;
+	static std::vector<unsigned int> buff_spell_list;
+	static std::vector<unsigned int> cleanse_spell_list;
+
+	static std::vector<unsigned int> deposit_item_id_list;
+
+	static std::vector<unsigned int> recover_hp_spell_list;
+	static std::vector<unsigned int> recover_mp_spell_list;
+	static std::vector<unsigned int> recover_hp_item_list;
+	static std::vector<unsigned int> recover_mp_item_list;
+
+	static int open_pack_lp;
+	
+	static float min_hp_threshold;
+	static float min_mp_thredshold;
+	static float max_wander_range;
+	static float max_z_range;
 };
 
 class Loot {

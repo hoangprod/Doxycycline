@@ -294,3 +294,26 @@ BOOL Loot::loot_all()
 {
 	return x2.o_loot_all(0);
 }
+
+BOOL Navigation::move_to_position(Vec3 position)
+{
+	// Set auto pathing on
+	*Patterns.Addr_isAutoPathing = (BYTE)1;
+
+	UINT_PTR LocalUnit = *(UINT_PTR*)((*(UINT_PTR*)Patterns.Addr_UnitClass) + Patterns.Offset_LocalUnit);
+
+	if (!LocalUnit)
+	{
+		return false;
+	}
+
+	UINT_PTR* ActorUnitModel = *(UINT_PTR**)(LocalUnit + Patterns.Offset_ActorUnitModel);
+
+	if (!ActorUnitModel)
+	{
+		return false;
+	}
+	x2.o_GetNavPath_and_Move(ActorUnitModel, &position);
+
+	return true;
+}

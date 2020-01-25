@@ -59,9 +59,16 @@ HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** 
 	return ret;
 }
 
+extern void* LuaStateRun;
 
 void* h_EndCall(IScriptSystem* scriptSys) // this is the method where we will exeucte lua
 {
+	if (LuaStateRun)
+	{
+		lua_c_ExecuteLuaFile(LuaStateRun, "script.lua");
+		LuaStateRun = 0;
+	}
+
 	return o_EndCall(scriptSys);
 }
 
@@ -116,7 +123,6 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		if (wParam == VK_NUMPAD7)
 		{
-			PathToPosition(pathPosition_DoNotModify);
 		}
 		if (wParam == VK_CONTROL)
 		{

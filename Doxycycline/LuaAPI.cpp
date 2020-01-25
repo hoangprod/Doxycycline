@@ -34,7 +34,8 @@ void LuaError(const char* functionName)
 {
 	std::stringstream ss;
 	ss << "Signature scan failed for lua function: " << functionName;
-	console.AddLog(ss.str().c_str());
+	//console.AddLog(ss.str().c_str());
+	printf(ss.str().data());
 }
 
 void LocateLuaFunctions()

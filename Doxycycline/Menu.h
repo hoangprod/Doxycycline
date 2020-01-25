@@ -370,5 +370,11 @@ struct HackView
 	void DisplayMemEdit();
 };
 
+struct Grinder
+{
+	void Display();
+
+};
+
 extern PacketEditor peditor;
 void MenuRender();
