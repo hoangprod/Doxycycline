@@ -125,9 +125,11 @@ class Stealth {
 };
 
 class Skill {
+public:
 	static DWORD * get_learned_skills_list();
 	static DWORD   get_skill_id_by_name(char* skillName);
 	
+	static int32_t get_skill_cooldown(uint32_t skillId);
 	static BOOL is_skill_on_cooldown(DWORD skillId);
 	static BOOL is_skill_useable(DWORD skillId);
 	static BOOL is_skill_learned(DWORD skillId);

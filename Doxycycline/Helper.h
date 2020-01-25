@@ -43,6 +43,8 @@ struct Addr {
 	UINT_PTR Func_GetIndexVelocity;
 	UINT_PTR Func_LootAll;
 	UINT_PTR Func_isLootable;
+	UINT_PTR Func_GetSkillByID;
+	UINT_PTR Func_GetSkillCooldown;
 
 	UINT_PTR Func_AI_IsCasting;
 	UINT_PTR Func_AI_StopCasting;

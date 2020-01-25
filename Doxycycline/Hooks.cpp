@@ -51,6 +51,8 @@ bool g_HijackCtrl = false;
 
 std::vector<int32_t> idList;
 
+X2* x2;
+
 HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** ppDevice, ID3D11DeviceContext** ppContext)
 {
 	HRESULT ret = pSwapChain->GetDevice(__uuidof(ID3D11Device), (PVOID*)ppDevice);
@@ -216,7 +218,9 @@ DWORD __stdcall InitializeHooks()
 
 	phookD3D11Present = (f_D3D11PresentHook)dx_swapchain.Hook(8, hookD3D11Present);
 
-	LocateLuaFunctions();	
+	LocateLuaFunctions();
+
+	x2 = new X2;
 
 	o_EncryptPacket = (f_EncryptPacket)Patterns.Func_EncryptPacket;
 	o_EncryptPacket = (f_EncryptPacket)detours.Hook(o_EncryptPacket, h_EncryptPacket, 14);

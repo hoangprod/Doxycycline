@@ -226,6 +226,27 @@ bool __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_isLootable is at %llx\n", Patterns.Func_isLootable); };
 
+	// PATTERN SCAN FOR GETSKILLBYID HERE
+	Patterns.Func_GetSkillByID = (UINT_PTR)0x39976BC0;
+
+	Patterns.Func_GetSkillCooldown = (UINT_PTR)PatternScan(x2GameModule, 0x1000000, "\x48\x83\xec\x28\x48\x8b\xc1\x48\x8b\x0d\xCC\xCC\xCC\x00\x48\x85\xc9\x74", "xxxxxxxxxx???xxxxx");
+
+	if (!Patterns.Func_GetSkillCooldown)
+	{
+		printf("[Error] Patterns.Func_GetSkillCooldown failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_GetSkillCooldown is at %llx\n", Patterns.Func_GetSkillCooldown); };
+
+	Patterns.Func_GetIndexVelocity = (UINT_PTR)ptr_offset_Scanner(x2GameModule, 0x200000, "\xe8\xCC\xCC\xCC\x00\x0f\x57\xf6\xf3\x0f\x59\x05\xCC\xCC\xCC\x00", 0, 5, 1, "x???xxxxxxxx???x");
+
+	if (!Patterns.Func_GetIndexVelocity)
+	{
+		printf("[Error] Patterns.Func_GetIndexVelocity failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_GetIndexVelocity is at %llx\n", (UINT_PTR)Patterns.Func_GetIndexVelocity); };
+
 	Patterns.Func_AI_IsCasting = (UINT_PTR)PatternScan(x2GameModule, 0x800000, "\x48\x83\xEC\x28\x8B\xCA\xE8\x00\x00\x00\x00\x4C\x8B\xD8\x48\x85\xC0\x75\x05\x48\x83\xC4\x28\xC3\x8B\x05\x00\x00\x00\x00\x41\x39\x83\x00\x00\x00\x00\x75\x16", "xxxxxxx????xxxxxxxxxxxxxxx????xxx????xx");
 
 	if (!Patterns.Func_AI_IsCasting)
@@ -261,17 +282,6 @@ bool __stdcall findPatterns()
 		return FALSE;
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_AI_GetGlobalCooldown is at %llx\n", Patterns.Func_AI_GetGlobalCooldown); };
-
-
-	Patterns.Func_GetIndexVelocity = (UINT_PTR)ptr_offset_Scanner(x2GameModule, 0x200000, "\xe8\xCC\xCC\xCC\x00\x0f\x57\xf6\xf3\x0f\x59\x05\xCC\xCC\xCC\x00", 0, 5, 1, "x???xxxxxxxx???x");
-
-	if (!Patterns.Func_GetIndexVelocity)
-	{
-		printf("[Error] Patterns.Func_GetIndexVelocity failed to pattern scan.\n");
-		return FALSE;
-	}
-	else { printf("[Pattern Scan]  Patterns.Func_GetIndexVelocity is at %llx\n", (UINT_PTR)Patterns.Func_GetIndexVelocity); };
-
 
 	Patterns.Func_AI_CheckBuff = (UINT_PTR)PatternScan(x2GameModule, 0x800000, "\x44\x89\x44\x24\x00\x48\x83\xEC\x28\x8B\xCA", "xxxx?xxxxxx");
 
