@@ -227,7 +227,14 @@ bool __stdcall findPatterns()
 	else { printf("[Pattern Scan]  Patterns.Func_isLootable is at %llx\n", Patterns.Func_isLootable); };
 
 	// PATTERN SCAN FOR GETSKILLBYID HERE
-	Patterns.Func_GetSkillByID = (UINT_PTR)0x39976BC0;
+	Patterns.Func_GetSkillByID = (UINT_PTR)ptr_offset_Scanner(x2GameModule, 0x300000, "\xe8\xCC\xCC\xCC\x00\x48\x8b\xd8\x48\x85\xc0\x0f\xCC\xCC\x00\x00\x00\xf6", 0, 5, 1, "x???xxxxxxxx??xxxx");
+
+	if (!Patterns.Func_GetSkillByID)
+	{
+		printf("[Error] Patterns.Func_GetSkillByID failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_GetSkillByID is at %llx\n", Patterns.Func_GetSkillByID); };
 
 	Patterns.Func_GetSkillCooldown = (UINT_PTR)PatternScan(x2GameModule, 0x1000000, "\x48\x83\xec\x28\x48\x8b\xc1\x48\x8b\x0d\xCC\xCC\xCC\x00\x48\x85\xc9\x74", "xxxxxxxxxx???xxxxx");
 
