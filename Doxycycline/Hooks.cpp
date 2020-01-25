@@ -13,6 +13,7 @@
 
 typedef float(__fastcall* f_GetWaterLevel)(void* cry3DEngine, void* referencePOS);
 typedef bool(__fastcall* f_EncryptPacket)(__int64* a1, unsigned __int8 a2, __int64 packet, int* a3);
+typedef UINT_PTR(__fastcall* f_EncryptSendPacket)(UINT_PTR localPlayer, UINT_PTR packetBody);
 typedef HRESULT(__stdcall* f_D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 typedef void*(__fastcall* f_EndCall)(IScriptSystem* scriptSys);
 
@@ -36,6 +37,7 @@ VMTHook vGetWaterLevel;
 VMTHook vEndCall;
 
 f_EncryptPacket o_EncryptPacket = NULL;
+f_EncryptSendPacket o_Encrypt_Send = NULL;
 f_GetWaterLevel o_GetWaterLevel = NULL;
 f_D3D11PresentHook phookD3D11Present = NULL;
 f_EndCall o_EndCall = NULL;
@@ -86,6 +88,15 @@ float __fastcall h_GetWaterLevel(void* cry3DEngine, void* referencePOS)
 	}
 	
 	return o_GetWaterLevel(cry3DEngine, referencePOS);
+}
+
+extern bool b_PacketEditor;
+
+UINT_PTR __fastcall h_Encrypt_Send_Packet(UINT_PTR localUnit, UINT_PTR packetBody)
+{
+	if(b_PacketEditor)
+		printf("Opcode %04x  -- %p\n", *(WORD*)(packetBody + 8), _ReturnAddress());
+	return o_Encrypt_Send(localUnit, packetBody);
 }
 
 bool __fastcall h_EncryptPacket(__int64* Buffer, unsigned __int8 isEncrypted, __int64 key, int* cleartextbuffer)
@@ -209,6 +220,16 @@ DWORD __stdcall InitializeHooks()
 
 	o_EncryptPacket = (f_EncryptPacket)Patterns.Func_EncryptPacket;
 	o_EncryptPacket = (f_EncryptPacket)detours.Hook(o_EncryptPacket, h_EncryptPacket, 14);
+
+	DWORD Func_Offset = *(DWORD*)(Patterns.Func_SendEncryptPacket + 8);
+
+	o_Encrypt_Send = (f_EncryptSendPacket)Patterns.Func_SendEncryptPacket;
+	o_Encrypt_Send = (f_EncryptSendPacket)detours.Hook(o_Encrypt_Send, h_Encrypt_Send_Packet, 15);
+
+	DWORD Func_Delta = Patterns.Func_SendEncryptPacket - (UINT_PTR)o_Encrypt_Send;
+	*(DWORD*)((UINT_PTR)o_Encrypt_Send + 8) = (Func_Offset + Func_Delta);
+
+	printf("new addy %p\n", o_Encrypt_Send);
 
 	DWORD_PTR* p3DEngineVtable = *(DWORD_PTR**)SSystemGlobalEnvironment::GetInstance()->p3DEngine;
 	vGetWaterLevel.vmt = (void**)p3DEngineVtable;

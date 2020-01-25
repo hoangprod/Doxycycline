@@ -101,6 +101,7 @@ struct AABB
 	BOOL IsReset() { return min.x > max.x; }
 };
 
+
 class ClientDoodad
 {
 public:

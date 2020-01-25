@@ -4,6 +4,7 @@
 #include <strsafe.h>
 #include <vector>
 #include "Scan.h"
+#include "Patterns.h"
 #include "Helper.h"
 
 #define ReCa reinterpret_cast
@@ -380,6 +381,8 @@ bool Detour64::Unhook(void* pTrampoline)
 	return false;
 }
 
+extern Addr Patterns;
+
 bool Detour64::Clearhook()
 {
 	for (func_iterator = hooked_funcs.begin(); func_iterator != hooked_funcs.end(); func_iterator++)
@@ -389,6 +392,15 @@ bool Detour64::Clearhook()
 		DWORD dwOld = 0;
 		VirtualProtect(curHook.origAddr, 1, PAGE_EXECUTE_READWRITE, &dwOld);
 		memcpy(curHook.origAddr, curHook.origBytes, curHook.orgByteCount);
+
+		if ((UINT_PTR)curHook.origAddr == Patterns.Func_SendEncryptPacket)
+		{
+			DWORD oldBytes = *(DWORD*)(Patterns.Func_SendEncryptPacket + 8);
+			UINT_PTR Delta = (UINT_PTR)curHook.origAddr - (UINT_PTR)curHook.origBytes;
+			*(DWORD*)(Patterns.Func_SendEncryptPacket + 8) = oldBytes - Delta;
+		}
+
+
 		VirtualProtect(curHook.origAddr, 1, dwOld, &dwOld);
 
 		if (*(char*)curHook.origAddr == *curHook.origBytes)

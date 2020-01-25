@@ -130,7 +130,7 @@ class Skill {
 	
 	static BOOL is_skill_on_cooldown(DWORD skillId);
 	static BOOL is_skill_useable(DWORD skillId);
-	static 	BOOL is_skill_learned(DWORD skillId);
+	static BOOL is_skill_learned(DWORD skillId);
 };
 
 class SkillCastInformation {
