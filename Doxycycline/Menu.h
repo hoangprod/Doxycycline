@@ -296,7 +296,6 @@ struct Consolelogs
 };
 
 extern Consolelogs console;
-
 extern ImU64* Address;
 extern ImU32 Size;
 
@@ -370,10 +369,106 @@ struct HackView
 	void DisplayMemEdit();
 };
 
+struct Settings
+{
+public:
+	bool grinding_bot_on;
+	bool deposit_items;
+	bool send_to_mule;
+	bool go_back_to_beginning;
+	bool resurrect_after_death;
+	bool loot_items;
+	bool hide_from_players;
+	bool teleport_to_next_mob;
+
+	Vec3 start_origin;
+	Vec3 storage_npc_location;
+	Vec3 mail_box_location;
+
+	std::string mule_character_name;
+	std::vector<Vec3> wander_path_list;
+
+	std::vector<std::string> whitelist_monsters;
+	std::vector<std::string> blacklist_monsters;
+	std::vector<std::string> open_item_list;
+
+	std::vector<unsigned int> attack_spell_list;
+	std::vector<unsigned int> buff_spell_list;
+	std::vector<unsigned int> cleanse_spell_list;
+
+	std::vector<unsigned int> deposit_item_id_list;
+
+	std::vector<unsigned int> recover_hp_spell_list;
+	std::vector<unsigned int> recover_mp_spell_list;
+	std::vector<unsigned int> recover_hp_item_list;
+	std::vector<unsigned int> recover_mp_item_list;
+
+	int current_wander_path_selection;
+	int current_whitelist_mob_selection;
+	int current_blacklist_mob_selection;
+
+	int max_open_pack_lp;
+
+	float min_mana_percentage;
+	float min_health_percentage;
+	float max_wander_range;
+	float max_z_range;
+
+};
+
 struct Grinder
 {
-	void Display();
+public:
+	static void Display();
+};
 
+
+struct Vertexes
+{
+public:
+	// Construction
+	float x_;
+	float y_;
+	float z_;
+
+	Vertexes(float x, float y, float z) : x_(x), y_(y), z_(z) {}
+	Vertexes() : x_(0), y_(0), z_(0) {}
+	Vertexes(Vec3 Vec3) : x_(Vec3.x), y_(Vec3.y), z_(Vec3.z) {}
+
+
+	// Getters
+	float getX() const { return x_; }
+	float getY() const { return y_; }
+	float getZ() const { return z_; }
+
+	// Setters
+	void setX(float val) { x_ = val; }
+	void setY(float val) { y_ = val; }
+	void setZ(float val) { z_ = val; }
+
+	void print()
+	{
+		std::cout << "X: " << x_ << ", Y: " << y_ << ", " << "Z: " << z_ << '\n';
+	}
+
+
+	bool empty()
+	{
+		//printf("Empty Check: %f %f %f\n", x_, y_, z_);
+
+		if (x_ == 0 || y_ == 0 || z_ == 0 || x_ > 100000000000 || y_ > 10000000000 || z_ > 1000000000000)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	std::string getString() {
+		return std::to_string(x_) + ", " + std::to_string(z_) + ", " + std::to_string(y_);
+	}
+
+	Vertexes flip() const { return Vertexes{ x_ , z_ , y_ }; }
+//	Vec3 V3Convert() const { return Vec3(x_, y_, z_); }
 };
 
 extern PacketEditor peditor;

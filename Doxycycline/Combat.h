@@ -42,6 +42,7 @@ public:
 	static DWORD get_targets_with_name(char * TargetName, float maxRange);
 
 	static std::vector<IActor*> get_aggro_mob_list();
+	static std::vector<IActor*> get_unique_mob_list();
 
 	static void* get_unit_by_id(DWORD targetId);
 	static DWORD get_current_target_id();
@@ -63,44 +64,6 @@ public:
 
 	static BOOL  stop_casting();
 	static BOOL  stop_channeling();
-
-	// Settings
-	static bool grinding_bot_on;
-	static bool deposit_items;
-	static bool send_to_mule;
-	static bool go_back_to_beginning;
-	static bool resurrect_after_death;
-	static bool loot_items;
-	static bool teleport_to_next_mob;
-
-	static Vec3 start_origin;
-	static Vec3 storage_npc_location;
-	static Vec3 mail_box_location;
-
-	static std::string mule_character_name;
-	static std::vector<Vec3> wander_path_list;
-
-	static std::vector<std::string> whitelist_monsters;
-	static std::vector<std::string> blacklist_monsters;
-	static std::vector<std::string> open_item_list;
-
-	static std::vector<unsigned int> attack_spell_list;
-	static std::vector<unsigned int> buff_spell_list;
-	static std::vector<unsigned int> cleanse_spell_list;
-
-	static std::vector<unsigned int> deposit_item_id_list;
-
-	static std::vector<unsigned int> recover_hp_spell_list;
-	static std::vector<unsigned int> recover_mp_spell_list;
-	static std::vector<unsigned int> recover_hp_item_list;
-	static std::vector<unsigned int> recover_mp_item_list;
-
-	static int open_pack_lp;
-	
-	static float min_hp_threshold;
-	static float min_mp_thredshold;
-	static float max_wander_range;
-	static float max_z_range;
 };
 
 class Loot {

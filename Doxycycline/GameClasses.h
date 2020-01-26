@@ -23,6 +23,8 @@ public:
 class Vec3
 {
 public:
+	//Vec3(float x_, float y_, float z_) : x(x_), y(y_), z(z_) {}
+	std::string Str() {return std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z);}
 	float x; //0x0000
 	float z; //0x0004
 	float y; //0x0008
@@ -701,6 +703,26 @@ public:
 	virtual void Function8();
 	virtual void Function9();
 }; //Size: 0x00C0
+
+class CSkill
+{
+	uint32_t SkillId;
+	std::string SkillName;
+	uint32_t ManaCost;
+};
+
+class ISkill
+{
+public:
+	int32_t SkillId; //0x0000
+	char pad_0004[116]; //0x0004
+	uint32_t cooldown; //0x0078
+	char pad_007C[20]; //0x007C
+	char* Description; //0x0090
+	char pad_0098[88]; //0x0098
+	char* Name; //0x00F0
+	char pad_00F8[576]; //0x00F8
+}; //Size: 0x0338
 
 class SSystemGlobalEnvironment
 {

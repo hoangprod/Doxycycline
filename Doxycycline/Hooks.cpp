@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "Hooks.h"
-#include "Menu.h"
 #include "vmt.h"
 #include "Scan.h"
 #include "Helper.h"
 #include "GameClasses.h"
+#include "Menu.h"
 #include "Hacks.h"
 #include "LuaAPI.h"
 #include "Combat.h"
@@ -132,7 +132,7 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		if (wParam == VK_NUMPAD6)
 		{
-			printf("%d\n", Combat::get_current_target_id());
+			printf("%p\n", x2->o_get_skill_by_id(10670));
 		}
 		if (wParam == VK_NUMPAD7)
 		{

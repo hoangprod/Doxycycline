@@ -18,6 +18,22 @@ UINT_PTR Combat::get_local_unit()
 	return *(UINT_PTR*)((*(UINT_PTR*)Patterns.Addr_UnitClass) + Patterns.Offset_LocalUnit);
 }
 
+bool is_monster_name_already_in_list(std::vector<IActor*> list, const char * name)
+{
+	if (list.empty())
+		return false;
+	else
+	{
+		for (auto& element : list) {
+			if (strcmp(element->Entity->GetName(), name) == 0)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+}
+
 IActor* get_closest_actor_from_map(std::map<IActor*, float> viableActors)
 {
 	if (!viableActors.empty())
@@ -114,6 +130,21 @@ std::vector<IActor*> Combat::get_aggro_mob_list()
 	for (auto actor : actorList)
 	{
 		if (actor && actor->Entity && EntityHelper::isNpcMob(actor->Entity) && EntityHelper::isHostile(actor->Entity) && is_targeting_me(actor->unitID))
+		{
+			Aggro_Actors.push_back(actor);
+		}
+	}
+
+	return Aggro_Actors;
+}
+
+std::vector<IActor*> Combat::get_unique_mob_list()
+{
+	std::vector<IActor*> Aggro_Actors;
+	auto actorList = LocalPlayerFinder::GetActorList();
+	for (auto actor : actorList)
+	{
+		if (actor && actor->Entity && EntityHelper::isNpcMob(actor->Entity) && EntityHelper::isHostile(actor->Entity) && !is_monster_name_already_in_list(Aggro_Actors, actor->Entity->GetName()))
 		{
 			Aggro_Actors.push_back(actor);
 		}

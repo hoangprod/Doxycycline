@@ -2,6 +2,7 @@
 #include "LuaAPI.h"
 #include "Scan.h"
 #include "Helper.h"
+#include "GameClasses.h"
 #include "Menu.h"
 
 f_lua_gettop lua_gettop;

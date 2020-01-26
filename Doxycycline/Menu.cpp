@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "Imgui/examples/imgui_memory_editor.h"
-#include "Menu.h"
 #include "GameClasses.h"
 #include "Hacks.h"
 #include "LuaAPI.h"
 #include "Radar.h"
 #include "Combat.h"
 #include "Helper.h"
+#include "Menu.h"
 
 MemoryEditor mem_edit;
 Consolelogs console;
@@ -23,9 +23,10 @@ static const char* lua_items[] = { "Lua State 1", "Lua State 2", "Lua State 3" }
 static const char* current_lua_item = lua_items[0];
 
 packetCrypto packetinfo;
+Settings settings;
 
 bool b_displayLocalPlayerInfo = false;
-bool b_Console = true, b_MemoryEditor = false, b_PacketEditor = false, b_Radar = false, b_LuaMenu = true;
+bool b_Console = true, b_MemoryEditor = false, b_PacketEditor = false, b_Radar = false, b_LuaMenu = true, b_GrindMenu = true;
 
 void* LuaStateRun = 0;
 
@@ -56,6 +57,9 @@ void MenuRender()
 
 	if(b_Radar)
 		radar.Render();
+
+	if (b_GrindMenu)
+		Grinder::Display();
 
 }
 
@@ -109,6 +113,7 @@ void HackView::Display()
 
 	ImGui::Checkbox("Memory Editor", &b_MemoryEditor); ImGui::SameLine();
 	ImGui::Checkbox("Log Console", &b_Console); ImGui::SameLine();
+	ImGui::Checkbox("Grind Bot", &b_GrindMenu); ImGui::SameLine();
 	ImGui::Checkbox("Lua Executor", &b_LuaMenu); ImGui::SameLine();
 	ImGui::Checkbox("Radar", &b_Radar); ImGui::SameLine();
 	ImGui::Checkbox("Packet Editor", &b_PacketEditor);
@@ -209,7 +214,6 @@ void PacketEditor::Display()
 
 		if (ImGui::Button(ss.str().c_str()))
 		{
-			console.AddLog("replay 2");
 			this->Replay(PacketsArr, element);
 		}
 		ImGui::SameLine();
@@ -277,4 +281,225 @@ void PacketEditor::Push(UINT_PTR pBody)
 		memcpy(packet, (void*)pBody, pSize);
 		PacketsArr.push_back(packet);
 	}
+}
+
+
+namespace ImGui
+{
+	static auto vector_getter = [](void* vec, int idx, const char** out_text)
+	{
+		auto& vector = *static_cast<std::vector<std::string>*>(vec);
+		if (idx < 0 || idx >= static_cast<int>(vector.size())) { return false; }
+		*out_text = vector.at(idx).c_str();
+		return true;
+	};
+
+	bool Combo(const char* label, int* currIndex, std::vector<std::string>& values)
+	{
+		if (values.empty()) { return false; }
+		return Combo(label, currIndex, vector_getter,
+			static_cast<void*>(&values), values.size());
+	}
+
+	bool ListBox(const char* label, int* currIndex, std::vector<Vec3>& values)
+	{
+		if (values.empty()) { return false; }
+		std::vector<std::string> strValue;
+		for (std::vector<Vec3>::iterator it = values.begin(); it != values.end(); ++it) {
+			strValue.push_back(it->Str());
+		}
+		if (strValue.empty()) { return false; }
+		return ListBox(label, currIndex, vector_getter,
+			static_cast<void*>(&strValue), strValue.size());
+	}
+
+	bool ListBox(const char* label, int* currIndex, std::vector<IActor*>& values)
+	{
+		if (values.empty()) { return false; }
+		std::vector<std::string> strValue;
+		for (auto& element : values) {
+			strValue.push_back(std::string(element->Entity->GetName()));
+		}
+		if (strValue.empty()) { return false; }
+		return ListBox(label, currIndex, vector_getter,
+			static_cast<void*>(&strValue), strValue.size());
+	}
+
+	bool ListBox(const char* label, int* currIndex, std::vector<Vertexes>& values)
+	{
+		if (values.empty()) { return false; }
+		std::vector<std::string> strValue;
+		for (std::vector<Vertexes>::iterator it = values.begin(); it != values.end(); ++it) {
+			strValue.push_back(it->getString());
+		}
+		if (strValue.empty()) { return false; }
+		return ListBox(label, currIndex, vector_getter,
+			static_cast<void*>(&strValue), strValue.size());
+	}
+
+	bool ListBox(const char* label, int* currIndex, std::vector<std::string>& values)
+	{
+		if (values.empty()) { return false; }
+		return ListBox(label, currIndex, vector_getter,
+			static_cast<void*>(&values), values.size());
+	}
+	bool ListBox(const char* label, int* currIndex, std::vector<std::pair<std::string, Vertexes>>& values)
+	{
+		if (values.empty()) { return false; }
+		std::vector<std::string> strValue;
+		for (std::vector<std::pair<std::string, Vertexes>>::iterator it = values.begin(); it != values.end(); ++it) {
+			strValue.push_back(it->second.getString() + "    @ " + it->first);
+		}
+		if (strValue.empty()) { return false; }
+		return ListBox(label, currIndex, vector_getter,
+			static_cast<void*>(&strValue), strValue.size());
+	}
+
+}
+
+bool is_empty(std::ifstream& pFile)
+{
+	return pFile.peek() == std::ifstream::traits_type::eof();
+}
+
+
+void Grinder::Display()
+{
+	ImGui::Begin("GrindBot");
+
+	// Toggles
+
+	ImGui::Checkbox("Grinding On", &settings.grinding_bot_on); ImGui::SameLine();
+	ImGui::Checkbox("Loot items", &settings.loot_items); ImGui::SameLine();
+	ImGui::Checkbox("Player detection", &settings.hide_from_players); ImGui::SameLine();
+	ImGui::Checkbox("Teleport2Mob", &settings.teleport_to_next_mob);
+
+	ImGui::Checkbox("Deposit Items", &settings.deposit_items); ImGui::SameLine();
+	ImGui::Checkbox("Send to Mule", &settings.send_to_mule); ImGui::SameLine();
+	ImGui::Checkbox("Rotate path", &settings.go_back_to_beginning); ImGui::SameLine();
+	ImGui::Checkbox("Resurrect", &settings.resurrect_after_death);
+
+	// Sliders
+	ImGui::SliderFloat("Wander Range", &settings.max_wander_range, 10.0f, 300.0f);
+	ImGui::SliderFloat("Max Target Height", &settings.max_wander_range, 10.0f, 200.0f);
+	ImGui::SliderFloat("Min. Health %", &settings.max_wander_range, 0.0f, 200.0f);
+	ImGui::SliderFloat("Min. Mana %", &settings.min_mana_percentage, 0.0f, 100.0f);
+
+	ImGui::Separator();
+
+	static const char* listbox_combo[] = { "Wander Path", "Whitelist Mobs", "Blacklist Mobs", "Attack Spells", "Buff Spells", "Cleanse Spells", "Recv HP Spells", "Recv MP Spells", "Recv HP Items", "Recv MP Items", "Items to Open" };
+	static int listBox_Selection = -1;
+	ImGui::Combo("listboxes", &listBox_Selection, listbox_combo, IM_ARRAYSIZE(listbox_combo));
+
+	if (listBox_Selection == 0)
+	{
+		Vec3 CurrentPos = LocalPlayerFinder::GetClientEntity()->GetWorldPos();
+
+		ImGui::Text("Current Position: %s", CurrentPos.Str());
+
+		ImGui::ListBox("Wander Points", &settings.current_wander_path_selection, settings.wander_path_list);
+
+		if (ImGui::Button("Add Wander Point")) {
+			if (LocalPlayerFinder::GetClientEntity())
+			{
+				settings.wander_path_list.push_back(CurrentPos);
+				++settings.current_wander_path_selection;
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Remove Point"))
+		{
+			if (!settings.wander_path_list.empty() && settings.current_wander_path_selection <= settings.wander_path_list.size() + 1)
+				settings.wander_path_list.erase(settings.wander_path_list.begin() + settings.current_wander_path_selection);
+			--settings.current_wander_path_selection;
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Clear List"))
+		{
+			settings.wander_path_list.clear();
+		}
+	}
+	if (listBox_Selection == 1)
+	{
+		static int current_surround_mob_selection = -1;
+		std::vector<IActor*> surroundMobs = Combat::get_unique_mob_list();
+		ImGui::ListBox("Mobs in surrounding", &current_surround_mob_selection, surroundMobs);
+
+
+		if (ImGui::Button("Add To Whitelist")) {
+			if (LocalPlayerFinder::GetClientEntity())
+			{
+				settings.whitelist_monsters.push_back(surroundMobs[current_surround_mob_selection]->Entity->GetName());
+				++settings.current_whitelist_mob_selection;
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Remove from Whitelist"))
+		{
+			if (!settings.whitelist_monsters.empty() && settings.current_whitelist_mob_selection <= settings.whitelist_monsters.size() + 1)
+				settings.whitelist_monsters.erase(settings.whitelist_monsters.begin() + settings.current_whitelist_mob_selection);
+			--settings.current_whitelist_mob_selection;
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Clear List"))
+		{
+			settings.whitelist_monsters.clear();
+		}
+
+		ImGui::ListBox("Whitelist Mobs", &settings.current_whitelist_mob_selection, settings.whitelist_monsters);
+	}
+	if (listBox_Selection == 2)
+	{
+		static int current_surround_mob_selection = -1;
+		std::vector<IActor*> surroundMobs = Combat::get_unique_mob_list();
+		ImGui::ListBox("Mobs in surrounding", &current_surround_mob_selection, surroundMobs);
+
+
+		if (ImGui::Button("Add To Blacklist")) {
+			if (LocalPlayerFinder::GetClientEntity())
+			{
+				settings.blacklist_monsters.push_back(surroundMobs[current_surround_mob_selection]->Entity->GetName());
+				++settings.current_blacklist_mob_selection;
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Remove From Blacklist"))
+		{
+			if (!settings.blacklist_monsters.empty() && settings.current_blacklist_mob_selection <= settings.blacklist_monsters.size() + 1)
+				settings.blacklist_monsters.erase(settings.blacklist_monsters.begin() + settings.current_blacklist_mob_selection);
+			--settings.current_blacklist_mob_selection;
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Clear List#1"))
+		{
+			settings.blacklist_monsters.clear();
+		}
+
+		ImGui::ListBox("Whitelist Mobs", &settings.current_blacklist_mob_selection, settings.blacklist_monsters);
+	}
+
+	ImGui::Separator();
+
+	if (ImGui::Button("Save settings"))
+	{
+		settings.wander_path_list.clear();
+	}
+
+	ImGui::SameLine();
+
+	if (ImGui::Button("Load Settings"))
+	{
+		settings.wander_path_list.clear();
+	}
+
+	ImGui::SameLine();
+
+	ImGui::Text("Grind Status: %s", "Idling...");
+	ImGui::End();
 }
