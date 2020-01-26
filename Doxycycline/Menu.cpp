@@ -32,6 +32,7 @@ void* LuaStateRun = 0;
 
 typedef bool(__fastcall* f_EncryptPacket)(__int64* buffer, unsigned __int8 isEncrypted, __int64 key, int* cleartextbuffer);
 
+extern bool g_HijackCtrl;
 extern f_EncryptPacket o_EncryptPacket;
 
 void PacketEditor::Replay(std::vector<char*> pVector, BYTE Element)
@@ -330,7 +331,7 @@ namespace ImGui
 		if (values.empty()) { return false; }
 		std::vector<std::string> strValue;
 		for (auto& element : values) {
-			std::string str = "Id: " + std::to_string(element->SkillId) + std::string(" Name: ") + std::string(element->Name) + std::string(" range: ") /*+ std::to_string(element->maxRange);*/;
+			std::string str = std::to_string(element->SkillId) + std::string(" Name: ") + std::string(element->Name) + std::string(" range: ") /*+ std::to_string(element->maxRange);*/;
 			strValue.push_back(str);
 		}
 		if (strValue.empty()) { return false; }
@@ -510,10 +511,13 @@ void Grinder::Display()
 	}
 	if (listBox_Selection == 3)
 	{
-		int current_search_skill = -1;
+		static int current_search_skill = -1;
 		static char str0[256];
 		static std::vector<ISkill*> searchResult;
-		ImGui::InputText("##SpellName", str0, IM_ARRAYSIZE(str0)); ImGui::SameLine();
+		ImGui::InputText("##SpellName", str0, IM_ARRAYSIZE(str0));
+		
+		ImGui::SameLine();
+
 		if (ImGui::Button("Search Spell")) {
 			searchResult = Skill::get_skill_id_by_name(str0);
 		}

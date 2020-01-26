@@ -47,7 +47,6 @@ Detour64 detours;
 Vec3 pathPosition_DoNotModify = {4500.0f, 4500.0f, 125.0f};
 
 bool g_ShowMenu = false;
-bool g_IsTyping = false;
 bool g_HijackCtrl = false;
 
 std::vector<int32_t> idList;
@@ -121,6 +120,11 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	ScreenToClient(window, &mPos);
 	ImGui::GetIO().MousePos.x = mPos.x;
 	ImGui::GetIO().MousePos.y = mPos.y;
+
+	if (g_HijackCtrl && g_ShowMenu)
+	{
+		SetCursor((HCURSOR)LoadImageA(NULL, MAKEINTRESOURCEA(32515), IMAGE_CURSOR, 0, 0, LR_SHARED));
+	}
 
 	if (uMsg == WM_KEYUP)
 	{
