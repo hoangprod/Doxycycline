@@ -395,7 +395,7 @@ void Grinder::Display()
 	{
 		Vec3 CurrentPos = LocalPlayerFinder::GetClientEntity()->GetWorldPos();
 
-		ImGui::Text("Current Position: %s", CurrentPos.Str());
+		ImGui::Text("Current Position: %s", CurrentPos.Str().data());
 
 		ImGui::ListBox("Wander Points", &settings.current_wander_path_selection, settings.wander_path_list);
 
@@ -410,9 +410,11 @@ void Grinder::Display()
 		ImGui::SameLine();
 		if (ImGui::Button("Remove Point"))
 		{
-			if (!settings.wander_path_list.empty() && settings.current_wander_path_selection <= settings.wander_path_list.size() + 1)
+			if (!settings.wander_path_list.empty() && settings.current_wander_path_selection >= 0 && settings.current_wander_path_selection <= settings.wander_path_list.size() + 1)
+			{
 				settings.wander_path_list.erase(settings.wander_path_list.begin() + settings.current_wander_path_selection);
-			--settings.current_wander_path_selection;
+				--settings.current_wander_path_selection;
+			}
 		}
 
 		ImGui::SameLine();
@@ -439,9 +441,11 @@ void Grinder::Display()
 		ImGui::SameLine();
 		if (ImGui::Button("Remove from Whitelist"))
 		{
-			if (!settings.whitelist_monsters.empty() && settings.current_whitelist_mob_selection <= settings.whitelist_monsters.size() + 1)
+			if (!settings.whitelist_monsters.empty() && settings.current_whitelist_mob_selection >= 0 && settings.current_whitelist_mob_selection <= settings.whitelist_monsters.size() + 1)
+			{
 				settings.whitelist_monsters.erase(settings.whitelist_monsters.begin() + settings.current_whitelist_mob_selection);
-			--settings.current_whitelist_mob_selection;
+				--settings.current_whitelist_mob_selection;
+			}
 		}
 
 		ImGui::SameLine();
@@ -470,9 +474,11 @@ void Grinder::Display()
 		ImGui::SameLine();
 		if (ImGui::Button("Remove From Blacklist"))
 		{
-			if (!settings.blacklist_monsters.empty() && settings.current_blacklist_mob_selection <= settings.blacklist_monsters.size() + 1)
+			if (!settings.blacklist_monsters.empty() && settings.current_blacklist_mob_selection >= 0 && settings.current_blacklist_mob_selection <= settings.blacklist_monsters.size() + 1)
+			{
 				settings.blacklist_monsters.erase(settings.blacklist_monsters.begin() + settings.current_blacklist_mob_selection);
-			--settings.current_blacklist_mob_selection;
+				--settings.current_blacklist_mob_selection;
+			}
 		}
 
 		ImGui::SameLine();

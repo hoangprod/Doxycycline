@@ -28,6 +28,9 @@
     <Filter Include="Source Files\Combat\Headers">
       <UniqueIdentifier>{b0f73f4e-c0cd-44e0-a30d-a3a10e1b446b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Library">
+      <UniqueIdentifier>{0b8b3fbb-afb2-4f0a-ac4c-d35d7d607316}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -86,6 +89,9 @@
     </ClCompile>
     <ClCompile Include="GameClasses.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SkillLib.cpp">
+      <Filter>Source Files\Library</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +163,9 @@
     </ClInclude>
     <ClInclude Include="Game.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SkillLib.h">
+      <Filter>Source Files\Library</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

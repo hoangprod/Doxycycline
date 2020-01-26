@@ -133,6 +133,7 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		if (wParam == VK_NUMPAD6)
 		{
 			printf("%p\n", x2->o_get_skill_by_id(10670));
+			printf("%p\n", x2->o_get_skill_by_id(22848));
 		}
 		if (wParam == VK_NUMPAD7)
 		{
