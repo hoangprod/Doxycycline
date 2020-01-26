@@ -47,11 +47,10 @@ Detour64 detours;
 Vec3 pathPosition_DoNotModify = {4500.0f, 4500.0f, 125.0f};
 
 bool g_ShowMenu = false;
+bool g_IsTyping = false;
 bool g_HijackCtrl = false;
 
 std::vector<int32_t> idList;
-
-X2* x2;
 
 HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** ppDevice, ID3D11DeviceContext** ppContext)
 {
@@ -132,8 +131,9 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		if (wParam == VK_NUMPAD6)
 		{
-			printf("%p\n", x2->o_get_skill_by_id(10670));
-			printf("%p\n", x2->o_get_skill_by_id(22848));
+			auto test = X2::W_get_skill_by_id(22848);
+
+			printf("%s %d\n", test->Name, test->cooldown);
 		}
 		if (wParam == VK_NUMPAD7)
 		{
@@ -221,7 +221,8 @@ DWORD __stdcall InitializeHooks()
 
 	LocateLuaFunctions();
 
-	x2 = new X2;
+	X2::InitializeX2();
+
 
 	o_EncryptPacket = (f_EncryptPacket)Patterns.Func_EncryptPacket;
 	o_EncryptPacket = (f_EncryptPacket)detours.Hook(o_EncryptPacket, h_EncryptPacket, 14);
@@ -234,8 +235,6 @@ DWORD __stdcall InitializeHooks()
 	DWORD Func_Delta = Patterns.Func_SendEncryptPacket - (UINT_PTR)o_Encrypt_Send;
 	*(DWORD*)((UINT_PTR)o_Encrypt_Send + 8) = (Func_Offset + Func_Delta);
 
-	printf("new addy %p\n", o_Encrypt_Send);
-
 	DWORD_PTR* p3DEngineVtable = *(DWORD_PTR**)SSystemGlobalEnvironment::GetInstance()->p3DEngine;
 	vGetWaterLevel.vmt = (void**)p3DEngineVtable;
 	o_GetWaterLevel = (f_GetWaterLevel)vGetWaterLevel.Hook(71, h_GetWaterLevel);
@@ -243,6 +242,7 @@ DWORD __stdcall InitializeHooks()
 	DWORD_PTR* pScriptSysVtable = *(DWORD_PTR**)SSystemGlobalEnvironment::GetInstance()->pScriptSysOne;
 	vEndCall.vmt = (void**)pScriptSysVtable;
 	o_EndCall = (f_EndCall)vEndCall.Hook(17, h_EndCall);
+
 
 	return NULL;
 }

@@ -4,8 +4,8 @@
 #include "Hacks.h"
 #include "LuaAPI.h"
 #include "Radar.h"
-#include "Combat.h"
 #include "Helper.h"
+#include "Combat.h"
 #include "Menu.h"
 
 MemoryEditor mem_edit;
@@ -325,6 +325,19 @@ namespace ImGui
 			static_cast<void*>(&strValue), strValue.size());
 	}
 
+	bool ListBox(const char* label, int* currIndex, std::vector<ISkill*>& values)
+	{
+		if (values.empty()) { return false; }
+		std::vector<std::string> strValue;
+		for (auto& element : values) {
+			std::string str = "Id: " + std::to_string(element->SkillId) + std::string(" Name: ") + std::string(element->Name) + std::string(" range: ") /*+ std::to_string(element->maxRange);*/;
+			strValue.push_back(str);
+		}
+		if (strValue.empty()) { return false; }
+		return ListBox(label, currIndex, vector_getter,
+			static_cast<void*>(&strValue), strValue.size());
+	}
+
 	bool ListBox(const char* label, int* currIndex, std::vector<Vertexes>& values)
 	{
 		if (values.empty()) { return false; }
@@ -389,7 +402,7 @@ void Grinder::Display()
 
 	static const char* listbox_combo[] = { "Wander Path", "Whitelist Mobs", "Blacklist Mobs", "Attack Spells", "Buff Spells", "Cleanse Spells", "Recv HP Spells", "Recv MP Spells", "Recv HP Items", "Recv MP Items", "Items to Open" };
 	static int listBox_Selection = -1;
-	ImGui::Combo("listboxes", &listBox_Selection, listbox_combo, IM_ARRAYSIZE(listbox_combo));
+	ImGui::Combo("Configuration Menus", &listBox_Selection, listbox_combo, IM_ARRAYSIZE(listbox_combo));
 
 	if (listBox_Selection == 0)
 	{
@@ -431,10 +444,13 @@ void Grinder::Display()
 
 
 		if (ImGui::Button("Add To Whitelist")) {
-			if (LocalPlayerFinder::GetClientEntity())
+			if (!surroundMobs.empty() && current_surround_mob_selection >= 0 && current_surround_mob_selection <= surroundMobs.size() + 1)
 			{
-				settings.whitelist_monsters.push_back(surroundMobs[current_surround_mob_selection]->Entity->GetName());
-				++settings.current_whitelist_mob_selection;
+				if (LocalPlayerFinder::GetClientEntity())
+				{
+					settings.whitelist_monsters.push_back(surroundMobs[current_surround_mob_selection]->Entity->GetName());
+					++settings.current_whitelist_mob_selection;
+				}
 			}
 		}
 
@@ -464,10 +480,13 @@ void Grinder::Display()
 
 
 		if (ImGui::Button("Add To Blacklist")) {
-			if (LocalPlayerFinder::GetClientEntity())
+			if (!surroundMobs.empty() && current_surround_mob_selection >= 0 && current_surround_mob_selection <= surroundMobs.size() + 1)
 			{
-				settings.blacklist_monsters.push_back(surroundMobs[current_surround_mob_selection]->Entity->GetName());
-				++settings.current_blacklist_mob_selection;
+				if (LocalPlayerFinder::GetClientEntity())
+				{
+					settings.blacklist_monsters.push_back(surroundMobs[current_surround_mob_selection]->Entity->GetName());
+					++settings.current_blacklist_mob_selection;
+				}
 			}
 		}
 
@@ -489,7 +508,50 @@ void Grinder::Display()
 
 		ImGui::ListBox("Whitelist Mobs", &settings.current_blacklist_mob_selection, settings.blacklist_monsters);
 	}
+	if (listBox_Selection == 3)
+	{
+		int current_search_skill = -1;
+		static char str0[256];
+		static std::vector<ISkill*> searchResult;
+		ImGui::InputText("##SpellName", str0, IM_ARRAYSIZE(str0)); ImGui::SameLine();
+		if (ImGui::Button("Search Spell")) {
+			searchResult = Skill::get_skill_id_by_name(str0);
+		}
 
+		if (ImGui::ListBox("Search Result", &current_search_skill, searchResult))
+		{
+
+		}
+
+		if (ImGui::Button("Add To Attack Spell List")) {
+			if (!searchResult.empty() && current_search_skill >= 0 && current_search_skill <= searchResult.size() + 1)
+			{	
+				if (LocalPlayerFinder::GetClientEntity())
+				{
+					settings.attack_spell_list.push_back(searchResult[current_search_skill]);
+					++settings.current_attack_spell_selection;
+				}
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Remove From Attack Spell List"))
+		{
+			if (!settings.attack_spell_list.empty() && settings.current_attack_spell_selection >= 0 && settings.current_attack_spell_selection <= settings.attack_spell_list.size() + 1)
+			{
+				settings.attack_spell_list.erase(settings.attack_spell_list.begin() + settings.current_attack_spell_selection);
+				--settings.current_attack_spell_selection;
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Clear List#2"))
+		{
+			settings.attack_spell_list.clear();
+		}
+
+		ImGui::ListBox("Whitelist Mobs", &settings.current_attack_spell_selection, settings.attack_spell_list);
+	}
 	ImGui::Separator();
 
 	if (ImGui::Button("Save settings"))

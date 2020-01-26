@@ -90,9 +90,6 @@
     <ClCompile Include="GameClasses.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SkillLib.cpp">
-      <Filter>Source Files\Library</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Imgui\imconfig.h">
@@ -163,9 +160,6 @@
     </ClInclude>
     <ClInclude Include="Game.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SkillLib.h">
-      <Filter>Source Files\Library</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

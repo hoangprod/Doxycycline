@@ -392,20 +392,25 @@ public:
 	std::vector<std::string> blacklist_monsters;
 	std::vector<std::string> open_item_list;
 
-	std::vector<unsigned int> attack_spell_list;
-	std::vector<unsigned int> buff_spell_list;
-	std::vector<unsigned int> cleanse_spell_list;
+	std::vector<ISkill*> attack_spell_list;
+	std::vector<ISkill*> buff_spell_list;
+	std::vector<ISkill*> cleanse_spell_list;
+	std::vector<ISkill*> recover_hp_spell_list;
+	std::vector<ISkill*> recover_mp_spell_list;
+	std::vector<uint32_t> deposit_item_id_list;
+	std::vector<uint32_t> recover_hp_item_list;
+	std::vector<uint32_t> recover_mp_item_list;
 
-	std::vector<unsigned int> deposit_item_id_list;
-
-	std::vector<unsigned int> recover_hp_spell_list;
-	std::vector<unsigned int> recover_mp_spell_list;
-	std::vector<unsigned int> recover_hp_item_list;
-	std::vector<unsigned int> recover_mp_item_list;
-
-	int current_wander_path_selection;
-	int current_whitelist_mob_selection;
-	int current_blacklist_mob_selection;
+	int current_wander_path_selection = -1;
+	int current_whitelist_mob_selection = -1;
+	int current_blacklist_mob_selection = -1;
+	int current_attack_spell_selection = -1;
+	int current_buff_spell_selection = -1;
+	int current_cleanse_spell_selection = -1;
+	int current_hp_heal_spell_selection = -1;
+	int current_mp_heal_spell_selection = -1;
+	int current_hp_item_selection = -1;
+	int current_mp_item_selection = -1;
 
 	int max_open_pack_lp;
 

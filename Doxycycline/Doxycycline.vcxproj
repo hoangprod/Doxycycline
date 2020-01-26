@@ -182,7 +182,6 @@
     <ClCompile Include="Patterns.cpp" />
     <ClCompile Include="Radar.cpp" />
     <ClCompile Include="Scan.cpp" />
-    <ClCompile Include="SkillLib.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Combat.h" />
@@ -207,7 +206,6 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="Radar.h" />
     <ClInclude Include="Scan.h" />
-    <ClInclude Include="SkillLib.h" />
     <ClInclude Include="vmt.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
