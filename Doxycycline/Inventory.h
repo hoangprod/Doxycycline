@@ -26,3 +26,15 @@ public:
 	uint32_t Stack; //0x0010
 	char pad_0014[154]; //0x0014
 }; //Size: 0x00AE
+
+
+class Inventory {
+	static DWORD find_item_slot_by_name(char* itemName);
+
+	static BOOL use_item(DWORD slotId);
+	static BOOL move_item(DWORD from_slot, DWORD to_slot);
+	static BOOL move_to_bank(DWORD slotId);
+	static BOOL withdraw_from_bank(DWORD slotId);
+	static BOOL sell_to_npc(DWORD npcId, DWORD slot);
+	static BOOL buy_from_npc(DWORD npcId, DWORD itemId);
+};

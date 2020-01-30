@@ -178,6 +178,7 @@
     <ClCompile Include="Imgui\imgui_draw.cpp" />
     <ClCompile Include="Imgui\imgui_widgets.cpp" />
     <ClCompile Include="Inventory.cpp" />
+    <ClCompile Include="Skills.cpp" />
     <ClCompile Include="LuaAPI.cpp" />
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Patterns.cpp" />
@@ -202,6 +203,7 @@
     <ClInclude Include="Imgui\imstb_textedit.h" />
     <ClInclude Include="Imgui\imstb_truetype.h" />
     <ClInclude Include="Inventory.h" />
+    <ClInclude Include="Skills.h" />
     <ClInclude Include="LuaAPI.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="Patterns.h" />

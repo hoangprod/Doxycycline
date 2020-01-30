@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Helper.h"
 #include "GameClasses.h"
+#include "Skills.h"
 #include "Game.h"
 extern Addr Patterns;
 

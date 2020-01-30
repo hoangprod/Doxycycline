@@ -5,6 +5,7 @@
 #include "LuaAPI.h"
 #include "Radar.h"
 #include "Helper.h"
+#include "Skills.h"
 #include "Combat.h"
 #include "Menu.h"
 

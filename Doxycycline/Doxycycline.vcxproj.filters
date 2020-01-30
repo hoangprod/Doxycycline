@@ -31,6 +31,9 @@
     <Filter Include="Source Files\Library">
       <UniqueIdentifier>{0b8b3fbb-afb2-4f0a-ac4c-d35d7d607316}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Combat\Source">
+      <UniqueIdentifier>{1ba43fc0-d89f-41b8-b492-972fd768f851}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -75,12 +78,6 @@
     <ClCompile Include="Radar.cpp">
       <Filter>Source Files\Features</Filter>
     </ClCompile>
-    <ClCompile Include="Combat.cpp">
-      <Filter>Source Files\Combat</Filter>
-    </ClCompile>
-    <ClCompile Include="Grinder.cpp">
-      <Filter>Source Files\Combat</Filter>
-    </ClCompile>
     <ClCompile Include="Patterns.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -90,8 +87,17 @@
     <ClCompile Include="GameClasses.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Combat.cpp">
+      <Filter>Source Files\Combat\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Grinder.cpp">
+      <Filter>Source Files\Combat\Source</Filter>
+    </ClCompile>
     <ClCompile Include="Inventory.cpp">
-      <Filter>Source Files\Combat</Filter>
+      <Filter>Source Files\Combat\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Skills.cpp">
+      <Filter>Source Files\Combat\Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -165,6 +171,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Inventory.h">
+      <Filter>Source Files\Combat\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Skills.h">
       <Filter>Source Files\Combat\Headers</Filter>
     </ClInclude>
   </ItemGroup>
