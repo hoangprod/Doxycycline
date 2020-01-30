@@ -4,14 +4,14 @@
 #include "Game.h"
 #include "Combat.h"
 
-std::vector<ISkill*> skill_list;
 extern Addr Patterns;
+
+std::vector<ISkill*> skill_list;
 
 BOOL Stats::has_buff(uint32_t buffID)
 {
 	return X2::W_AI_CheckBuff(NULL, LocalPlayerFinder::GetClientActor()->unitID, buffID);
 }
-
 
 UINT_PTR Combat::get_local_unit()
 {
@@ -403,4 +403,54 @@ int32_t Skill::get_skill_cooldown(uint32_t skillId)
 	int32_t unk2 = 0;
 	X2::W_get_skill_cooldown(skill, &cooldown, &unk2);
 	return cooldown;
-}	
+}
+
+int World::GetCurrentStage()
+{
+	return *(int*)Patterns.Addr_GameStage;
+}
+
+int World::GetCurrentTransition()
+{
+	return *(int*)Patterns.Addr_TransitionStage;
+}
+
+const char* World::GetCurrentStageStr()
+{
+
+	if (GetCurrentTransition() != 0)
+		return "Screen Transitioning";
+
+	GameStage stage = (GameStage)GetCurrentStage();
+
+	switch (stage)
+	{
+	case Not_Loaded:
+		return "Not Loaded";
+		break;
+	case Splash_Logo:
+		return "Splash Logo";
+		break;
+	case PreServer_Select:
+		return "Pre-Server Selection";
+		break;
+	case Server_Select:
+		return "Server Selection";
+		break;
+	case Character_Select:
+		return "Character Selection";
+		break;
+	case Character_Creation:
+		return "Character Creation";
+		break;
+	case SetCustomize_CharacterPos:
+		return "SetCustomizeCharacterPos";
+		break;
+	case In_Game:
+		return "In Game";
+		break;
+	default:
+		return "Unknown";
+		break;
+	}
+}

@@ -31,13 +31,15 @@ bool b_Console = true, b_MemoryEditor = false, b_PacketEditor = false, b_Radar =
 void* LuaStateRun = 0;
 
 typedef bool(__fastcall* f_EncryptPacket)(__int64* buffer, unsigned __int8 isEncrypted, __int64 key, int* cleartextbuffer);
+typedef UINT_PTR(__fastcall* f_EncryptSendPacket)(UINT_PTR localPlayer, UINT_PTR packetBody);
 
 extern bool g_HijackCtrl;
 extern f_EncryptPacket o_EncryptPacket;
-
+extern f_EncryptSendPacket o_Encrypt_Send;
+extern Addr Patterns;
 void PacketEditor::Replay(std::vector<char*> pVector, BYTE Element)
 {
-	o_EncryptPacket(packetinfo.sUnknown, 1, (__int64)pVector[Element], packetinfo.sClear);
+	o_Encrypt_Send( *(UINT_PTR*)Patterns.Addr_UnitClass,(__int64)pVector[Element]);
 }
 
 void MenuRender()
@@ -331,7 +333,7 @@ namespace ImGui
 		if (values.empty()) { return false; }
 		std::vector<std::string> strValue;
 		for (auto& element : values) {
-			std::string str = std::to_string(element->SkillId) + std::string(" Name: ") + std::string(element->Name) + std::string(" range: ") /*+ std::to_string(element->maxRange);*/;
+			std::string str = std::to_string(element->SkillId) + std::string(" Name: [") + std::string(element->Name) + std::string("] range: ") /*+ std::to_string(element->maxRange);*/;
 			strValue.push_back(str);
 		}
 		if (strValue.empty()) { return false; }
@@ -401,7 +403,7 @@ void Grinder::Display()
 
 	ImGui::Separator();
 
-	static const char* listbox_combo[] = { "Wander Path", "Whitelist Mobs", "Blacklist Mobs", "Attack Spells", "Buff Spells", "Cleanse Spells", "Recv HP Spells", "Recv MP Spells", "Recv HP Items", "Recv MP Items", "Items to Open" };
+	static const char* listbox_combo[] = { "Wander Path", "Whitelist Mobs", "Blacklist Mobs", "Attack Spells", "Buff Spells", "Cleanse Spells", "Recover HP Spells", "Recover MP Spells", "Recover HP Items", "Recover MP Items", "Items to Open" };
 	static int listBox_Selection = -1;
 	ImGui::Combo("Configuration Menus", &listBox_Selection, listbox_combo, IM_ARRAYSIZE(listbox_combo));
 
@@ -554,24 +556,214 @@ void Grinder::Display()
 			settings.attack_spell_list.clear();
 		}
 
-		ImGui::ListBox("Whitelist Mobs", &settings.current_attack_spell_selection, settings.attack_spell_list);
+		ImGui::ListBox("Attack Spell Order", &settings.current_attack_spell_selection, settings.attack_spell_list);
 	}
+	if (listBox_Selection == 4)
+	{
+		static int current_search_skill = -1;
+		static char str0[256];
+		static std::vector<ISkill*> searchResult;
+		ImGui::InputText("##SpellName", str0, IM_ARRAYSIZE(str0));
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Search Spell")) {
+			searchResult = Skill::get_skill_id_by_name(str0);
+		}
+
+		if (ImGui::ListBox("Search Result", &current_search_skill, searchResult))
+		{
+
+		}
+
+		if (ImGui::Button("Add To Buff Spell List")) {
+			if (!searchResult.empty() && current_search_skill >= 0 && current_search_skill <= searchResult.size() + 1)
+			{
+				if (LocalPlayerFinder::GetClientEntity())
+				{
+					settings.buff_spell_list.push_back(searchResult[current_search_skill]);
+					++settings.current_buff_spell_selection;
+				}
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Remove From Buff Spell List"))
+		{
+			if (!settings.buff_spell_list.empty() && settings.current_buff_spell_selection >= 0 && settings.current_buff_spell_selection <= settings.buff_spell_list.size() + 1)
+			{
+				settings.buff_spell_list.erase(settings.buff_spell_list.begin() + settings.current_buff_spell_selection);
+				--settings.current_buff_spell_selection;
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Clear List#3"))
+		{
+			settings.buff_spell_list.clear();
+		}
+
+		ImGui::ListBox("Buff Spells Priority", &settings.current_buff_spell_selection, settings.buff_spell_list);
+	}
+	if (listBox_Selection == 5)
+	{
+		static int current_search_skill = -1;
+		static char str0[256];
+		static std::vector<ISkill*> searchResult;
+		ImGui::InputText("##SpellName", str0, IM_ARRAYSIZE(str0));
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Search Spell")) {
+			searchResult = Skill::get_skill_id_by_name(str0);
+		}
+
+		if (ImGui::ListBox("Search Result", &current_search_skill, searchResult))
+		{
+
+		}
+
+		if (ImGui::Button("Add To Cleanse Spell List")) {
+			if (!searchResult.empty() && current_search_skill >= 0 && current_search_skill <= searchResult.size() + 1)
+			{
+				if (LocalPlayerFinder::GetClientEntity())
+				{
+					settings.cleanse_spell_list.push_back(searchResult[current_search_skill]);
+					++settings.current_cleanse_spell_selection;
+				}
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Remove From Cleanse Spell List"))
+		{
+			if (!settings.cleanse_spell_list.empty() && settings.current_cleanse_spell_selection >= 0 && settings.current_cleanse_spell_selection <= settings.cleanse_spell_list.size() + 1)
+			{
+				settings.cleanse_spell_list.erase(settings.cleanse_spell_list.begin() + settings.current_cleanse_spell_selection);
+				--settings.current_cleanse_spell_selection;
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Clear List#4"))
+		{
+			settings.cleanse_spell_list.clear();
+		}
+
+		ImGui::ListBox("Cleanse Spells Priority", &settings.current_cleanse_spell_selection, settings.cleanse_spell_list);
+	}
+	if (listBox_Selection == 6)
+	{
+		static int current_search_skill = -1;
+		static char str0[256];
+		static std::vector<ISkill*> searchResult;
+		ImGui::InputText("##SpellName", str0, IM_ARRAYSIZE(str0));
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Search Spell")) {
+			searchResult = Skill::get_skill_id_by_name(str0);
+		}
+
+		if (ImGui::ListBox("Search Result", &current_search_skill, searchResult))
+		{
+
+		}
+
+		if (ImGui::Button("Add To Heal Spell List")) {
+			if (!searchResult.empty() && current_search_skill >= 0 && current_search_skill <= searchResult.size() + 1)
+			{
+				if (LocalPlayerFinder::GetClientEntity())
+				{
+					settings.recover_hp_spell_list.push_back(searchResult[current_search_skill]);
+					++settings.current_hp_heal_spell_selection;
+				}
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Remove From Heal Spell List"))
+		{
+			if (!settings.recover_hp_spell_list.empty() && settings.current_hp_heal_spell_selection >= 0 && settings.current_hp_heal_spell_selection <= settings.recover_hp_spell_list.size() + 1)
+			{
+				settings.recover_hp_spell_list.erase(settings.recover_hp_spell_list.begin() + settings.current_hp_heal_spell_selection);
+				--settings.current_hp_heal_spell_selection;
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Clear List#4"))
+		{
+			settings.recover_hp_spell_list.clear();
+		}
+
+		ImGui::ListBox("Heal Spells Priority", &settings.current_hp_heal_spell_selection, settings.recover_hp_spell_list);
+	}
+	if (listBox_Selection == 7)
+	{
+		static int current_search_skill = -1;
+		static char str0[256];
+		static std::vector<ISkill*> searchResult;
+		ImGui::InputText("##SpellName", str0, IM_ARRAYSIZE(str0));
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Search Spell")) {
+			searchResult = Skill::get_skill_id_by_name(str0);
+		}
+
+		if (ImGui::ListBox("Search Result", &current_search_skill, searchResult))
+		{
+
+		}
+
+		if (ImGui::Button("Add To Recover MP Spell List")) {
+			if (!searchResult.empty() && current_search_skill >= 0 && current_search_skill <= searchResult.size() + 1)
+			{
+				if (LocalPlayerFinder::GetClientEntity())
+				{
+					settings.recover_mp_spell_list.push_back(searchResult[current_search_skill]);
+					++settings.current_mp_heal_spell_selection;
+				}
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Remove From Recover MP Spell List"))
+		{
+			if (!settings.recover_mp_spell_list.empty() && settings.current_mp_heal_spell_selection >= 0 && settings.current_mp_heal_spell_selection <= settings.recover_mp_spell_list.size() + 1)
+			{
+				settings.recover_mp_spell_list.erase(settings.recover_mp_spell_list.begin() + settings.current_mp_heal_spell_selection);
+				--settings.current_mp_heal_spell_selection;
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Clear List#4"))
+		{
+			settings.recover_mp_spell_list.clear();
+		}
+
+		ImGui::ListBox("Recover MP Spells Priority", &settings.current_mp_heal_spell_selection, settings.recover_mp_spell_list);
+	}
+	
 	ImGui::Separator();
+
+	ImGui::Columns(2);
 
 	if (ImGui::Button("Save settings"))
 	{
-		settings.wander_path_list.clear();
+		// Save to json
 	}
 
 	ImGui::SameLine();
 
 	if (ImGui::Button("Load Settings"))
 	{
-		settings.wander_path_list.clear();
 	}
 
-	ImGui::SameLine();
-
-	ImGui::Text("Grind Status: %s", "Idling...");
+	ImGui::NextColumn();
+	ImGui::Text("Current Grind Status: %s", "Idling...");
+	ImGui::Text("Current Gamestage: %s", World::GetCurrentStageStr());
 	ImGui::End();
 }

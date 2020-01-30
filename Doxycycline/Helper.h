@@ -23,6 +23,8 @@ struct Addr {
 	UINT_PTR Addr_gEnv;
 	UINT_PTR Addr_UnitClass;
 	UINT_PTR Addr_LootClass;
+	UINT_PTR Addr_GameStage;
+	UINT_PTR Addr_TransitionStage;
 
 	DWORD Offset_LocalUnit;
 	DWORD Offset_ActorUnitModel;
@@ -39,12 +41,28 @@ struct Addr {
 	UINT_PTR Func_UpdateSwimCaller;
 	UINT_PTR Func_GetSetNavPath;
 	UINT_PTR Func_GetClientUnit;
-	UINT_PTR Func_CastSkillWrapper;
+
 	UINT_PTR Func_GetIndexVelocity;
 	UINT_PTR Func_LootAll;
 	UINT_PTR Func_isLootable;
+
 	UINT_PTR Func_GetSkillByID;
 	UINT_PTR Func_GetSkillCooldown;
+	UINT_PTR Func_CastSkillWrapper;
+
+	UINT_PTR Func_GetSlotClass;
+	UINT_PTR Func_GetBagClass;
+	UINT_PTR Func_GetBankClass;
+	UINT_PTR Func_GetEmptySlotCount;
+	UINT_PTR Func_MoveItemToEmptyBankSlot;
+	UINT_PTR Func_MoveItemToEmptyCofferSlot;
+	UINT_PTR Func_MoveItemToEmptyBagSlot;
+	UINT_PTR Func_DepositMoney;
+	UINT_PTR Func_WithdrawMoney;
+	UINT_PTR Func_UseItemById;
+	UINT_PTR Func_GetItemInformation;
+	UINT_PTR Func_GetItemInformationEx;
+	UINT_PTR Func_PickupItemPartial;
 
 	UINT_PTR Func_AI_IsCasting;
 	UINT_PTR Func_AI_StopCasting;

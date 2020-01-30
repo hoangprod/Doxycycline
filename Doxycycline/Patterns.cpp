@@ -62,6 +62,24 @@ bool __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Addr_LootClass is at %llx\n", (UINT_PTR)Patterns.Addr_LootClass); };
 
+	Patterns.Addr_GameStage = (UINT_PTR)ptr_offset_Scanner(x2GameModule, 0x2000000, "\x83\x3d\xCC\xCC\xCC\x00\x05\x75\xCC\xe8\xCC\xCC\xCC\xff\x48", 0, 6, 2, "xx???xxx?x???xx") + 1; //+1 because cmp xxx, 5
+
+	if (!Patterns.Addr_GameStage)
+	{
+		printf("[Error] Patterns.Addr_GameStage failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Addr_GameStage is at %llx\n", (UINT_PTR)Patterns.Addr_GameStage); };
+
+	Patterns.Addr_TransitionStage = (UINT_PTR)ptr_offset_Scanner(x2GameModule, 0x2000000, "\x83\x3d\xCC\xCC\xCC\x00\x02\x0f\x84\xCC\xff\xff\xff\xf3", 0, 6, 2, "xx???xxxx?xxxx") + 1; //+1 because cmp XXX, 2
+
+	if (!Patterns.Addr_TransitionStage)
+	{
+		printf("[Error] Patterns.Addr_TransitionStage failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Addr_TransitionStage is at %llx\n", (UINT_PTR)Patterns.Addr_TransitionStage); };
+
 	//////////////////////////////////////////////////////////////////[ OFFSETS ]///////////////////////////////////////////////////////////////////////////////
 
 	printf("\n------------------ [ OFFSETS ] ------------------\n\n");
@@ -85,7 +103,7 @@ bool __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Offset_LocalUnit is at %llx\n", (UINT_PTR)Patterns.Offset_LocalUnit); };
 
-	Patterns.Offset_ActorUnitModel = (UINT_PTR)Scan_Offsets(x2GameModule, 0x800000, "\x48\x83\xec\x28\x48\x8b\x89\xCC\xCC\x00\x00\x48\x8b\x01\xff\x90\xCC\xCC\x00\x00\xf3\x0f\x10\x40", "xxxxxxx??xxxxxxx??xxxxxx", 7, 4);
+	Patterns.Offset_ActorUnitModel = (DWORD)Scan_Offsets(x2GameModule, 0x800000, "\x48\x83\xec\x28\x48\x8b\x89\xCC\xCC\x00\x00\x48\x8b\x01\xff\x90\xCC\xCC\x00\x00\xf3\x0f\x10\x40", "xxxxxxx??xxxxxxx??xxxxxx", 7, 4);
 
 	if (!Patterns.Offset_ActorUnitModel)
 	{
@@ -94,7 +112,7 @@ bool __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Offset_ActorUnitModel is at %llx\n", (UINT_PTR)Patterns.Offset_ActorUnitModel); };
 
-	Patterns.Offset_UserStats = (UINT_PTR)Scan_Offsets(x2GameModule, 0x800000, "\x48\x83\xec\x38\x48\x8b\x89\xCC\xCC\x00\x00\xf3\x0f\x11\x4c\xCC\xCC\xf3\x0f\x11\x4c", "xxxxxxx??xxxxxx??xxxx", 7, 4);
+	Patterns.Offset_UserStats = (DWORD)Scan_Offsets(x2GameModule, 0x800000, "\x48\x83\xec\x38\x48\x8b\x89\xCC\xCC\x00\x00\xf3\x0f\x11\x4c\xCC\xCC\xf3\x0f\x11\x4c", "xxxxxxx??xxxxxx??xxxx", 7, 4);
 
 	if (!Patterns.Offset_UserStats)
 	{
@@ -104,7 +122,7 @@ bool __stdcall findPatterns()
 	else { printf("[Pattern Scan]  Patterns.Offset_UserStats is at %llx\n", (UINT_PTR)Patterns.Offset_UserStats); };
 
 
-	Patterns.Offset_SpeedStat = (UINT_PTR)Scan_Offsets(x2GameModule, 0x800000, "\xF3\x0F\x10\xB3\xCC\xCC\x00\x00\x48\x8B\xCB\xF3\x0F\x59\xCC\xCC\xE8", "xxxx??xxxxxxxx??x", 4, 4);
+	Patterns.Offset_SpeedStat = (DWORD)Scan_Offsets(x2GameModule, 0x800000, "\xF3\x0F\x10\xB3\xCC\xCC\x00\x00\x48\x8B\xCB\xF3\x0F\x59\xCC\xCC\xE8", "xxxx??xxxxxxxx??x", 4, 4);
 
 	if (!Patterns.Offset_SpeedStat)
 	{
@@ -113,7 +131,7 @@ bool __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Offset_SpeedStat is at %llx\n", (UINT_PTR)Patterns.Offset_SpeedStat); };
 
-	Patterns.Offset_CurrentTargetId = (UINT_PTR)Scan_Offsets(x2GameModule, 0x800000, "\x8b\x80\xCC\xCC\x00\x00\xeb\xCC\x40\x32\xf6\x8b\x05\xCC\xCC\xCC\x03", "xx??xxx?xxxxx???x", 2, 4);
+	Patterns.Offset_CurrentTargetId = (DWORD)Scan_Offsets(x2GameModule, 0x800000, "\x8b\x80\xCC\xCC\x00\x00\xeb\xCC\x40\x32\xf6\x8b\x05\xCC\xCC\xCC\x03", "xx??xxx?xxxxx???x", 2, 4);
 
 	if (!Patterns.Offset_CurrentTargetId)
 	{
@@ -123,7 +141,7 @@ bool __stdcall findPatterns()
 	else { printf("[Pattern Scan]  Patterns.Offset_CurrentTargetId is at %llx\n", (UINT_PTR)Patterns.Offset_CurrentTargetId); };
 
 
-	Patterns.Offset_isInCombat = (UINT_PTR)Scan_Offsets(x2GameModule, 0x800000, "\x0f\xb6\x81\xCC\xCC\x00\x00\xc7\x44\x24\x28\x02\x00\x00\x00", "xxx??xxxxxxxxxx", 3, 4);
+	Patterns.Offset_isInCombat = (DWORD)Scan_Offsets(x2GameModule, 0x800000, "\x0f\xb6\x81\xCC\xCC\x00\x00\xc7\x44\x24\x28\x02\x00\x00\x00", "xxx??xxxxxxxxxx", 3, 4);
 
 	if (!Patterns.Offset_isInCombat)
 	{
@@ -132,7 +150,7 @@ bool __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Offset_isInCombat is at %llx\n", (UINT_PTR)Patterns.Offset_isInCombat); };
 
-	Patterns.Offset_IsUnitInCombat = (UINT_PTR)Scan_Offsets(x2GameModule, 0x800000, "\x80\xB9\x00\x00\x00\x00\x00\x75\x12\x48\x8B\x01", "xx?????xxxxx", 2, 4);
+	Patterns.Offset_IsUnitInCombat = (DWORD)Scan_Offsets(x2GameModule, 0x800000, "\x80\xB9\x00\x00\x00\x00\x00\x75\x12\x48\x8B\x01", "xx?????xxxxx", 2, 4);
 
 	if (!Patterns.Offset_IsUnitInCombat)
 	{
@@ -141,7 +159,7 @@ bool __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Offset_IsUnitInCombat is at %llx\n", (UINT_PTR)Patterns.Offset_IsUnitInCombat); };
 
-	Patterns.Offset_isDead = (UINT_PTR)Scan_Offsets(x2GameModule, 0x800000, "\x80\xbb\xCC\xCC\x00\x00\x00\x0f\xCC\xCC\xCC\x00\x00\x45\x33\xc0\x33\xd2", "xx??xxxx???xxxxxxx", 2, 4);
+	Patterns.Offset_isDead = (DWORD)Scan_Offsets(x2GameModule, 0x800000, "\x80\xbb\xCC\xCC\x00\x00\x00\x0f\xCC\xCC\xCC\x00\x00\x45\x33\xc0\x33\xd2", "xx??xxxx???xxxxxxx", 2, 4);
 
 	if (!Patterns.Offset_isDead)
 	{
@@ -208,6 +226,127 @@ bool __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_CastSkillWrapper is at %llx\n", Patterns.Func_CastSkillWrapper); };
 
+	//////////////////////////////////////////////////////////////////[ Inventory ]///////////////////////////////////////////////////////////////////////////////
+
+
+	Patterns.Func_GetSlotClass = (UINT_PTR)ptr_offset_Scanner(x2GameModule, 0x800000, "\xe8\xCC\xCC\xCC\x00\x48\x8b\xc8\x8b\x54\xCC\xCC\xe8", 0, 5, 1, "x???xxxxxx??x");
+
+	if (!Patterns.Func_GetSlotClass)
+	{
+		printf("[Error] Patterns.Func_GetSlotClass failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_GetSlotClass is at %llx\n", Patterns.Func_GetSlotClass); };
+
+	Patterns.Func_GetBagClass = (UINT_PTR)ptr_offset_Scanner(x2GameModule, 0x800000, "\xe8\xCC\xCC\xCC\x00\x48\x83\xb8\xCC\xCC\x00\x00\x00", 0, 5, 1, "x???xxxx??xxx");
+
+	if (!Patterns.Func_GetBagClass)
+	{
+		printf("[Error] Patterns.Func_GetBagClass failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_GetBagClass is at %llx\n", Patterns.Func_GetBagClass); };
+
+	Patterns.Func_GetBankClass = (UINT_PTR)ptr_offset_Scanner(x2GameModule, 0x800000, "\xe8\xCC\xCC\xCC\x00\x48\x8b\xc8\xe8\xCC\xCC\xCC\x00\x33\xdb", 0, 5, 1, "x???xxxxx???xxx");
+
+	if (!Patterns.Func_GetBankClass)
+	{
+		printf("[Error] Patterns.Func_GetBankClass failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_GetBankClass is at %llx\n", Patterns.Func_GetBankClass); };
+
+	Patterns.Func_GetEmptySlotCount = (UINT_PTR)PatternScan(x2GameModule, 0x800000, "\x40\x53\x55\x56\x57\x41\x54\x48\x83\xec\x20\x48\x8b\xe9\x48\x83\xCC\xCC\x33", "xxxxxxxxxxxxxxxx??x");
+
+	if (!Patterns.Func_GetEmptySlotCount)
+	{
+		printf("[Error] Patterns.Func_GetEmptySlotCount failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_GetEmptySlotCount is at %llx\n", Patterns.Func_GetEmptySlotCount); };
+
+	Patterns.Func_MoveItemToEmptyBankSlot = (UINT_PTR)PatternScan(x2GameModule, 0x800000, "\x48\x83\xec\x28\x33\xc0\x45\x33\xc9\x8b\xd1", "xxxxxxxxxxx");
+
+	if (!Patterns.Func_MoveItemToEmptyBankSlot)
+	{
+		printf("[Error] Patterns.Func_MoveItemToEmptyBankSlot failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_MoveItemToEmptyBankSlot is at %llx\n", Patterns.Func_MoveItemToEmptyBankSlot); };
+
+	Patterns.Func_MoveItemToEmptyCofferSlot = (UINT_PTR)PatternScan((char*)(Patterns.Func_MoveItemToEmptyBankSlot + 1), 0x800000, "\x48\x83\xec\x28\x33\xc0\x45\x33\xc9\x8b\xd1", "xxxxxxxxxxx"); // Same pattern as previous
+
+	if (!Patterns.Func_MoveItemToEmptyCofferSlot)
+	{
+		printf("[Error] Patterns.Func_MoveItemToEmptyCofferSlot failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_MoveItemToEmptyCofferSlot is at %llx\n", Patterns.Func_MoveItemToEmptyCofferSlot); };
+
+	Patterns.Func_MoveItemToEmptyBagSlot = (UINT_PTR)PatternScan((char*)(Patterns.Func_MoveItemToEmptyCofferSlot + 1), 0x800000, "\x48\x83\xec\x28\x33\xc0\x45\x33\xc9\x8b\xd1", "xxxxxxxxxxx"); // Same pattern as previous
+
+	if (!Patterns.Func_MoveItemToEmptyBagSlot)
+	{
+		printf("[Error] Patterns.Func_MoveItemToEmptyBagSlot failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_MoveItemToEmptyBagSlot is at %llx\n", Patterns.Func_MoveItemToEmptyBagSlot); };
+
+	Patterns.Func_DepositMoney = (UINT_PTR)PatternScan(x2GameModule, 0x800000, "\x85\xc9\x0f\xCC\xCC\x00\x00\x00\x57\x48\x83\xec\x40\x48\xc7", "xxx??xxxxxxxxxx");
+
+	if (!Patterns.Func_DepositMoney)
+	{
+		printf("[Error] Patterns.Func_DepositMoney failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_DepositMoney is at %llx\n", Patterns.Func_DepositMoney); };
+
+	Patterns.Func_WithdrawMoney = (UINT_PTR)PatternScan((char*)(Patterns.Func_DepositMoney + 1), 0x800000, "\x85\xc9\x0f\xCC\xCC\x00\x00\x00\x57\x48\x83\xec\x40\x48\xc7", "xxx??xxxxxxxxxx");
+
+	if (!Patterns.Func_WithdrawMoney)
+	{
+		printf("[Error] Patterns.Func_WithdrawMoney failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_WithdrawMoney is at %llx\n", Patterns.Func_WithdrawMoney); };
+
+	Patterns.Func_UseItemById = (UINT_PTR)PatternScan(x2GameModule, 0x800000, "\x48\x89\x74\x24\x18\x89\x4c\x24\x08\x57\x48\x83\xec\x20\x48\x8d\x0d\xCC\xCC\xCC\x03", "xxxxxxxxxxxxxxxxx???x");
+
+	if (!Patterns.Func_UseItemById)
+	{
+		printf("[Error] Patterns.Func_UseItemById failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_UseItemById is at %llx\n", Patterns.Func_UseItemById); };
+
+	Patterns.Func_GetItemInformation = (UINT_PTR)ptr_offset_Scanner(x2GameModule, 0x800000, "\xe8\xCC\xCC\xCC\x00\x48\x85\xc0\x0f\xCC\xCC\x00\x00\x00\x8b\x48\x08", 0, 1, 5, "x???xxxxx??xxxxxx");
+
+	if (!Patterns.Func_GetItemInformation)
+	{
+		printf("[Error] Patterns.Func_GetItemInformation failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_GetItemInformation is at %llx\n", Patterns.Func_GetItemInformation); };
+
+	Patterns.Func_GetItemInformationEx = (UINT_PTR)ptr_offset_Scanner(x2GameModule, 0x800000, "\xe8\xCC\xCC\xCC\x00\x48\x85\xc0\x0f\xCC\xCC\x00\x00\x00\x8b\x88\xCC\xCC\x00\x00", 0, 1, 5, "x???xxxxx??xxxxx??xx");
+
+	if (!Patterns.Func_GetItemInformationEx)
+	{
+		printf("[Error] Patterns.Func_GetItemInformationEx failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_GetItemInformationEx is at %llx\n", Patterns.Func_GetItemInformationEx); };
+
+	Patterns.Func_PickupItemPartial = (UINT_PTR)PatternScan(x2GameModule, 0x800000, "\x89\x54\x24\x10\x48\x83\xec\x28\x45\x8b\xc8\x44\x8b\xc2", "xxxxxxxxxxxxxx");
+
+	if (!Patterns.Func_PickupItemPartial)
+	{
+		printf("[Error] Patterns.Func_PickupItemPartial failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_PickupItemPartial is at %llx\n", Patterns.Func_PickupItemPartial); };
+
+
 	Patterns.Func_LootAll = (UINT_PTR)PatternScan(x2GameModule, 0x800000, "\x48\x89\x5c\x24\x18\x57\x48\x83\xec\xCC\x48\x8b\x05\xCC\xCC\xCC\x03", "xxxxxxxxx?xxx???x");
 
 	if (!Patterns.Func_LootAll)
@@ -226,7 +365,8 @@ bool __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_isLootable is at %llx\n", Patterns.Func_isLootable); };
 
-	// PATTERN SCAN FOR GETSKILLBYID HERE
+	//////////////////////////////////////////////////////////////////[ Skills ]///////////////////////////////////////////////////////////////////////////////
+
 	Patterns.Func_GetSkillByID = (UINT_PTR)ptr_offset_Scanner(x2GameModule, 0x300000, "\xe8\xCC\xCC\xCC\x00\x48\x8b\xd8\x48\x85\xc0\x0f\xCC\xCC\x00\x00\x00\xf6", 0, 5, 1, "x???xxxxxxxx??xxxx");
 
 	if (!Patterns.Func_GetSkillByID)

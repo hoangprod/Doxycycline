@@ -9,6 +9,24 @@ public:
 	static BOOL move_to_position(Vec3 position);
 };
 
+enum GameStage {
+	Not_Loaded = 0,
+	Splash_Logo = 1,
+	PreServer_Select = 5,
+	Server_Select = 7,
+	Character_Select = 8,
+	Character_Creation = 9,
+	SetCustomize_CharacterPos = 11,
+	In_Game = 12
+};
+
+class World {
+public:
+	static int GetCurrentStage();
+	static int GetCurrentTransition();
+	static const char* GetCurrentStageStr();
+};
+
 class Interaction {
 public:
 	static BOOL interact_with_npc_id(DWORD npcId);
@@ -29,7 +47,6 @@ public:
 
 class Combat {
 public:
-
 	static UINT_PTR get_entitylist_ptr();
 	static UINT_PTR get_local_unit();
 
@@ -46,24 +63,24 @@ public:
 
 	static void* get_unit_by_id(DWORD targetId);
 	static DWORD get_current_target_id();
-	static BOOL  set_current_target(DWORD targetId);
 
-	static BOOL  cast_skill_on_targetId(DWORD TargetId, DWORD SkillId);
-	static BOOL  cast_skill_on_current_target(DWORD SkillId);
-	static BOOL  cast_skill_on_self(DWORD SkillId);
+	static BOOL set_current_target(DWORD targetId);
+	static BOOL cast_skill_on_targetId(DWORD TargetId, DWORD SkillId);
+	static BOOL cast_skill_on_current_target(DWORD SkillId);
+	static BOOL cast_skill_on_self(DWORD SkillId);
 
-	static BOOL  isRunning();
-	static BOOL  isStuck();
-	static BOOL  is_casting();
-	static BOOL  is_channeling();
-	static BOOL  is_in_combat();
-	static BOOL  is_dead(DWORD unitID);
-	static BOOL  is_targeting_me(DWORD unitID);
+	static BOOL isRunning();
+	static BOOL isStuck();
+	static BOOL is_casting();
+	static BOOL is_channeling();
+	static BOOL is_in_combat();
+	static BOOL is_dead(DWORD unitID);
+	static BOOL is_targeting_me(DWORD unitID);
 
-	static BOOL  need_heal();
+	static BOOL need_heal();
 
-	static BOOL  stop_casting();
-	static BOOL  stop_channeling();
+	static BOOL stop_casting();
+	static BOOL stop_channeling();
 };
 
 class Loot {

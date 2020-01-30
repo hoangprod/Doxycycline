@@ -17,6 +17,15 @@ typedef UINT_PTR(__fastcall* f_EncryptSendPacket)(UINT_PTR localPlayer, UINT_PTR
 typedef HRESULT(__stdcall* f_D3D11PresentHook) (IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 typedef void*(__fastcall* f_EndCall)(IScriptSystem* scriptSys);
 
+typedef UINT_PTR(__fastcall* f_Get_Empty_Bag_Slot)(UINT_PTR bagClass);
+f_Get_Empty_Bag_Slot o_Test = (f_Get_Empty_Bag_Slot)0x399B2490;
+
+typedef bool(__fastcall* f_MoveItemToEmptyBankSlot)(uint32_t slot);
+f_MoveItemToEmptyBankSlot o_moveslot = (f_MoveItemToEmptyBankSlot)0x39105D50;
+
+typedef bool(__fastcall* f_MoveItemToEmptyCofferSlot)(uint32_t slot);
+f_MoveItemToEmptyCofferSlot o_moveslot2 = (f_MoveItemToEmptyCofferSlot)0x039105D70;
+
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern packetCrypto packetinfo;
 extern Addr Patterns;
@@ -94,8 +103,11 @@ extern bool b_PacketEditor;
 
 UINT_PTR __fastcall h_Encrypt_Send_Packet(UINT_PTR localUnit, UINT_PTR packetBody)
 {
-	if(b_PacketEditor)
+	if (b_PacketEditor)
+	{
+		peditor.Push((UINT_PTR)packetBody);
 		printf("Opcode %04x  -- %p\n", *(WORD*)(packetBody + 8), _ReturnAddress());
+	}
 	return o_Encrypt_Send(localUnit, packetBody);
 }
 
@@ -106,7 +118,7 @@ bool __fastcall h_EncryptPacket(__int64* Buffer, unsigned __int8 isEncrypted, __
 
 	if (isEncrypted == 1)
 	{
-		peditor.Push((UINT_PTR)key);
+		//peditor.Push((UINT_PTR)key);
 	}
 
 	return o_EncryptPacket(Buffer, isEncrypted, key, cleartextbuffer);
@@ -135,12 +147,15 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		if (wParam == VK_NUMPAD6)
 		{
-			auto test = X2::W_get_skill_by_id(22848);
+			UINT_PTR test = *(UINT_PTR*)0x3CFA0730;
+			UINT_PTR slot = o_Test(0x3CFA0730);
 
-			printf("%s %d\n", test->Name, test->cooldown);
+			printf("free slot: %lld\n", slot);
 		}
 		if (wParam == VK_NUMPAD7)
 		{
+			Combat::cast_skill_on_self(0x3dba);
+
 		}
 		if (wParam == VK_CONTROL)
 		{
