@@ -21,6 +21,22 @@ f_AI_IsChanneling o_AI_IsChanneling;
 f_AI_GetGlobalCooldown o_AI_GetGlobalCooldown;
 f_AI_CheckBuff o_AI_CheckBuff;
 
+f_GetSlotClass o_GetSlotClass;
+f_GetBagClass o_GetBagClass;
+f_GetBankClass o_GetBankClass;
+f_GetItemInformation o_GetItemInformation;
+f_GetItemInformationEx o_GetItemInformationEx;
+f_GetEmptySlotCount o_GetEmptySlotCount;
+
+f_MoveItemToEmptyBankSlot o_MoveItemToEmptyBankSlot;
+f_MoveItemToEmptyCofferSlot o_MoveItemToEmptyCofferSlot;
+f_MoveItemToEmptyBagSlot o_MoveItemToEmptyBagSlot;
+f_UseItemById o_UseItemById;
+
+f_DepositMoney o_DepositMoney;
+f_WithdrawMoney o_WithdrawMoney;
+
+
 void X2::InitializeX2()
 {
 	o_GetNavPath_and_Move = (f_GetNavPath_and_Move)Patterns.Func_GetSetNavPath;
@@ -37,6 +53,20 @@ void X2::InitializeX2()
 	o_AI_IsChanneling = (f_AI_IsChanneling)Patterns.Func_AI_IsChanneling;
 	o_AI_GetGlobalCooldown = (f_AI_GetGlobalCooldown)Patterns.Func_AI_GetGlobalCooldown;
 	o_AI_CheckBuff = (f_AI_CheckBuff)Patterns.Func_AI_CheckBuff;
+
+	o_GetSlotClass = (f_GetSlotClass)Patterns.Func_GetSlotClass;
+	o_GetBagClass = (f_GetBagClass)Patterns.Func_GetBagClass;
+	o_GetBankClass = (f_GetBankClass)Patterns.Func_GetBankClass;
+	o_GetItemInformation = (f_GetItemInformation)Patterns.Func_GetItemInformation;
+	o_GetItemInformationEx = (f_GetItemInformationEx)Patterns.Func_GetItemInformationEx;
+	o_GetEmptySlotCount = (f_GetEmptySlotCount)Patterns.Func_GetEmptySlotCount;
+
+	o_MoveItemToEmptyBankSlot = (f_MoveItemToEmptyBankSlot)Patterns.Func_MoveItemToEmptyBankSlot;
+	o_MoveItemToEmptyCofferSlot = (f_MoveItemToEmptyCofferSlot)Patterns.Func_MoveItemToEmptyCofferSlot;
+	o_MoveItemToEmptyBagSlot = (f_MoveItemToEmptyBagSlot)Patterns.Func_MoveItemToEmptyBagSlot;
+	o_UseItemById = (f_UseItemById)Patterns.Func_UseItemById;
+	o_DepositMoney = (f_DepositMoney)Patterns.Func_DepositMoney;
+	o_WithdrawMoney = (f_WithdrawMoney)Patterns.Func_WithdrawMoney;
 }
 
 long long X2::W_GetNavPath_and_Move(UINT_PTR* ActorUnit, Vec3* EndPos)
@@ -104,3 +134,62 @@ bool X2::W_AI_CheckBuff(void* nullParam, uint32_t unitId, uint32_t buffId)
 	return o_AI_CheckBuff(nullParam, unitId, buffId);
 }
 
+UINT_PTR* X2::W_GetSlotClass()
+{
+	return o_GetSlotClass();
+}
+
+UINT_PTR* X2::W_GetBagClass()
+{
+	return o_GetBagClass();
+}
+
+UINT_PTR* X2::W_GetBankClass()
+{
+	return o_GetBagClass();
+}
+
+UINT_PTR* X2::W_GetItemInformation(UINT_PTR* StorageClass, uint32_t slot)
+{
+	return o_GetItemInformation(StorageClass, slot);
+}
+
+UINT_PTR* X2::W_GetItemInformationEx(uint32_t ItemId)
+{
+	return o_GetItemInformationEx(ItemId);
+}
+
+UINT_PTR X2::W_GetEmptySlotCount(UINT_PTR* StorageClass)
+{
+	return o_GetEmptySlotCount(StorageClass);
+}
+
+bool X2::W_MoveItemToEmptyBankSlot(uint32_t slot)
+{
+	return o_MoveItemToEmptyBankSlot(slot);
+}
+
+bool X2::W_MoveItemToEmptyCofferSlot(uint32_t slot)
+{
+	return o_MoveItemToEmptyCofferSlot(slot);
+}
+
+bool X2::W_MoveItemToEmptyBagSlot(uint32_t slot)
+{
+	return o_MoveItemToEmptyBagSlot(slot);
+}
+
+bool X2::W_UseItemById(uint32_t itemId)
+{
+	return o_UseItemById(itemId);
+}
+
+void X2::W_DepositMoney(int Amount, int AAPointCount)
+{
+	return o_DepositMoney(Amount, AAPointCount);
+}
+
+void X2::W_WithdrawMoney(int Amount, int AAPointCount)
+{
+	return o_WithdrawMoney(Amount, AAPointCount);
+}

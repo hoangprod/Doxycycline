@@ -15,6 +15,22 @@ typedef BOOL(__fastcall* f_AI_IsChanneling)(void* nullParam, int unitID);
 typedef void* (__fastcall* f_AI_GetGlobalCooldown)(void* nullParam, int unitID); // not sure if this returns a 4 byte or 8 byte value
 typedef bool(__fastcall* f_AI_CheckBuff)(void* nullParam, int unitID, uint32_t buffID);
 
+typedef UINT_PTR* (__fastcall* f_GetSlotClass)(void);
+typedef UINT_PTR* (__fastcall* f_GetBagClass)(void);
+typedef UINT_PTR* (__fastcall* f_GetBankClass)(void);
+typedef UINT_PTR* (__fastcall* f_GetItemInformation)(UINT_PTR* StorageClass, uint32_t slot);
+typedef UINT_PTR* (__fastcall* f_GetItemInformationEx)(uint32_t ItemId);
+typedef UINT_PTR(__fastcall* f_GetEmptySlotCount)(UINT_PTR* StorageClass);
+
+typedef bool(__fastcall* f_MoveItemToEmptyBankSlot)(uint32_t slot);
+typedef bool(__fastcall* f_MoveItemToEmptyCofferSlot)(uint32_t slot);
+typedef bool(__fastcall* f_MoveItemToEmptyBagSlot)(uint32_t slot);
+typedef bool(__fastcall* f_UseItemById)(uint32_t itemId);
+
+typedef void(__fastcall* f_DepositMoney)(int Amount, int AAPointCount);
+typedef void(__fastcall* f_WithdrawMoney)(int Amount, int AAPointCount);
+
+
 class X2
 {
 public:
@@ -34,5 +50,21 @@ public:
 	static bool W_AI_IsChanneling(void* nullParam, uint32_t unitId);
 	static void* W_AI_GetGlobalCooldown(void* nullParam, uint32_t unitId);
 	static bool W_AI_CheckBuff(void* nullParam, uint32_t unitId, uint32_t buffId);
+
+	static UINT_PTR* W_GetSlotClass();
+	static UINT_PTR* W_GetBagClass();
+	static UINT_PTR* W_GetBankClass();
+
+	static UINT_PTR* W_GetItemInformation(UINT_PTR* StorageClass, uint32_t slot);
+	static UINT_PTR* W_GetItemInformationEx(uint32_t ItemId);
+	static UINT_PTR W_GetEmptySlotCount(UINT_PTR* StorageClass);
+
+	static bool W_MoveItemToEmptyBankSlot(uint32_t slot);
+	static bool W_MOveItemToEmptyCofferSlot(uint32_t slot);
+	static bool W_MOveItemToEmptyBagSlot(uint32_t slot);
+	static bool W_UseItemById(uint32_t itemId);
+
+	static void W_DepositMoney(int Amount, int AAPointCount);
+	static void W_WithdrawMoney(int Amount, int AAPointCount);
 };
 

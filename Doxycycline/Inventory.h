@@ -29,12 +29,21 @@ public:
 
 
 class Inventory {
-	static DWORD find_item_slot_by_name(char* itemName);
+	static uint32_t find_item_slot_by_name(char* itemName);
 
-	static BOOL use_item(DWORD slotId);
-	static BOOL move_item(DWORD from_slot, DWORD to_slot);
-	static BOOL move_to_bank(DWORD slotId);
-	static BOOL withdraw_from_bank(DWORD slotId);
+	static bool use_item(uint32_t slot);
+	static bool use_item(uint32_t itemId);
+	static uint32_t empty_bag_slot_count();
+	static uint32_t empty_bank_slot_count();
+	static bool is_bank_full();
+	static bool is_bag_full();
+
+	static BOOL move_item_to_bag(uint32_t bankSlot);
+	static BOOL move_item_to_bank(uint32_t bagSlot);
+	static BOOL withdraw_money_from_bank(uint32_t Count);
+
+
+
 	static BOOL sell_to_npc(DWORD npcId, DWORD slot);
 	static BOOL buy_from_npc(DWORD npcId, DWORD itemId);
 };
