@@ -54,6 +54,7 @@ struct Addr {
 	UINT_PTR Func_GetBagClass;
 	UINT_PTR Func_GetBankClass;
 	UINT_PTR Func_GetEmptySlotCount;
+	UINT_PTR Func_GetItemIdCount;
 	UINT_PTR Func_MoveItemToEmptyBankSlot;
 	UINT_PTR Func_MoveItemToEmptyCofferSlot;
 	UINT_PTR Func_MoveItemToEmptyBagSlot;

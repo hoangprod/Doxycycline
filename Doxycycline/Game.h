@@ -20,6 +20,7 @@ typedef UINT_PTR* (__fastcall* f_GetBagClass)(void);
 typedef UINT_PTR* (__fastcall* f_GetBankClass)(void);
 typedef UINT_PTR* (__fastcall* f_GetItemInformation)(UINT_PTR* StorageClass, uint32_t slot);
 typedef UINT_PTR* (__fastcall* f_GetItemInformationEx)(uint32_t ItemId);
+typedef UINT_PTR(__fastcall* f_GetItemIdCount)(UINT_PTR* StorageClass, int itemType, char null, char one, UINT_PTR null_2);
 typedef UINT_PTR(__fastcall* f_GetEmptySlotCount)(UINT_PTR* StorageClass);
 
 typedef bool(__fastcall* f_MoveItemToEmptyBankSlot)(uint32_t slot);
@@ -57,11 +58,12 @@ public:
 
 	static UINT_PTR* W_GetItemInformation(UINT_PTR* StorageClass, uint32_t slot);
 	static UINT_PTR* W_GetItemInformationEx(uint32_t ItemId);
+	static UINT_PTR W_GetItemIdCount(UINT_PTR* StorageClass, int itemType);
 	static UINT_PTR W_GetEmptySlotCount(UINT_PTR* StorageClass);
 
 	static bool W_MoveItemToEmptyBankSlot(uint32_t slot);
-	static bool W_MOveItemToEmptyCofferSlot(uint32_t slot);
-	static bool W_MOveItemToEmptyBagSlot(uint32_t slot);
+	static bool W_MoveItemToEmptyCofferSlot(uint32_t slot);
+	static bool W_MoveItemToEmptyBagSlot(uint32_t slot);
 	static bool W_UseItemById(uint32_t itemId);
 
 	static void W_DepositMoney(int Amount, int AAPointCount);

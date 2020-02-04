@@ -10,6 +10,9 @@ public:
 	static ISkill* get_skill_by_id(uint32_t skillId);
 
 	static int32_t get_skill_cooldown(uint32_t skillId);
+	static uint32_t get_skill_maxRange(uint32_t skillId);
+	static uint32_t get_skill_minRange(uint32_t skillId);
+
 	static BOOL is_skill_on_cooldown(DWORD skillId);
 	static BOOL is_skill_useable(DWORD skillId);
 	static BOOL is_skill_learned(DWORD skillId);

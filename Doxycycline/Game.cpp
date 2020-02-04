@@ -26,6 +26,7 @@ f_GetBagClass o_GetBagClass;
 f_GetBankClass o_GetBankClass;
 f_GetItemInformation o_GetItemInformation;
 f_GetItemInformationEx o_GetItemInformationEx;
+f_GetItemIdCount o_GetItemIdCount;
 f_GetEmptySlotCount o_GetEmptySlotCount;
 
 f_MoveItemToEmptyBankSlot o_MoveItemToEmptyBankSlot;
@@ -59,6 +60,7 @@ void X2::InitializeX2()
 	o_GetBankClass = (f_GetBankClass)Patterns.Func_GetBankClass;
 	o_GetItemInformation = (f_GetItemInformation)Patterns.Func_GetItemInformation;
 	o_GetItemInformationEx = (f_GetItemInformationEx)Patterns.Func_GetItemInformationEx;
+	o_GetItemIdCount = (f_GetItemIdCount)Patterns.Func_GetItemIdCount;
 	o_GetEmptySlotCount = (f_GetEmptySlotCount)Patterns.Func_GetEmptySlotCount;
 
 	o_MoveItemToEmptyBankSlot = (f_MoveItemToEmptyBankSlot)Patterns.Func_MoveItemToEmptyBankSlot;
@@ -146,7 +148,7 @@ UINT_PTR* X2::W_GetBagClass()
 
 UINT_PTR* X2::W_GetBankClass()
 {
-	return o_GetBagClass();
+	return o_GetBankClass();
 }
 
 UINT_PTR* X2::W_GetItemInformation(UINT_PTR* StorageClass, uint32_t slot)
@@ -157,6 +159,11 @@ UINT_PTR* X2::W_GetItemInformation(UINT_PTR* StorageClass, uint32_t slot)
 UINT_PTR* X2::W_GetItemInformationEx(uint32_t ItemId)
 {
 	return o_GetItemInformationEx(ItemId);
+}
+
+UINT_PTR X2::W_GetItemIdCount(UINT_PTR* StorageClass, int itemType)
+{
+	return o_GetItemIdCount(StorageClass, itemType, 0, 1, 0);
 }
 
 UINT_PTR X2::W_GetEmptySlotCount(UINT_PTR* StorageClass)

@@ -256,7 +256,7 @@ bool __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_GetBankClass is at %llx\n", Patterns.Func_GetBankClass); };
 
-	Patterns.Func_GetEmptySlotCount = (UINT_PTR)PatternScan(x2GameModule, 0x800000, "\x40\x53\x55\x56\x57\x41\x54\x48\x83\xec\x20\x48\x8b\xe9\x48\x83\xCC\xCC\x33", "xxxxxxxxxxxxxxxx??x");
+	Patterns.Func_GetEmptySlotCount = (UINT_PTR)PatternScan(x2GameModule, 0x2000000, "\x40\x53\x55\x56\x57\x41\x54\x48\x83\xec\x20\x48\x8b\xe9\x48\x83\xCC\xCC\x33", "xxxxxxxxxxxxxxxx??x");
 
 	if (!Patterns.Func_GetEmptySlotCount)
 	{
@@ -264,6 +264,15 @@ bool __stdcall findPatterns()
 		return FALSE;
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_GetEmptySlotCount is at %llx\n", Patterns.Func_GetEmptySlotCount); };
+
+	Patterns.Func_GetItemIdCount = (UINT_PTR)PatternScan(x2GameModule, 0x2000000, "\x48\x89\x5c\x24\x18\x89\x54\x24\x10\x55\x56\x57\x48\x83\xec\x30", "xxxxxxxxxxxxxxxx");
+
+	if (!Patterns.Func_GetItemIdCount)
+	{
+		printf("[Error] Patterns.Func_GetItemIdCount failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_GetItemIdCount is at %llx\n", Patterns.Func_GetItemIdCount); };
 
 	Patterns.Func_MoveItemToEmptyBankSlot = (UINT_PTR)PatternScan(x2GameModule, 0x800000, "\x48\x83\xec\x28\x33\xc0\x45\x33\xc9\x8b\xd1", "xxxxxxxxxxx");
 
@@ -319,7 +328,7 @@ bool __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_UseItemById is at %llx\n", Patterns.Func_UseItemById); };
 
-	Patterns.Func_GetItemInformation = (UINT_PTR)ptr_offset_Scanner(x2GameModule, 0x800000, "\xe8\xCC\xCC\xCC\x00\x48\x85\xc0\x0f\xCC\xCC\x00\x00\x00\x8b\x48\x08", 0, 1, 5, "x???xxxxx??xxxxxx");
+	Patterns.Func_GetItemInformation = (UINT_PTR)ptr_offset_Scanner(x2GameModule, 0x800000, "\xe8\xCC\xCC\xCC\x00\x48\x85\xc0\x0f\xCC\xCC\x00\x00\x00\x8b\x48\x08", 0, 5, 1, "x???xxxxx??xxxxxx");
 
 	if (!Patterns.Func_GetItemInformation)
 	{
@@ -328,7 +337,7 @@ bool __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_GetItemInformation is at %llx\n", Patterns.Func_GetItemInformation); };
 
-	Patterns.Func_GetItemInformationEx = (UINT_PTR)ptr_offset_Scanner(x2GameModule, 0x800000, "\xe8\xCC\xCC\xCC\x00\x48\x85\xc0\x0f\xCC\xCC\x00\x00\x00\x8b\x88\xCC\xCC\x00\x00", 0, 1, 5, "x???xxxxx??xxxxx??xx");
+	Patterns.Func_GetItemInformationEx = (UINT_PTR)ptr_offset_Scanner(x2GameModule, 0x800000, "\xe8\xCC\xCC\xCC\x00\x48\x85\xc0\x0f\xCC\xCC\x00\x00\x00\x8b\x88\xCC\xCC\x00\x00", 0, 5, 1, "x???xxxxx??xxxxx??xx");
 
 	if (!Patterns.Func_GetItemInformationEx)
 	{
