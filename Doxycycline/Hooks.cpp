@@ -139,8 +139,10 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		if (wParam == VK_NUMPAD6)
 		{
-			printf("%d %d\n", Inventory::empty_bag_slot_count(), Inventory::empty_bank_slot_count());
-			printf("%p %p\n", Inventory::get_bag_item_information(2), Inventory::get_bag_item_information(3));
+			int LocalUnit = ((((*(DWORD*)Patterns.Addr_UnitClass) + 0x2C) >> 10 ) & 4);
+
+			printf("%d\n", LocalUnit);
+
 
 		}
 		if (wParam == VK_NUMPAD7)

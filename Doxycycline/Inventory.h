@@ -4,16 +4,30 @@ class ItemInfoEx
 {
 public:
 	uint32_t ItemId; //0x0000
-	char pad_0004[44]; //0x0004
+	char pad_0004[16]; //0x0004
+	uint8_t SoulBoundEnum; //0x0014
+	char pad_0015[3]; //0x0015
+	int32_t processStage; //0x0018
+	uint16_t ItemUsage; //0x001C
+	char pad_001E[6]; //0x001E
+	uint32_t contributionPointPrice; //0x0024
+	uint32_t craftType; //0x0028
+	char pad_002C[4]; //0x002C
 	char* Description; //0x0030
-	char pad_0038[72]; //0x0038
+	char pad_0038[28]; //0x0038
+	uint32_t honorPrice; //0x0054
+	char pad_0058[24]; //0x0058
+	uint32_t livingPointPrice; //0x0070
+	char pad_0074[12]; //0x0074
 	uint32_t MaxStack; //0x0080
 	char pad_0084[4]; //0x0084
 	char* Name; //0x0088
 	char pad_0090[361]; //0x0090
 	uint8_t bSellable; //0x01F9
-	char pad_01FA[593]; //0x01FA
-}; //Size: 0x044B
+	char pad_01FA[14]; //0x01FA
+}; //Size: 0x0208
+
+
 
 class ItemInfo
 {
@@ -36,8 +50,8 @@ public:
 	static ItemInfoEx* get_bank_item_informationEX(uint32_t slot);
 	static uint32_t get_item_slotIdx(uint32_t slot, uint32_t idx);
 
-	static uint32_t find_bag_item_slot_by_name(char* itemName);
-	static uint32_t find_bank_item_slot_by_name(char* itemName);
+	static uint32_t find_bag_item_slot_by_name(const char* itemName);
+	static uint32_t find_bank_item_slot_by_name(const char* itemName);
 
 	static uint32_t get_current_bag_money();
 	static uint32_t get_current_bank_money();
