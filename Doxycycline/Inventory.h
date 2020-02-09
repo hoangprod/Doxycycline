@@ -123,3 +123,4 @@ public:
 	static std::vector<uint32_t> get_all_unidentified_item();
 };
 
+bool iequals(const std::string& a, const std::string& b);

@@ -35,6 +35,8 @@ struct Addr {
 	DWORD Offset_isInCombat;
 	DWORD Offset_IsUnitInCombat;
 	DWORD Offset_isDead;
+	DWORD Offset_Mana;
+	DWORD Offset_Health;
 
 	UINT_PTR Func_EncryptPacket;
 	UINT_PTR Func_SendEncryptPacket;
@@ -72,6 +74,8 @@ struct Addr {
 	UINT_PTR Func_AI_IsChanneling;
 	UINT_PTR Func_AI_GetGlobalCooldown;
 	UINT_PTR Func_AI_CheckBuff;
+
+	UINT_PTR Func_GetUnitStat;
 };
 
 class Detour64

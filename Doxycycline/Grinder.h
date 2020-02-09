@@ -28,7 +28,7 @@ public:
 	Grinding()
 	{
 		const char* BotStatus = new char[100](); BotStatus = "Grindbot - Starting...";
-		auto fp = std::bind(&Grinding::Idle, this);
+		auto fp = std::bind(&Grinding::States, this);
 		Ai.setState(fp);
 	};
 
@@ -36,6 +36,7 @@ public:
 		delete[] BotStatus;
 	}
 
+	void States();
 	void Idle();
 	void Wander();
 	void Fight();
@@ -46,12 +47,5 @@ public:
 	const char* BotStatus = NULL;
 
 private:
-	// Add more here
-	Combat combat;
-	float GrindRadius = 100.0f;
-	float lowHealthPercentage = 50.0f;
-	bool  playerDetection = true;
-
-	std::vector<char*> Blacklist_Mobs;
-	std::vector<char*> Whitelist_Mobs;
+	bool needHeal();
 };

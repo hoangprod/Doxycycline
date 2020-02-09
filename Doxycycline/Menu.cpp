@@ -460,8 +460,8 @@ void Grinder::Display()
 	// Sliders
 	ImGui::SliderFloat("Wander Range", &settings.max_wander_range, 10.0f, 300.0f);
 	ImGui::SliderFloat("Max Target Height", &settings.max_wander_range, 10.0f, 200.0f);
-	ImGui::SliderFloat("Min. Health %", &settings.max_wander_range, 0.0f, 200.0f);
-	ImGui::SliderFloat("Min. Mana %", &settings.min_mana_percentage, 0.0f, 100.0f);
+	ImGui::SliderFloat("Min. Health %", &settings.max_wander_range, 0.0f, 1.0f);
+	ImGui::SliderFloat("Min. Mana %", &settings.min_mana_percentage, 0.0f, 1.0f);
 
 	ImGui::Separator();
 

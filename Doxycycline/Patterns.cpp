@@ -168,6 +168,25 @@ bool __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Offset_isDead is at %llx\n", (UINT_PTR)Patterns.Offset_isDead); };
 
+	Patterns.Offset_Mana = (DWORD)Scan_Offsets(x2GameModule, 0x1000000, "\xf7\xaa\xCC\xCC\x00\x00\xc1\xfa\x05", "xx??xxxxx", 2, 4);
+
+	if (!Patterns.Offset_Mana)
+	{
+		printf("[Error] Patterns.Offset_Mana failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Offset_Mana is at %llx\n", (UINT_PTR)Patterns.Offset_Mana); };
+
+	Patterns.Offset_Health = (DWORD)Scan_Offsets(x2GameModule, 0x1000000, "\x44\x8b\x81\xCC\xCC\x00\x00\xb8\x1f\x85\xeb\x51", "xxx??xxxxxxx", 3, 4);
+
+	if (!Patterns.Offset_Health)
+	{
+		printf("[Error] Patterns.Offset_Health failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Offset_Health is at %llx\n", (UINT_PTR)Patterns.Offset_Health); };
+
+
 	//////////////////////////////////////////////////////////////////[ FUNCTIONS ]///////////////////////////////////////////////////////////////////////////////
 
 	printf("\n------------------ [ FUNCTIONS ] ------------------\n\n");
@@ -465,6 +484,17 @@ bool __stdcall findPatterns()
 		return FALSE;
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_AI_CheckBuff is at %llx\n", Patterns.Func_AI_CheckBuff); };
+
+	// ---------- UnitClass --------------
+
+	Patterns.Func_GetUnitStat = (UINT_PTR)PatternScan(x2GameModule, 0x2000000, "\x48\x89\x5c\x24\x08\x48\x89\x74\x24\x10\x57\x48\x83\xec\x20\x41\x0f\xb6\xf8", "xxxxxxxxxxxxxxxxxxx");
+
+	if (!Patterns.Func_GetUnitStat)
+	{
+		printf("[Error] Patterns.Func_GetUnitStat failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_GetUnitStat is at %llx\n", Patterns.Func_GetUnitStat); };
 
 
 	printf("\n------------------ [ END PATTERN SCAN ] ------------------\n\n");

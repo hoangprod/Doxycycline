@@ -3,10 +3,10 @@
 #include "Helper.h"
 #include "Skills.h"
 #include "Game.h"
+#include "Inventory.h"
 #include "Combat.h"
 
 extern Addr Patterns;
-
 
 BOOL Stats::has_buff(uint32_t buffID)
 {
@@ -123,6 +123,51 @@ IActor* Combat::get_closest_lootable(float maxRange)
 	return get_closest_actor_from_map(viableActors);
 }
 
+bool Combat::is_player_nearby(float maxRange)
+{
+	IActor* player = get_closest_player(maxRange);
+
+	return player != 0;
+}
+
+uint32_t Combat::get_closest_mob_targetid(float maxRange)
+{
+	auto target = get_closest_monster_npc(maxRange);
+
+	if (!target)
+		return 0;
+
+	return target->unitID;
+}
+
+
+uint32_t Combat::get_closest_targetId_with_name(char* TargetName, float maxRange)
+{
+	std::map<IActor*, float> viableActors;
+	Vec3 localPos = LocalPlayerFinder::GetClientEntity()->GetWorldPos();
+	auto actorList = LocalPlayerFinder::GetActorList();
+	for (auto actor : actorList)
+	{
+		if (actor && actor->Entity && iequals(TargetName, actor->Entity->GetName()))
+		{
+			Vec3 actorPos = actor->Entity->GetWorldPos();
+			float heightDistance = abs(actorPos.y - localPos.y);
+			float totalDistance = abs(actorPos.x - localPos.x) + abs(actorPos.z - localPos.z) + heightDistance;
+			if (totalDistance <= maxRange && heightDistance <= 35.f)
+			{
+				viableActors.insert(std::make_pair(actor, totalDistance));
+			}
+		}
+	}
+
+	auto target = get_closest_actor_from_map(viableActors);
+
+	if (!target)
+		return 0;
+
+	return target->unitID;
+}
+
 std::vector<IActor*> Combat::get_aggro_mob_list()
 {
 	std::vector<IActor*> Aggro_Actors;
@@ -153,22 +198,22 @@ std::vector<IActor*> Combat::get_unique_mob_list()
 	return Aggro_Actors;
 }
 
-void* Combat::get_unit_by_id(DWORD targetId)
+void* Combat::get_unit_by_id(uint32_t targetId)
 {
-	return (void*)X2::W_GetClientUnit(targetId);
+	return (void*)X2::W_GetUnitById(targetId);
 }
 
-DWORD Combat::get_current_target_id()
+uint32_t Combat::get_current_target_id()
 {
 	UINT_PTR LocalUnit = get_local_unit();
 
 	if (!LocalUnit)
 		return 0;
 
-	return *(DWORD*)(LocalUnit + Patterns.Offset_CurrentTargetId);
+	return *(uint32_t*)(LocalUnit + Patterns.Offset_CurrentTargetId);
 }
 
-BOOL Combat::set_current_target(DWORD targetId)
+BOOL Combat::set_current_target(uint32_t targetId)
 {
 	UINT_PTR LocalUnit = get_local_unit();
 
@@ -180,7 +225,7 @@ BOOL Combat::set_current_target(DWORD targetId)
 	return true;
 }
 
-BOOL Combat::cast_skill_on_targetId(DWORD targetId, DWORD SkillId)
+BOOL Combat::cast_skill_on_targetId(uint32_t targetId, uint32_t SkillId)
 {
 	if (set_current_target(targetId))
 	{
@@ -200,7 +245,7 @@ BOOL Combat::cast_skill_on_targetId(DWORD targetId, DWORD SkillId)
 	return 0;
 }
 
-BOOL Combat::cast_skill_on_current_target(DWORD SkillId)
+BOOL Combat::cast_skill_on_current_target(uint32_t SkillId)
 {
 	if (get_current_target_id())
 	{
@@ -220,7 +265,7 @@ BOOL Combat::cast_skill_on_current_target(DWORD SkillId)
 
 }
 
-BOOL Combat::cast_skill_on_self(DWORD SkillId)
+BOOL Combat::cast_skill_on_self(uint32_t SkillId)
 {
 	UINT_PTR LocalUnit = get_local_unit();
 
@@ -258,14 +303,14 @@ BOOL Combat::is_in_combat()
 
 BOOL Combat::is_dead(DWORD unitID)
 {
-	UINT_PTR Unit = X2::W_GetClientUnit(unitID);
+	UINT_PTR Unit = X2::W_GetUnitById(unitID);
 	return *(bool*)((UINT_PTR)Unit + (UINT_PTR)Patterns.Offset_isDead);
 }
 
 BOOL Combat::is_targeting_me(DWORD unitID)
 {
 	DWORD local_UnitId = LocalPlayerFinder::GetClientActor()->unitID;
-	UINT_PTR MobUnit = X2::W_GetClientUnit(unitID);
+	UINT_PTR MobUnit = X2::W_GetUnitById(unitID);
 	DWORD unitCurrentTarget = *(DWORD*)((UINT_PTR)MobUnit + (UINT_PTR)Patterns.Offset_CurrentTargetId);
 
 	if (unitCurrentTarget == local_UnitId)

@@ -35,7 +35,7 @@ typedef void(__fastcall* f_MoveItemPartial)(UINT_PTR* storageClass, uint32_t Slo
 typedef void(__fastcall* f_DepositMoney)(int Amount, int AAPointCount);
 typedef void(__fastcall* f_WithdrawMoney)(int Amount, int AAPointCount);
 
-
+typedef UINT_PTR(__fastcall* f_GetUnitStats)(UINT_PTR* UnitClass, uint32_t statType, char null);
 
 class X2
 {
@@ -43,7 +43,7 @@ public:
 	//X2();
 	static void InitializeX2();
 	static long long W_GetNavPath_and_Move(UINT_PTR* ActorUnit, Vec3* EndPos);
-	static UINT_PTR W_GetClientUnit(uint32_t UnitId);
+	static UINT_PTR W_GetUnitById(uint32_t UnitId);
 	static char W_UseSkillWrapper(UINT_PTR null, uint32_t skillId, UINT_PTR Struct, char null_1, char null_2, char null_3);
 	static float W_VelocityOfIndex(int Index);
 	static bool W_isLootable(UINT_PTR lootClass, uint32_t NetworkId);
@@ -80,5 +80,7 @@ public:
 	static void W_MoveItemPartial(UINT_PTR* itemInformation, uint32_t Slot, uint32_t Quantity);
 	static void W_DepositMoney(int Amount, int AAPointCount);
 	static void W_WithdrawMoney(int Amount, int AAPointCount);
+
+	static UINT_PTR W_GetUnitStats(UINT_PTR* unitClass, uint32_t statType);
 };
 

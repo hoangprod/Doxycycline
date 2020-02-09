@@ -11,6 +11,8 @@
 #include "Patterns.h"
 #include "Inventory.h"
 #include "Skills.h"
+#include "Grinder.h"
+#include "Unit.h"
 #include "Game.h"
 
 typedef float(__fastcall* f_GetWaterLevel)(void* cry3DEngine, void* referencePOS);
@@ -22,6 +24,7 @@ typedef void*(__fastcall* f_EndCall)(IScriptSystem* scriptSys);
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern packetCrypto packetinfo;
 extern Addr Patterns;
+extern Settings settings;
 
 ID3D11Device* pDevice = NULL;
 ID3D11DeviceContext* pContext = NULL;
@@ -51,6 +54,7 @@ Vec3 pathPosition_DoNotModify = {4500.0f, 4500.0f, 125.0f};
 bool g_ShowMenu = false;
 bool g_HijackCtrl = false;
 
+Grinding grind;
 std::vector<int32_t> idList;
 
 HRESULT GetDeviceAndCtxFromSwapchain(IDXGISwapChain* pSwapChain, ID3D11Device** ppDevice, ID3D11DeviceContext** ppContext)
@@ -140,40 +144,17 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		if (wParam == VK_NUMPAD6)
 		{
-			auto test = Inventory::get_item_master_info(2);
-			printf("%s %d %d %d %d %d %d\n", test.Name.c_str(), test.currentStack, test.isConsumable, test.itemId, test.MaxStack, test.skillType, test.levelRequirement);
+
+
 		}
 		if (wParam == VK_NUMPAD7)
 		{
-			auto test = Inventory::get_all_unidentified_item();
 
-			printf("found %lld consumable.\n", test.size());
-
-			
-			for (auto ele : test){
-				auto slot = Inventory::find_bag_item_slot_by_itemId(ele);
-
-				if (!slot)
-				{
-					printf("slot invalid\n");
-					continue;
-				}
-
-				auto test2 = Inventory::get_item_master_info(slot);
-
-				if (test2.itemId == 0)
-				{
-					printf("itemid invalid\n");
-					continue;
-				}
-
-				printf("%s %d\n", test2.Name.data(), test2.slot);
-			}
 
 		}
 		if (wParam == VK_NUMPAD8)
 		{
-			printf("%p\n", Skill::get_skill_by_id(11948));
+
 
 		}
 
@@ -240,6 +221,13 @@ HRESULT __fastcall hookD3D11Present(IDXGISwapChain* pChain, UINT SyncInterval, U
 	{
 		MenuRender();
 	}
+
+	if (settings.grinding_bot_on)
+	{
+		grind.Ai.update();
+	}
+	
+
 	ImGui::EndFrame();
 
 	ImGui::Render();

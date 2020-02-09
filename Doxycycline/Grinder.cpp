@@ -1,89 +1,47 @@
 #include "pch.h"
 #include "GameClasses.h"
 #include "Combat.h"
+#include "Menu.h"
 #include "Grinder.h"
+
+extern Settings settings;
+
+void Grinding::States()
+{
+	static bool isHiding = false;
+
+	// If 150 ticks have not past yet
+	if ((lastTick + tick) > GetTickCount64())
+		return;
+
+	lastTick = GetTickCount64();
+
+	if (settings.hide_from_players && Combat::is_player_nearby(100.0f))
+	{
+		isHiding = true;
+
+		auto fp = std::bind(&Grinding::Hide, this);
+		Ai.setState(fp);
+	}
+
+}
 
 void Grinding::Idle()
 {
 	BotStatus = "Grindbot - Idling...";
 
-	if (playerDetection && combat.get_closest_player(75.0f))
-	{
-		auto fp = std::bind(&Grinding::Hide, this);
-		Ai.setState(fp);
-	}
-
-	else if (false) // if ready to go bank
-	{
-		auto fp = std::bind(&Grinding::Bank, this);
-		Ai.setState(fp);
-	}
-
-	else
-	{
-		auto fp = std::bind(&Grinding::Wander, this);
-		Ai.setState(fp);
-	}
 }
 
 void Grinding::Wander()
 {
 	BotStatus = "Grindbot - Wandering...";
 
-	if (playerDetection && combat.get_closest_player(75.0f))
-	{
-		auto fp = std::bind(&Grinding::Hide, this);
-		Ai.setState(fp);
-	}
-
-	else if (false) 	// if low health, go to heal
-	{
-		auto fp = std::bind(&Grinding::Heal, this);
-		Ai.setState(fp);
-	}
-
-	else if (false)   // if ready to go bank
-	{
-		auto fp = std::bind(&Grinding::Bank, this);
-		Ai.setState(fp);
-	}
-
-	else if (combat.get_closest_monster_npc(60.0f)) // Use setting as well as integrate whitelist/blacklist later
-	{
-		auto fp = std::bind(&Grinding::Fight, this);
-		Ai.setState(fp);
-	}
-
-	else
-	{
-		// perform wandering logic, walk around, etc
-	}
 }
 
 void Grinding::Fight()
 {
 	BotStatus = "Grindbot - Fighting...";
 
-	if (playerDetection && combat.get_closest_player(75.0f))
-	{
-		auto fp = std::bind(&Grinding::Hide, this);
-		Ai.setState(fp);
-	}
-	else if (false) // check if low health
-	{
-		auto fp = std::bind(&Grinding::Heal, this);
-		Ai.setState(fp);
-	}
-	else if(IActor* target = combat.get_closest_monster_npc(60.0f))
-	{
-		// Fight logic
-	}
-	else
-	{
-		// Cannot find any monster, wander
-		auto fp = std::bind(&Grinding::Wander, this);
-		Ai.setState(fp);
-	}
 
 }
 
@@ -100,4 +58,11 @@ void Grinding::Heal()
 void Grinding::Hide()
 {
 
+}
+
+bool Grinding::needHeal()
+{
+	auto localPlayer = LocalPlayerFinder::GetClientEntity();
+
+	return false;
 }

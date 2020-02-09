@@ -99,6 +99,9 @@
     <ClCompile Include="Skills.cpp">
       <Filter>Source Files\Combat\Source</Filter>
     </ClCompile>
+    <ClCompile Include="Unit.cpp">
+      <Filter>Source Files\Combat\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Imgui\imconfig.h">
@@ -178,6 +181,9 @@
     </ClInclude>
     <ClInclude Include="json.hpp">
       <Filter>Schofferhoffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Unit.h">
+      <Filter>Source Files\Combat\Headers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

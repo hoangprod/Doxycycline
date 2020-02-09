@@ -40,6 +40,7 @@ f_MoveItemPartial o_MoveItemPartial;
 f_DepositMoney o_DepositMoney;
 f_WithdrawMoney o_WithdrawMoney;
 
+f_GetUnitStats o_GetUnitStats;
 
 void X2::InitializeX2()
 {
@@ -77,6 +78,8 @@ void X2::InitializeX2()
 	o_MoveItemPartial = (f_MoveItemPartial)Patterns.Func_PickupItemPartial;
 	o_DepositMoney = (f_DepositMoney)Patterns.Func_DepositMoney;
 	o_WithdrawMoney = (f_WithdrawMoney)Patterns.Func_WithdrawMoney;
+
+	o_GetUnitStats = (f_GetUnitStats)Patterns.Func_GetUnitStat;
 }
 
 long long X2::W_GetNavPath_and_Move(UINT_PTR* ActorUnit, Vec3* EndPos)
@@ -84,7 +87,7 @@ long long X2::W_GetNavPath_and_Move(UINT_PTR* ActorUnit, Vec3* EndPos)
 	return o_GetNavPath_and_Move(ActorUnit, EndPos);
 }
 
-UINT_PTR X2::W_GetClientUnit(uint32_t UnitId)
+UINT_PTR X2::W_GetUnitById(uint32_t UnitId)
 {
 	return o_GetClientUnit(UnitId);
 }
@@ -236,4 +239,9 @@ void X2::W_DepositMoney(int Amount, int AAPointCount)
 void X2::W_WithdrawMoney(int Amount, int AAPointCount)
 {
 	return o_WithdrawMoney(Amount, AAPointCount);
+}
+
+UINT_PTR X2::W_GetUnitStats(UINT_PTR* unitClass, uint32_t statType)
+{
+	return o_GetUnitStats(unitClass, statType, 0);
 }
