@@ -390,7 +390,6 @@ public:
 
 	std::vector<std::string> whitelist_monsters;
 	std::vector<std::string> blacklist_monsters;
-	std::vector<std::string> open_item_list;
 
 	std::vector<ISkill*> attack_spell_list;
 	std::vector<ISkill*> buff_spell_list;
@@ -400,6 +399,8 @@ public:
 	std::vector<uint32_t> deposit_item_id_list;
 	std::vector<uint32_t> recover_hp_item_list;
 	std::vector<uint32_t> recover_mp_item_list;
+	std::vector<uint32_t> open_item_list;
+
 
 	int current_wander_path_selection = -1;
 	int current_whitelist_mob_selection = -1;
@@ -411,6 +412,7 @@ public:
 	int current_mp_heal_spell_selection = -1;
 	int current_hp_item_selection = -1;
 	int current_mp_item_selection = -1;
+	int current_open_item_selection = -1;
 
 	int max_open_pack_lp;
 
@@ -419,6 +421,8 @@ public:
 	float max_wander_range;
 	float max_z_range;
 
+	void SaveSettings();
+	void LoadSettings();
 };
 
 struct Grinder

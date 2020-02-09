@@ -176,5 +176,8 @@
     <ClInclude Include="Skills.h">
       <Filter>Source Files\Combat\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="json.hpp">
+      <Filter>Schofferhoffer</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

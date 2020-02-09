@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "GameClasses.h"
 #include "Game.h"
+#include "Skills.h"
 #include "Inventory.h"
 
 bool iequals(const std::string& a, const std::string& b)
@@ -26,6 +27,44 @@ const char* get_process_stateStr(int processedState)
 	if (v2 == 1)
 		return "finished_product";
 	return "invalid item_processed_state";
+}
+
+
+const char* Inventory::get_usage_string(int usage)
+{
+	const char* result;
+
+	switch (usage)
+	{
+	case 1:
+		result = "carry";
+		break;
+	case 2:
+		result = "equip";
+		break;
+	case 3:
+		result = "consume";
+		break;
+	case 4:
+		result = "toggle";
+		break;
+	case 5:
+		result = "place";
+		break;
+	case 6:
+		result = "socket";
+		break;
+	case 7:
+		result = "spawn";
+		break;
+	case 8:
+		result = "build";
+		break;
+	default:
+		result = "invalid item_usage";
+		break;
+	}
+	return result;
 }
 
 const char* Inventory::get_soul_bound_string(int soulbound)
@@ -56,38 +95,98 @@ const char* Inventory::get_soul_bound_string(int soulbound)
 	}
 }
 
-const char* Inventory::get_item_usage(int itemUsage)
+const char* Inventory::get_item_category_string(uint32_t slot)
 {
-	switch (itemUsage)
+	auto infoExtra = get_bag_infoExtra(slot);
+
+	if (!infoExtra)
+		return 0;
+
+	return infoExtra->category;
+}
+
+CItem Inventory::get_item_master_info(uint32_t slot)
+{
+	auto info = get_bag_item_information(slot);
+
+	if(!info)
+		return CItem();
+
+	auto infoEx = get_bag_item_informationEX(slot);
+
+	if (!infoEx)
+		return CItem();
+
+	auto infoExtra = get_bag_infoExtra(slot);
+
+	if (!infoExtra)
+		return CItem();
+
+	CItem skillMasterInfo;
+
+	skillMasterInfo.Name = infoEx->Name;
+	skillMasterInfo.slot = slot;
+	skillMasterInfo.currentStack = info->Stack;
+	skillMasterInfo.isConsumable = is_item_consumable(slot);
+	skillMasterInfo.isSellable = is_item_sellable(slot);
+	skillMasterInfo.isUnidentified = is_item_unidentified(slot);
+	skillMasterInfo.itemId = infoEx->ItemId;
+	skillMasterInfo.levelRequirement = infoEx->levelRequirement;
+	skillMasterInfo.MaxStack = infoEx->MaxStack;
+	skillMasterInfo.skillType = infoEx->skillType;
+	skillMasterInfo.soulBoundEnum = infoEx->SoulBoundEnum;
+	skillMasterInfo.usageEnum = infoExtra->usageEnum;
+
+	return skillMasterInfo;
+}
+
+std::vector<uint32_t> Inventory::get_all_consumeable_item()
+{
+	std::vector<uint32_t> consumeable_item_list;
+
+	uint8_t maxSlot = get_max_bag_slot_count();
+
+	if (!maxSlot)
+		return std::vector<uint32_t>(); // Empty Vector
+
+	for (int i = 1; i < maxSlot; ++i)
 	{
-	case 1:
-		return "carry";
-		break;
-	case 2:
-		return "equip";
-		break;
-	case 3:
-		return "consume";
-		break;
-	case 4:
-		return "toggle";
-		break;
-	case 5:
-		return "place";
-		break;
-	case 6:
-		return "socket";
-		break;
-	case 7:
-		return "spawn";
-		break;
-	case 8:
-		return "build";
-		break;
-	default:
-		return "invalid item_usage";
-		break;
+		if (is_item_consumable(i))
+		{
+			auto info = get_bag_item_information(i);
+			
+			if (!info)
+				continue;
+
+			consumeable_item_list.push_back(info->ItemId);
+		}
 	}
+
+	return consumeable_item_list;
+}
+
+std::vector<uint32_t> Inventory::get_all_unidentified_item()
+{
+	std::vector<uint32_t> consumeable_item_list;
+	uint8_t maxSlot = get_max_bag_slot_count();
+
+	if (!maxSlot)
+		return std::vector<uint32_t>(); // Empty Vector
+
+	for (int i = 1; i < maxSlot; ++i)
+	{
+		if (is_item_unidentified(i))
+		{
+			auto info = get_bag_item_information(i);
+
+			if (!info)
+				continue;
+
+			consumeable_item_list.push_back(info->ItemId);
+		}
+	}
+
+	return consumeable_item_list;
 }
 
 bool Inventory::is_bank_full()
@@ -108,7 +207,22 @@ bool Inventory::is_bag_full()
 
 bool Inventory::is_item_consumable(uint32_t slot)
 {
-	return false;
+	auto infoExtra = get_bag_infoExtra(slot);
+
+	if (!infoExtra)
+		return false;
+
+	return infoExtra->usageEnum == 3;
+}
+
+bool Inventory::is_item_unidentified(uint32_t slot)
+{
+	auto infoExtra = get_bag_infoExtra(slot);
+
+	if (!infoExtra)
+		return false;
+
+	return iequals("unidentified", infoExtra->category);
 }
 
 bool Inventory::is_item_sellable(uint32_t slot)
@@ -121,11 +235,6 @@ bool Inventory::is_item_sellable(uint32_t slot)
 	return ((itemEx->bSellable >> 3) & 1);
 }
 
-bool Inventory::is_item_tradeable(uint32_t slot)
-{
-	return false;
-}
-
 bool Inventory::is_item_stackable(uint32_t slot)
 {
 	auto itemEx = get_bag_item_informationEX(slot);
@@ -136,9 +245,67 @@ bool Inventory::is_item_stackable(uint32_t slot)
 	return (itemEx->MaxStack > 1);
 }
 
-bool Inventory::is_item_usable(uint32_t slot)
+bool Inventory::is_item_off_cooldown(uint32_t slot)
 {
-	return false;
+	auto itemEx = get_bag_item_informationEX(slot);
+
+	if (!itemEx)
+		return false;
+
+	return Skill::get_skill_cooldown(itemEx->skillType) == 0;
+}
+
+bool Inventory::move_item_to_bag(uint32_t bankSlot)
+{
+	uint32_t slotIdx = get_item_slotIdx(bankSlot, 0x300);
+
+	if (!slotIdx)
+		return false;
+
+	return X2::W_MoveItemToEmptyBagSlot(slotIdx);
+}
+
+bool Inventory::move_item_to_bank(uint32_t bagSlot)
+{
+	uint32_t slotIdx = get_item_slotIdx(bagSlot, 0x200);
+
+	if (!slotIdx)
+		return false;
+
+	return X2::W_MoveItemToEmptyBankSlot(slotIdx);
+}
+
+
+// Fix this, it is bad
+void Inventory::move_partial_item(uint32_t Slot, uint32_t Quantity, bool from_bank)
+{
+	UINT_PTR* storageClass = NULL;
+	ItemInfo* itemInfo = NULL;
+	uint32_t slotIdx = 0;
+
+
+	if (from_bank)
+	{
+		slotIdx = get_item_slotIdx(Slot, 0x300);
+		itemInfo = get_bank_item_information(Slot);
+	}
+	else
+	{
+		slotIdx = get_item_slotIdx(Slot, 0x200);
+		itemInfo = get_bag_item_information(Slot);
+	}
+
+	return X2::W_MoveItemPartial((UINT_PTR*)itemInfo, slotIdx, Quantity);
+}
+
+void Inventory::withdraw_money_from_bank(uint32_t Count)
+{
+	return X2::W_WithdrawMoney(Count, 0);
+}
+
+void Inventory::deposit_money_to_bank(uint32_t Count)
+{
+	return X2::W_DepositMoney(Count, 0);
 }
 
 ItemInfo * Inventory::get_bag_item_information(uint32_t slot)
@@ -161,6 +328,21 @@ ItemInfo* Inventory::get_bank_item_information(uint32_t slot)
 	ItemInfo* itemInfo = (ItemInfo*)X2::W_GetItemInformation(bankClass, slotIdx);
 
 	return itemInfo;
+}
+
+InfoExtra* Inventory::get_bag_infoExtra(uint32_t slot)
+{
+	auto infoEx = get_bag_item_informationEX(slot);
+
+	if (!infoEx)
+		return NULL;
+
+	InfoExtra* infoExtra = (InfoExtra*)X2::W_GetItemInfoExtra(infoEx->extraInfo);
+
+	if (!infoExtra)
+		return NULL;
+
+	return infoExtra;
 }
 
 ItemInfoEx * Inventory::get_bag_item_informationEX(uint32_t slot)
@@ -197,6 +379,27 @@ uint32_t Inventory::get_item_slotIdx(uint32_t slot, uint32_t idx)
 	return slotIdx;
 }
 
+uint32_t Inventory::find_bag_item_slot_by_itemId(uint32_t itemId)
+{
+	uint8_t maxSlot = get_max_bag_slot_count();
+
+	if (!maxSlot)
+		return 0;
+
+	for (int i = 1; i < maxSlot; ++i)
+	{
+		ItemInfo* info = get_bag_item_information(i);
+
+		if (info)
+		{
+			if (itemId == info->ItemId)
+				return i;
+		}
+	}
+
+	return 0;
+}
+
 uint32_t Inventory::find_bag_item_slot_by_name(const char* itemName)
 {
 	uint8_t maxSlot = get_max_bag_slot_count();
@@ -206,11 +409,32 @@ uint32_t Inventory::find_bag_item_slot_by_name(const char* itemName)
 
 	for (int i = 1; i < maxSlot; ++i)
 	{
-		ItemInfoEx* infoEx = get_bag_item_informationEX(i);
+		ItemInfoEx* info = get_bag_item_informationEX(i);
+
+		if (info)
+		{
+			if (iequals(itemName, info->Name))
+				return i;
+		}
+	}
+
+	return 0;
+}
+
+uint32_t Inventory::find_bank_item_slot_by_itemId(uint32_t itemId)
+{
+	uint8_t maxSlot = get_max_bank_slot_count();
+
+	if (!maxSlot)
+		return 0;
+
+	for (int i = 1; i < maxSlot; ++i)
+	{
+		ItemInfo* infoEx = get_bank_item_information(i);
 
 		if (infoEx)
 		{
-			if (iequals(itemName, infoEx->Name))
+			if (itemId == infoEx->ItemId)
 				return i;
 		}
 	}
@@ -267,7 +491,7 @@ uint32_t Inventory::get_count_by_itemId(uint32_t itemId)
 	if (!BagClass)
 		return 0;
 
-	uint32_t UsedSlots = X2::W_GetItemIdCount(BagClass, 45505);
+	uint32_t UsedSlots = X2::W_GetItemIdCount(BagClass, itemId);
 	return UsedSlots;
 }
 

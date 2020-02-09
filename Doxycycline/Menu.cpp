@@ -7,7 +7,12 @@
 #include "Helper.h"
 #include "Skills.h"
 #include "Combat.h"
+#include "Inventory.h"
+#include "json.hpp"
 #include "Menu.h"
+#include <iomanip>
+
+using json = nlohmann::json;
 
 MemoryEditor mem_edit;
 Consolelogs console;
@@ -290,6 +295,15 @@ void PacketEditor::Push(UINT_PTR pBody)
 
 namespace ImGui
 {
+	template <typename T>
+	std::string to_string_with_precision(const T a_value, const int n = 0)
+	{
+		std::ostringstream out;
+		out.precision(n);
+		out << std::fixed << a_value;
+		return out.str();
+	}
+
 	static auto vector_getter = [](void* vec, int idx, const char** out_text)
 	{
 		auto& vector = *static_cast<std::vector<std::string>*>(vec);
@@ -303,6 +317,29 @@ namespace ImGui
 		if (values.empty()) { return false; }
 		return Combo(label, currIndex, vector_getter,
 			static_cast<void*>(&values), values.size());
+	}
+
+	bool ListBox(const char* label, int* currIndex, std::vector<uint32_t>& values)
+	{
+		if (values.empty()) { return false; }
+		std::vector<std::string> strValue;
+		for (std::vector<uint32_t>::iterator it = values.begin(); it != values.end(); ++it) {
+			uint32_t slot = Inventory::find_bag_item_slot_by_itemId(*it);
+
+			if (!slot)
+				continue;
+
+			ItemInfoEx* itemInfoEx = Inventory::get_bag_item_informationEX(slot);
+
+			if (!itemInfoEx)
+				continue;
+			
+			strValue.push_back("Slot: " + std::to_string(slot) + " | Name: " + std::string(itemInfoEx->Name));
+
+		}
+		if (strValue.empty()) { return false; }
+		return ListBox(label, currIndex, vector_getter,
+			static_cast<void*>(&strValue), strValue.size());
 	}
 
 	bool ListBox(const char* label, int* currIndex, std::vector<Vec3>& values)
@@ -334,7 +371,9 @@ namespace ImGui
 		if (values.empty()) { return false; }
 		std::vector<std::string> strValue;
 		for (auto& element : values) {
-			std::string str = std::to_string(element->SkillId) + std::string(" Name: [") + std::string(element->Name) + std::string("] range: ") /*+ std::to_string(element->maxRange);*/;
+			std::pair<float, float> minmaxRange = Skill::get_skill_min_max_range(element->SkillId);
+			std::string str = std::to_string(element->SkillId) + std::string(" Name: [") + std::string(element->Name) + std::string("] range: " +
+				to_string_with_precision(minmaxRange.first) + "-" + to_string_with_precision(minmaxRange.second) + "m");
 			strValue.push_back(str);
 		}
 		if (strValue.empty()) { return false; }
@@ -372,6 +411,28 @@ namespace ImGui
 			static_cast<void*>(&strValue), strValue.size());
 	}
 
+}
+
+
+namespace ns {
+	void to_json(json& j, std::vector<Vec3>& p) {
+		for (std::vector<Vec3>::iterator it = p.begin(); it != p.end(); ++it) {
+			j[it - p.begin()] = (json{ { "x", it->x },{ "z", it->z },{ "y", it->y } });
+		}
+	}
+
+
+	std::vector<Vec3> from_json(const json& j) {
+		std::vector<Vec3> tempVector;
+		for (auto it = j.begin(); it != j.end(); ++it) {
+			Vec3 temp;
+			temp.x = it->at("x").get<float>();
+			temp.z = it->at("z").get<float>();
+			temp.y = it->at("y").get<float>();
+			tempVector.push_back(temp);
+		}
+		return tempVector;
+	}
 }
 
 bool is_empty(std::ifstream& pFile)
@@ -505,7 +566,7 @@ void Grinder::Display()
 		}
 
 		ImGui::SameLine();
-		if (ImGui::Button("Clear List#1"))
+		if (ImGui::Button("Clear List##1"))
 		{
 			settings.blacklist_monsters.clear();
 		}
@@ -522,7 +583,7 @@ void Grinder::Display()
 		ImGui::SameLine();
 
 		if (ImGui::Button("Search Spell")) {
-			searchResult = Skill::get_skill_id_by_name(str0);
+			searchResult = Skill::search_skill_id_by_name(str0);
 		}
 
 		if (ImGui::ListBox("Search Result", &current_search_skill, searchResult))
@@ -552,7 +613,7 @@ void Grinder::Display()
 		}
 
 		ImGui::SameLine();
-		if (ImGui::Button("Clear List#2"))
+		if (ImGui::Button("Clear List##2"))
 		{
 			settings.attack_spell_list.clear();
 		}
@@ -569,7 +630,7 @@ void Grinder::Display()
 		ImGui::SameLine();
 
 		if (ImGui::Button("Search Spell")) {
-			searchResult = Skill::get_skill_id_by_name(str0);
+			searchResult = Skill::search_skill_id_by_name(str0);
 		}
 
 		if (ImGui::ListBox("Search Result", &current_search_skill, searchResult))
@@ -599,7 +660,7 @@ void Grinder::Display()
 		}
 
 		ImGui::SameLine();
-		if (ImGui::Button("Clear List#3"))
+		if (ImGui::Button("Clear List##3"))
 		{
 			settings.buff_spell_list.clear();
 		}
@@ -616,7 +677,7 @@ void Grinder::Display()
 		ImGui::SameLine();
 
 		if (ImGui::Button("Search Spell")) {
-			searchResult = Skill::get_skill_id_by_name(str0);
+			searchResult = Skill::search_skill_id_by_name(str0);
 		}
 
 		if (ImGui::ListBox("Search Result", &current_search_skill, searchResult))
@@ -646,7 +707,7 @@ void Grinder::Display()
 		}
 
 		ImGui::SameLine();
-		if (ImGui::Button("Clear List#4"))
+		if (ImGui::Button("Clear List##5"))
 		{
 			settings.cleanse_spell_list.clear();
 		}
@@ -663,7 +724,7 @@ void Grinder::Display()
 		ImGui::SameLine();
 
 		if (ImGui::Button("Search Spell")) {
-			searchResult = Skill::get_skill_id_by_name(str0);
+			searchResult = Skill::search_skill_id_by_name(str0);
 		}
 
 		if (ImGui::ListBox("Search Result", &current_search_skill, searchResult))
@@ -693,7 +754,7 @@ void Grinder::Display()
 		}
 
 		ImGui::SameLine();
-		if (ImGui::Button("Clear List#4"))
+		if (ImGui::Button("Clear List##6"))
 		{
 			settings.recover_hp_spell_list.clear();
 		}
@@ -710,7 +771,7 @@ void Grinder::Display()
 		ImGui::SameLine();
 
 		if (ImGui::Button("Search Spell")) {
-			searchResult = Skill::get_skill_id_by_name(str0);
+			searchResult = Skill::search_skill_id_by_name(str0);
 		}
 
 		if (ImGui::ListBox("Search Result", &current_search_skill, searchResult))
@@ -740,7 +801,7 @@ void Grinder::Display()
 		}
 
 		ImGui::SameLine();
-		if (ImGui::Button("Clear List#4"))
+		if (ImGui::Button("Clear List##7"))
 		{
 			settings.recover_mp_spell_list.clear();
 		}
@@ -748,23 +809,306 @@ void Grinder::Display()
 		ImGui::ListBox("Recover MP Spells Priority", &settings.current_mp_heal_spell_selection, settings.recover_mp_spell_list);
 	}
 	
+	// Item heals and open
+	
+	// Heal HP Items
+	if (listBox_Selection == 8)
+	{
+		static int current_search_item = -1;
+
+		std::vector<uint32_t> searchResult = Inventory::get_all_consumeable_item();
+
+		if (ImGui::ListBox("Consumeable Items", &current_search_item, searchResult))
+		{
+
+		}
+
+		if (ImGui::Button("Add To Recover HP Item List")) {
+			if (!searchResult.empty() && current_search_item >= 0 && current_search_item <= searchResult.size() + 1)
+			{
+				if (LocalPlayerFinder::GetClientEntity())
+				{
+					settings.recover_hp_item_list.push_back(searchResult[current_search_item]);
+					++settings.current_hp_item_selection;
+				}
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Remove From Recover HP Item List"))
+		{
+			if (!settings.recover_hp_item_list.empty() && settings.current_hp_item_selection >= 0 && settings.current_hp_item_selection <= settings.recover_hp_item_list.size() + 1)
+			{
+				settings.recover_hp_item_list.erase(settings.recover_hp_item_list.begin() + settings.current_hp_item_selection);
+				--settings.current_hp_item_selection;
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Clear List##8"))
+		{
+			settings.recover_hp_item_list.clear();
+		}
+
+		ImGui::ListBox("Recover HP Item Priority", &settings.current_hp_item_selection, settings.recover_hp_item_list);
+	}
+
+	
+	// Heal MP Items
+	if (listBox_Selection == 9)
+	{
+		static int current_search_item = -1;
+
+		std::vector<uint32_t> searchResult = Inventory::get_all_unidentified_item();
+
+		if (ImGui::ListBox("Unidentified Items", &current_search_item, searchResult))
+		{
+
+		}
+
+		if (ImGui::Button("Add To Recover MP Item List")) {
+			if (!searchResult.empty() && current_search_item >= 0 && current_search_item <= searchResult.size() + 1)
+			{
+				if (LocalPlayerFinder::GetClientEntity())
+				{
+					settings.recover_mp_item_list.push_back(searchResult[current_search_item]);
+					++settings.current_mp_item_selection;
+				}
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Remove From Recover MP Item List"))
+		{
+			if (!settings.recover_mp_item_list.empty() && settings.current_mp_item_selection >= 0 && settings.current_mp_item_selection <= settings.recover_mp_item_list.size() + 1)
+			{
+				settings.recover_mp_item_list.erase(settings.recover_mp_item_list.begin() + settings.current_mp_item_selection);
+				--settings.current_mp_item_selection;
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Clear List##9"))
+		{
+			settings.recover_mp_item_list.clear();
+		}
+
+		ImGui::ListBox("Recover HP Item Priority", &settings.current_mp_item_selection, settings.recover_mp_item_list);
+	}
+
+	// Open Purses
+	if (listBox_Selection == 10)
+	{
+		static int current_search_item = -1;
+
+		std::vector<uint32_t> searchResult = Inventory::get_all_unidentified_item();
+
+		if (ImGui::ListBox("Unidentified Items", &current_search_item, searchResult))
+		{
+
+		}
+
+		if (ImGui::Button("Add To Open Item List")) {
+			if (!searchResult.empty() && current_search_item >= 0 && current_search_item <= searchResult.size() + 1)
+			{
+				if (LocalPlayerFinder::GetClientEntity())
+				{
+					settings.open_item_list.push_back(searchResult[current_search_item]);
+					++settings.current_open_item_selection;
+				}
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Remove From Open Item List"))
+		{
+			if (!settings.open_item_list.empty() && settings.current_open_item_selection >= 0 && settings.current_open_item_selection <= settings.open_item_list.size() + 1)
+			{
+				settings.open_item_list.erase(settings.open_item_list.begin() + settings.current_open_item_selection);
+				--settings.current_open_item_selection;
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Clear List##10"))
+		{
+			settings.open_item_list.clear();
+		}
+
+		ImGui::ListBox("Open Item List Priority", &settings.current_open_item_selection, settings.open_item_list);
+	}
+
+
+	// -- Item Heals and Open
+
+
 	ImGui::Separator();
 
 	ImGui::Columns(2);
 
 	if (ImGui::Button("Save settings"))
 	{
-		// Save to json
+		settings.SaveSettings();
 	}
 
 	ImGui::SameLine();
 
 	if (ImGui::Button("Load Settings"))
 	{
+		settings.LoadSettings();
 	}
 
 	ImGui::NextColumn();
 	ImGui::Text("Current Grind Status: %s", "Idling...");
 	ImGui::Text("Current Gamestage: %s", World::GetCurrentStageStr());
 	ImGui::End();
+}
+
+std::vector<uint32_t> skill_to_id(std::vector<ISkill*> skillList)
+{
+	std::vector<uint32_t> spellId;
+
+	for (auto itr : skillList)
+	{
+		spellId.push_back(itr->SkillId);
+	}
+
+	return spellId;
+}
+
+std::vector<ISkill*> id_to_skill(std::vector<uint32_t> IdList)
+{
+	std::vector<ISkill*> skillList;
+
+	for (auto itr : IdList)
+	{
+		skillList.push_back(Skill::get_skill_by_id(itr));
+	}
+
+	return skillList;
+}
+
+void Settings::SaveSettings()
+{
+	std::vector<uint32_t> attack_spells = skill_to_id(settings.attack_spell_list);
+	std::vector<uint32_t> buff_spells = skill_to_id(settings.buff_spell_list);
+	std::vector<uint32_t> cleanse_spells = skill_to_id(settings.cleanse_spell_list);
+	std::vector<uint32_t> hp_spells = skill_to_id(settings.recover_hp_spell_list);
+	std::vector<uint32_t> mp_spells = skill_to_id(settings.recover_mp_spell_list);
+
+	json hp_items(settings.recover_hp_item_list);
+	json mp_items(settings.recover_mp_item_list);
+	json open_items(settings.open_item_list);
+	json whitelist_mobs(settings.whitelist_monsters);
+	json blacklist_mobs(settings.blacklist_monsters);
+	json attack_spells_j(attack_spells);
+	json buff_spells_j(buff_spells);
+	json cleanse_spells_j(cleanse_spells);
+	json hp_spells_j(hp_spells);
+	json mp_spells_j(mp_spells);
+	json item_open_list(settings.open_item_list);
+
+	json wander_path;
+
+	ns::to_json(wander_path, settings.wander_path_list);
+
+	json SaveObj = {
+		{"Toggles", {
+			{"Fly_Hack", bFlyHack},
+			{"No_Fall_Dmg", bNoFallDamage},
+			{"Memory_Editor", b_MemoryEditor},
+			{"Log_Console", b_Console},
+			{"Grindbot_Menu", b_GrindMenu},
+			{"Lua_Exec", b_LuaMenu},
+			{"Radar", b_Radar},
+			{"Packet_Editor", b_PacketEditor}
+		}},
+
+		{"Sliders", {
+			{"Player_Speed", speedMultiplier},
+			{"Animation_Speed", animationMultiplier}
+		}},
+
+		{"GrindBot", {
+			{"Loot_Items", settings.loot_items},
+			{"Hide", settings.hide_from_players},
+			{"Teleport2Mob", settings.teleport_to_next_mob},
+			{"Deposit_Items", settings.deposit_items},
+			{"Send_Mule", settings.send_to_mule},
+			{"Rotate_Path", settings.go_back_to_beginning},
+			{"Resurrect", settings.resurrect_after_death},
+			{"Whitelist_mobs", whitelist_mobs},
+			{"Blacklist_mobs", blacklist_mobs},
+			{"Attack_spells", attack_spells_j},
+			{"Buff_spells", buff_spells_j},
+			{"Cleanse_spells", cleanse_spells_j},
+			{"MP_spells", hp_spells_j},
+			{"HP_spells", mp_spells_j},
+			{"Open_Item_List", item_open_list},
+			{"Wander_path", wander_path}
+		}}
+	};
+
+	std::ofstream output("Doxycycline.json");
+	output << std::setw(4) << SaveObj << std::endl;
+	output.close();
+}
+
+void Settings::LoadSettings()
+{
+	std::ifstream inputs("Doxycycline.json");
+	if (!inputs.fail() && !is_empty(inputs)) {
+		json curSettings; inputs >> curSettings;
+		json Toggles = curSettings["Toggles"];
+		{
+			bFlyHack = Toggles["Fly_Hack"];
+			bNoFallDamage = Toggles["No_Fall_Dmg"];
+			b_MemoryEditor = Toggles["Memory_Editor"];
+			b_Console = Toggles["Log_Console"];
+			b_GrindMenu = Toggles["Grindbot_Menu"];
+			b_LuaMenu = Toggles["Lua_Exec"];
+			b_Radar = Toggles["Radar"];
+			b_PacketEditor = Toggles["Packet_Editor"];
+		}
+
+		json Sliders = curSettings["Sliders"];
+		{
+			speedMultiplier = Sliders["Player_Speed"];
+			SetPlayerStatSpeed(speedMultiplier);
+			animationMultiplier = Sliders["Animation_Speed"];
+			SetPlayerAnimationSpeed(animationMultiplier);
+		}
+
+		json Grindbot = curSettings["GrindBot"];
+		{
+			std::vector<uint32_t> attack_spells_v, buff_spells_v, cleanse_spells_v, HP_spells_v, MP_spells_v;
+
+			settings.loot_items = Grindbot["Loot_Items"];
+			settings.hide_from_players = Grindbot["Hide"];
+			settings.teleport_to_next_mob = Grindbot["Teleport2Mob"];
+			settings.deposit_items = Grindbot["Deposit_Items"];
+			settings.send_to_mule = Grindbot["Send_Mule"];
+			settings.go_back_to_beginning = Grindbot["Rotate_Path"];
+			settings.resurrect_after_death = Grindbot["Resurrect"];
+			settings.whitelist_monsters = Grindbot["Whitelist_mobs"].get<std::vector<std::string>>();
+			settings.blacklist_monsters = Grindbot["Blacklist_mobs"].get<std::vector<std::string>>();
+			settings.open_item_list = Grindbot["Open_Item_List"].get<std::vector<uint32_t>>();
+
+			attack_spells_v = Grindbot["Attack_spells"].get<std::vector<uint32_t>>();
+			buff_spells_v = Grindbot["Buff_spells"].get<std::vector<uint32_t>>();
+			cleanse_spells_v = Grindbot["Cleanse_spells"].get<std::vector<uint32_t>>();
+			HP_spells_v = Grindbot["MP_spells"].get<std::vector<uint32_t>>();
+			MP_spells_v = Grindbot["HP_spells"].get<std::vector<uint32_t>>();
+
+			settings.attack_spell_list = id_to_skill(attack_spells_v);
+			settings.buff_spell_list = id_to_skill(buff_spells_v);
+			settings.cleanse_spell_list = id_to_skill(cleanse_spells_v);
+			settings.recover_hp_spell_list = id_to_skill(HP_spells_v);
+			settings.recover_mp_spell_list = id_to_skill(MP_spells_v);
+			settings.wander_path_list = ns::from_json(Grindbot["Wander_path"]);
+		}
+
+
+		inputs.close();
+	}
 }

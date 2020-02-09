@@ -346,6 +346,15 @@ bool __stdcall findPatterns()
 	}
 	else { printf("[Pattern Scan]  Patterns.Func_GetItemInformationEx is at %llx\n", Patterns.Func_GetItemInformationEx); };
 
+	Patterns.Func_GetItemInfoExtra = (UINT_PTR)ptr_offset_Scanner(x2GameModule, 0x800000, "\xe8\xCC\xCC\xCC\x00\x48\x85\xc0\x74\xCC\x48\x8b\x40\x10", 0, 5, 1, "x???xxxxx?xxxx");
+
+	if (!Patterns.Func_GetItemInfoExtra)
+	{
+		printf("[Error] Patterns.Func_GetItemInfoExtra failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_GetItemInfoExtra is at %llx\n", Patterns.Func_GetItemInfoExtra); };
+
 	Patterns.Func_PickupItemPartial = (UINT_PTR)PatternScan(x2GameModule, 0x800000, "\x89\x54\x24\x10\x48\x83\xec\x28\x45\x8b\xc8\x44\x8b\xc2", "xxxxxxxxxxxxxx");
 
 	if (!Patterns.Func_PickupItemPartial)
@@ -375,6 +384,15 @@ bool __stdcall findPatterns()
 	else { printf("[Pattern Scan]  Patterns.Func_isLootable is at %llx\n", Patterns.Func_isLootable); };
 
 	//////////////////////////////////////////////////////////////////[ Skills ]///////////////////////////////////////////////////////////////////////////////
+
+	Patterns.Func_GetSkillInfo = (UINT_PTR)PatternScan(x2GameModule, 0x1000000, "\x48\x89\x5c\x24\x10\x48\x89\x6c\x24\x18\x48\x89\x74\x24\x20\x89\x4c\x24\x08\x57\x48\x83\xec\x40", "xxxxxxxxxxxxxxxxxxxxxxxx");
+
+	if (!Patterns.Func_GetSkillInfo)
+	{
+		printf("[Error] Patterns.Func_GetSkillInfo failed to pattern scan.\n");
+		return FALSE;
+	}
+	else { printf("[Pattern Scan]  Patterns.Func_GetSkillInfo is at %llx\n", Patterns.Func_GetSkillInfo); };
 
 	Patterns.Func_GetSkillByID = (UINT_PTR)ptr_offset_Scanner(x2GameModule, 0x300000, "\xe8\xCC\xCC\xCC\x00\x48\x8b\xd8\x48\x85\xc0\x0f\xCC\xCC\x00\x00\x00\xf6", 0, 5, 1, "x???xxxxxxxx??xxxx");
 

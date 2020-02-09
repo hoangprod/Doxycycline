@@ -26,6 +26,7 @@ f_GetBagClass o_GetBagClass;
 f_GetBankClass o_GetBankClass;
 f_GetItemInformation o_GetItemInformation;
 f_GetItemInformationEx o_GetItemInformationEx;
+f_GetItemInfoExtra o_GetItemInfoExtra;
 f_GetItemIdCount o_GetItemIdCount;
 f_GetEmptySlotCount o_GetEmptySlotCount;
 
@@ -33,7 +34,9 @@ f_MoveItemToEmptyBankSlot o_MoveItemToEmptyBankSlot;
 f_MoveItemToEmptyCofferSlot o_MoveItemToEmptyCofferSlot;
 f_MoveItemToEmptyBagSlot o_MoveItemToEmptyBagSlot;
 f_UseItemById o_UseItemById;
+f_GetSkillInfo o_GetSkillInfo;
 
+f_MoveItemPartial o_MoveItemPartial;
 f_DepositMoney o_DepositMoney;
 f_WithdrawMoney o_WithdrawMoney;
 
@@ -46,6 +49,8 @@ void X2::InitializeX2()
 	o_VelocityOfIndex = (f_VelocityOfIndex)Patterns.Func_GetIndexVelocity;
 	o_loot_all = (f_loot_all)Patterns.Func_LootAll;
 	o_isLootable = (f_isLootable)Patterns.Func_isLootable;
+
+	o_GetSkillInfo = (f_GetSkillInfo)Patterns.Func_GetSkillInfo;
 	o_get_skill_by_id = (f_get_skill_by_id)Patterns.Func_GetSkillByID;
 	o_get_skill_cooldown = (f_get_skill_cooldown)Patterns.Func_GetSkillCooldown;
 
@@ -60,6 +65,7 @@ void X2::InitializeX2()
 	o_GetBankClass = (f_GetBankClass)Patterns.Func_GetBankClass;
 	o_GetItemInformation = (f_GetItemInformation)Patterns.Func_GetItemInformation;
 	o_GetItemInformationEx = (f_GetItemInformationEx)Patterns.Func_GetItemInformationEx;
+	o_GetItemInfoExtra = (f_GetItemInfoExtra)Patterns.Func_GetItemInfoExtra;
 	o_GetItemIdCount = (f_GetItemIdCount)Patterns.Func_GetItemIdCount;
 	o_GetEmptySlotCount = (f_GetEmptySlotCount)Patterns.Func_GetEmptySlotCount;
 
@@ -67,6 +73,8 @@ void X2::InitializeX2()
 	o_MoveItemToEmptyCofferSlot = (f_MoveItemToEmptyCofferSlot)Patterns.Func_MoveItemToEmptyCofferSlot;
 	o_MoveItemToEmptyBagSlot = (f_MoveItemToEmptyBagSlot)Patterns.Func_MoveItemToEmptyBagSlot;
 	o_UseItemById = (f_UseItemById)Patterns.Func_UseItemById;
+
+	o_MoveItemPartial = (f_MoveItemPartial)Patterns.Func_PickupItemPartial;
 	o_DepositMoney = (f_DepositMoney)Patterns.Func_DepositMoney;
 	o_WithdrawMoney = (f_WithdrawMoney)Patterns.Func_WithdrawMoney;
 }
@@ -99,6 +107,25 @@ bool X2::W_isLootable(UINT_PTR lootClass, uint32_t NetworkId)
 char X2::W_loot_all(uint32_t null)
 {
 	return o_loot_all(null);
+}
+
+bool X2::W_get_skill_info(uint32_t skillId, CSkill * skillInfo)
+{
+	skillInfo->SkillId = skillId;
+
+	return o_GetSkillInfo(skillId, *(UINT_PTR**)((*(UINT_PTR*)Patterns.Addr_UnitClass) + Patterns.Offset_LocalUnit), &skillInfo->Name, &skillInfo->abilityType, &skillInfo->learnLevel, &skillInfo->levelStep, &skillInfo->show,
+		0, &skillInfo->minRange, &skillInfo->maxRange, &skillInfo->ManaCost, &skillInfo->castingTime, &skillInfo->cooldownTime, 0, &skillInfo->nextLearnLevel, &skillInfo->firstLearnLevel,
+		&skillInfo->isHarmful, &skillInfo->isHelpful, &skillInfo->isMeleeAttack, &skillInfo->hasRange, &skillInfo->upgradeCost, &skillInfo->skillPoints);
+}
+
+bool X2::W_get_skill_info(uint32_t skillId, char** Name, char** abilityType, int* learnLevel, int* levelStep, bool* show, float* minRange, float* maxRange, int* manaCost, int* castingTime, int* cooldownTime,
+	int* nextLearnLevel, int* firstLearnLevel, bool* isHarmful, bool* isHelpful, bool* isMeleeAttack, bool* hasRange, int* upgradeCost, int* skillPoints)
+{
+	skillId = skillId;
+
+	return o_GetSkillInfo(skillId, *(UINT_PTR**)((*(UINT_PTR*)Patterns.Addr_UnitClass) + Patterns.Offset_LocalUnit), Name, abilityType, learnLevel, levelStep, show,
+		0, minRange, maxRange, manaCost, castingTime, cooldownTime, 0, nextLearnLevel, firstLearnLevel,
+		isHarmful, isHelpful, isMeleeAttack, hasRange, upgradeCost, skillPoints);
 }
 
 ISkill* X2::W_get_skill_by_id(uint32_t skillId)
@@ -161,6 +188,11 @@ UINT_PTR* X2::W_GetItemInformationEx(uint32_t ItemId)
 	return o_GetItemInformationEx(ItemId);
 }
 
+UINT_PTR* X2::W_GetItemInfoExtra(uint32_t itemInfoEx)
+{
+	return o_GetItemInfoExtra(itemInfoEx) ;
+}
+
 UINT_PTR X2::W_GetItemIdCount(UINT_PTR* StorageClass, int itemType)
 {
 	return o_GetItemIdCount(StorageClass, itemType, 0, 1, 0);
@@ -189,6 +221,11 @@ bool X2::W_MoveItemToEmptyBagSlot(uint32_t slot)
 bool X2::W_UseItemById(uint32_t itemId)
 {
 	return o_UseItemById(itemId);
+}
+
+void X2::W_MoveItemPartial(UINT_PTR* itemInformation, uint32_t Slot, uint32_t Quantity)
+{
+	return o_MoveItemPartial(itemInformation, Slot, Quantity);
 }
 
 void X2::W_DepositMoney(int Amount, int AAPointCount)

@@ -10,6 +10,7 @@
 #include "Combat.h"
 #include "Patterns.h"
 #include "Inventory.h"
+#include "Skills.h"
 #include "Game.h"
 
 typedef float(__fastcall* f_GetWaterLevel)(void* cry3DEngine, void* referencePOS);
@@ -139,15 +140,46 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		if (wParam == VK_NUMPAD6)
 		{
-			int LocalUnit = ((((*(DWORD*)Patterns.Addr_UnitClass) + 0x2C) >> 10 ) & 4);
-
-			printf("%d\n", LocalUnit);
-
-
+			auto test = Inventory::get_item_master_info(2);
+			printf("%s %d %d %d %d %d %d\n", test.Name.c_str(), test.currentStack, test.isConsumable, test.itemId, test.MaxStack, test.skillType, test.levelRequirement);
 		}
 		if (wParam == VK_NUMPAD7)
 		{
-			Combat::cast_skill_on_self(0x3dba);
+			auto test = Inventory::get_all_unidentified_item();
+
+			printf("found %lld consumable.\n", test.size());
+
+			
+			for (auto ele : test){
+				auto slot = Inventory::find_bag_item_slot_by_itemId(ele);
+
+				if (!slot)
+				{
+					printf("slot invalid\n");
+					continue;
+				}
+
+				auto test2 = Inventory::get_item_master_info(slot);
+
+				if (test2.itemId == 0)
+				{
+					printf("itemid invalid\n");
+					continue;
+				}
+
+				printf("%s %d\n", test2.Name.data(), test2.slot);
+			}
+
+		}
+		if (wParam == VK_NUMPAD8)
+		{
+			printf("%p\n", Skill::get_skill_by_id(11948));
+
+		}
+
+		if (wParam == VK_NUMPAD9)
+		{
+			Inventory::move_partial_item(7, 2, true);
 
 		}
 		if (wParam == VK_CONTROL)

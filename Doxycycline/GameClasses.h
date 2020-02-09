@@ -311,12 +311,47 @@ public:
 	virtual void Function9();
 }; //Size: 0x0040
 
+class CItem {
+public:
+	std::string Name;
+	bool isUnidentified;
+	bool isConsumable;
+	bool isSellable;
+	uint8_t soulBoundEnum;
+	uint32_t slot;
+	uint32_t itemId;
+	uint32_t MaxStack;
+	uint32_t currentStack;
+	uint32_t skillType;
+	uint32_t usageEnum;
+	uint32_t levelRequirement;
+};
+
+
 class CSkill
 {
+public:
 	uint32_t SkillId;
-	std::string SkillName;
-	uint32_t ManaCost;
+	char* Name;
+	char* abilityType;
+	int learnLevel;
+	int levelStep;
+	bool show;
+	float minRange;
+	float maxRange;
+	int ManaCost;
+	int castingTime;
+	int cooldownTime;
+	int nextLearnLevel;
+	int firstLearnLevel;
+	bool isHarmful;
+	bool isHelpful;
+	bool isMeleeAttack;
+	bool hasRange;
+	int upgradeCost;
+	int skillPoints;
 };
+
 
 class ISkill
 {

@@ -46,6 +46,7 @@ struct Addr {
 	UINT_PTR Func_LootAll;
 	UINT_PTR Func_isLootable;
 
+	UINT_PTR Func_GetSkillInfo;
 	UINT_PTR Func_GetSkillByID;
 	UINT_PTR Func_GetSkillCooldown;
 	UINT_PTR Func_CastSkillWrapper;
@@ -63,6 +64,7 @@ struct Addr {
 	UINT_PTR Func_UseItemById;
 	UINT_PTR Func_GetItemInformation;
 	UINT_PTR Func_GetItemInformationEx;
+	UINT_PTR Func_GetItemInfoExtra;
 	UINT_PTR Func_PickupItemPartial;
 
 	UINT_PTR Func_AI_IsCasting;

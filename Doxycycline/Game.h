@@ -20,6 +20,7 @@ typedef UINT_PTR* (__fastcall* f_GetBagClass)(void);
 typedef UINT_PTR* (__fastcall* f_GetBankClass)(void);
 typedef UINT_PTR* (__fastcall* f_GetItemInformation)(UINT_PTR* StorageClass, uint32_t slot);
 typedef UINT_PTR* (__fastcall* f_GetItemInformationEx)(uint32_t ItemId);
+typedef UINT_PTR* (__fastcall* f_GetItemInfoExtra)(uint32_t itemInfoEx);
 typedef UINT_PTR(__fastcall* f_GetItemIdCount)(UINT_PTR* StorageClass, int itemType, char null, char one, UINT_PTR null_2);
 typedef UINT_PTR(__fastcall* f_GetEmptySlotCount)(UINT_PTR* StorageClass);
 
@@ -27,9 +28,13 @@ typedef bool(__fastcall* f_MoveItemToEmptyBankSlot)(uint32_t slot);
 typedef bool(__fastcall* f_MoveItemToEmptyCofferSlot)(uint32_t slot);
 typedef bool(__fastcall* f_MoveItemToEmptyBagSlot)(uint32_t slot);
 typedef bool(__fastcall* f_UseItemById)(uint32_t itemId);
+typedef bool(__fastcall* f_GetSkillInfo)(uint32_t skillId, UINT_PTR* LocalUnit, char** name, char** abilityName, int* learnLevel, int* levelStep, bool* show, char** iconPath, float* minRange, float* maxRange, int* manaCost, int* castingTime,
+	int* cooldownTime, char ** description, int* nextLearnLevel, int* firstLearnLevel, bool* isHarmful, bool* isHelpful, bool* isMeleeAttack, bool* hasRange, int* upgradeCost, int* skillPoints);
 
+typedef void(__fastcall* f_MoveItemPartial)(UINT_PTR* storageClass, uint32_t Slot, uint32_t Quantity);
 typedef void(__fastcall* f_DepositMoney)(int Amount, int AAPointCount);
 typedef void(__fastcall* f_WithdrawMoney)(int Amount, int AAPointCount);
+
 
 
 class X2
@@ -43,6 +48,10 @@ public:
 	static float W_VelocityOfIndex(int Index);
 	static bool W_isLootable(UINT_PTR lootClass, uint32_t NetworkId);
 	static char W_loot_all(uint32_t null);
+
+	static bool W_get_skill_info(uint32_t skillId, CSkill * skillInfo);
+	static bool W_get_skill_info(uint32_t skillId, char** Name, char** abilityType, int* learnLevel, int* levelStep, bool* show, float* minRange, float* maxRange, int* manaCost, int* castingTime, int* cooldownTime,
+		int* nextLearnLevel, int* firstLearnLevel, bool* isHarmful, bool* isHelpful, bool* isMeleeAttack, bool* hasRange, int* upgradeCost, int* skillPoints);
 	static ISkill* W_get_skill_by_id(uint32_t skillId);
 	static void* W_get_skill_cooldown(void* skill_struct, void* cooldownHolderStruct, void* unkBuffer);
 
@@ -58,6 +67,8 @@ public:
 
 	static UINT_PTR* W_GetItemInformation(UINT_PTR* StorageClass, uint32_t slot);
 	static UINT_PTR* W_GetItemInformationEx(uint32_t ItemId);
+	static UINT_PTR* W_GetItemInfoExtra(uint32_t itemInfoEx);
+
 	static UINT_PTR W_GetItemIdCount(UINT_PTR* StorageClass, int itemType);
 	static UINT_PTR W_GetEmptySlotCount(UINT_PTR* StorageClass);
 
@@ -66,6 +77,7 @@ public:
 	static bool W_MoveItemToEmptyBagSlot(uint32_t slot);
 	static bool W_UseItemById(uint32_t itemId);
 
+	static void W_MoveItemPartial(UINT_PTR* itemInformation, uint32_t Slot, uint32_t Quantity);
 	static void W_DepositMoney(int Amount, int AAPointCount);
 	static void W_WithdrawMoney(int Amount, int AAPointCount);
 };
