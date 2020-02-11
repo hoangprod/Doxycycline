@@ -108,3 +108,49 @@ bool Unit::IsUnitDead(uint32_t unitId)
 
 	return *(bool*)((UINT_PTR)unit + Patterns.Offset_isDead);
 }
+
+UINT_PTR* Unit::GetBuffManager(uint32_t unitId)
+{
+	UINT_PTR* unit = GetUnitById(unitId);
+
+	if (!unit)
+		return 0;
+
+	return (UINT_PTR*)((UINT_PTR)unit + Patterns.Offset_BuffMngr);
+}
+
+Buff* Unit::GetBuffInfo(uint32_t unitId, int debuffOrBuff, int buffSlot)
+{
+	uint32_t* BuffClass = (uint32_t*)GetBuffClassPtr(unitId, debuffOrBuff, buffSlot);
+
+	if (!BuffClass)
+	{
+		return 0;
+	}
+
+	return (Buff*)X2::W_GetBuffInfo(BuffClass[1]);
+}
+
+UINT_PTR Unit::GetBuffCount(uint32_t unitId, int debuffOrBuff)
+{
+	UINT_PTR* BuffMgr = GetBuffManager(unitId);
+	
+	if (!BuffMgr)
+	{
+		return 0;
+	}
+
+	return X2::W_GetBuffCount(BuffMgr, debuffOrBuff);
+}
+
+UINT_PTR* Unit::GetBuffClassPtr(uint32_t unitId, int debuffOrBuff, int buffSlot)
+{
+	UINT_PTR* BuffMgr = GetBuffManager(unitId);
+
+	if (!BuffMgr)
+	{
+		return 0;
+	}
+
+	return X2::W_GetBuffClassPtr(BuffMgr, debuffOrBuff, buffSlot);
+}

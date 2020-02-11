@@ -8,6 +8,7 @@
 #include "Skills.h"
 #include "Combat.h"
 #include "Inventory.h"
+#include "Grinder.h"
 #include "json.hpp"
 #include "Menu.h"
 #include <iomanip>
@@ -43,6 +44,9 @@ extern bool g_HijackCtrl;
 extern f_EncryptPacket o_EncryptPacket;
 extern f_EncryptSendPacket o_Encrypt_Send;
 extern Addr Patterns;
+extern Grinding grind;
+
+
 void PacketEditor::Replay(std::vector<char*> pVector, BYTE Element)
 {
 	o_Encrypt_Send( *(UINT_PTR*)Patterns.Addr_UnitClass,(__int64)pVector[Element]);
@@ -372,9 +376,21 @@ namespace ImGui
 		std::vector<std::string> strValue;
 		for (auto& element : values) {
 			std::pair<float, float> minmaxRange = Skill::get_skill_min_max_range(element->SkillId);
-			std::string str = std::to_string(element->SkillId) + std::string(" Name: [") + std::string(element->Name) + std::string("] range: " +
-				to_string_with_precision(minmaxRange.first) + "-" + to_string_with_precision(minmaxRange.second) + "m");
-			strValue.push_back(str);
+
+			if (minmaxRange.first == 0.0f && minmaxRange.second == 0.0f)
+			{
+				float effectiveRange = Skill::get_skill_effective_range(element->SkillId);
+					std::string str = std::to_string(element->SkillId) + std::string(" Name: [") + std::string(element->Name) + std::string("] effective range: " +
+						to_string_with_precision(effectiveRange) + "m");
+				strValue.push_back(str);
+			}
+			else
+			{
+				std::string str = std::to_string(element->SkillId) + std::string(" Name: [") + std::string(element->Name) + std::string("] range: " +
+					to_string_with_precision(minmaxRange.first) + "-" + to_string_with_precision(minmaxRange.second) + "m");
+				strValue.push_back(str);
+			}
+
 		}
 		if (strValue.empty()) { return false; }
 		return ListBox(label, currIndex, vector_getter,
@@ -459,13 +475,13 @@ void Grinder::Display()
 
 	// Sliders
 	ImGui::SliderFloat("Wander Range", &settings.max_wander_range, 10.0f, 300.0f);
-	ImGui::SliderFloat("Max Target Height", &settings.max_wander_range, 10.0f, 200.0f);
-	ImGui::SliderFloat("Min. Health %", &settings.max_wander_range, 0.0f, 1.0f);
+	ImGui::SliderFloat("Max Target Height", &settings.max_z_range, 10.0f, 200.0f);
+	ImGui::SliderFloat("Min. Health %", &settings.min_health_percentage, 0.0f, 1.0f);
 	ImGui::SliderFloat("Min. Mana %", &settings.min_mana_percentage, 0.0f, 1.0f);
 
 	ImGui::Separator();
 
-	static const char* listbox_combo[] = { "Wander Path", "Whitelist Mobs", "Blacklist Mobs", "Attack Spells", "Buff Spells", "Cleanse Spells", "Recover HP Spells", "Recover MP Spells", "Recover HP Items", "Recover MP Items", "Items to Open" };
+	static const char* listbox_combo[] = { "Wander Path", "Whitelist Mobs", "Blacklist Mobs", "Attack Spells", "Buff Spells", "Cleanse Spells", "Recover HP Spells", "Recover MP Spells", "Recover HP Items", "Recover MP Items", "Items to Open", "Store Item List" };
 	static int listBox_Selection = -1;
 	ImGui::Combo("Configuration Menus", &listBox_Selection, listbox_combo, IM_ARRAYSIZE(listbox_combo));
 
@@ -818,7 +834,7 @@ void Grinder::Display()
 
 		std::vector<uint32_t> searchResult = Inventory::get_all_consumeable_item();
 
-		if (ImGui::ListBox("Consumeable Items", &current_search_item, searchResult))
+		if (ImGui::ListBox("Consumeable HP Items", &current_search_item, searchResult))
 		{
 
 		}
@@ -859,9 +875,9 @@ void Grinder::Display()
 	{
 		static int current_search_item = -1;
 
-		std::vector<uint32_t> searchResult = Inventory::get_all_unidentified_item();
+		std::vector<uint32_t> searchResult = Inventory::get_all_consumeable_item();
 
-		if (ImGui::ListBox("Unidentified Items", &current_search_item, searchResult))
+		if (ImGui::ListBox("Consumeable MP Items", &current_search_item, searchResult))
 		{
 
 		}
@@ -893,7 +909,7 @@ void Grinder::Display()
 			settings.recover_mp_item_list.clear();
 		}
 
-		ImGui::ListBox("Recover HP Item Priority", &settings.current_mp_item_selection, settings.recover_mp_item_list);
+		ImGui::ListBox("Recover MP Item Priority", &settings.current_mp_item_selection, settings.recover_mp_item_list);
 	}
 
 	// Open Purses
@@ -938,7 +954,47 @@ void Grinder::Display()
 		ImGui::ListBox("Open Item List Priority", &settings.current_open_item_selection, settings.open_item_list);
 	}
 
+	// Store item in storage
+	if (listBox_Selection == 11)
+	{
+		static int current_search_item = -1;
 
+		std::vector<uint32_t> searchResult = Inventory::get_all_bag_items();
+
+		if (ImGui::ListBox("Items in Bag", &current_search_item, searchResult))
+		{
+
+		}
+
+		if (ImGui::Button("Add To Store Item List")) {
+			if (!searchResult.empty() && current_search_item >= 0 && current_search_item <= searchResult.size() + 1)
+			{
+				if (LocalPlayerFinder::GetClientEntity())
+				{
+					settings.store_item_list.push_back(searchResult[current_search_item]);
+					++settings.current_store_item_selection;
+				}
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Remove From Store Item List"))
+		{
+			if (!settings.store_item_list.empty() && settings.current_store_item_selection >= 0 && settings.current_store_item_selection <= settings.store_item_list.size() + 1)
+			{
+				settings.store_item_list.erase(settings.store_item_list.begin() + settings.current_store_item_selection);
+				--settings.current_store_item_selection;
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Clear List##11"))
+		{
+			settings.store_item_list.clear();
+		}
+
+		ImGui::ListBox("Open Store Item List Priority", &settings.current_store_item_selection, settings.store_item_list);
+	}
 	// -- Item Heals and Open
 
 
@@ -959,7 +1015,7 @@ void Grinder::Display()
 	}
 
 	ImGui::NextColumn();
-	ImGui::Text("Current Grind Status: %s", "Idling...");
+	ImGui::Text("Current Grind Status: %s", grind.BotStatus);
 	ImGui::Text("Current Gamestage: %s", World::GetCurrentStageStr());
 	ImGui::End();
 }
@@ -1007,7 +1063,7 @@ void Settings::SaveSettings()
 	json hp_spells_j(hp_spells);
 	json mp_spells_j(mp_spells);
 	json item_open_list(settings.open_item_list);
-
+	json item_store_list(settings.store_item_list);
 	json wander_path;
 
 	ns::to_json(wander_path, settings.wander_path_list);
@@ -1030,6 +1086,10 @@ void Settings::SaveSettings()
 		}},
 
 		{"GrindBot", {
+			{"Wander_range", settings.max_wander_range},
+			{"Max_Target_Height", settings.max_z_range},
+			{"min_health", settings.min_health_percentage},
+			{"min_mana", settings.min_mana_percentage},
 			{"Loot_Items", settings.loot_items},
 			{"Hide", settings.hide_from_players},
 			{"Teleport2Mob", settings.teleport_to_next_mob},
@@ -1044,7 +1104,10 @@ void Settings::SaveSettings()
 			{"Cleanse_spells", cleanse_spells_j},
 			{"MP_spells", hp_spells_j},
 			{"HP_spells", mp_spells_j},
+			{"MP_Items", settings.recover_mp_item_list},
+			{"HP_Items", settings.recover_hp_item_list},
 			{"Open_Item_List", item_open_list},
+			{"Store_Item_list", item_store_list},
 			{"Wander_path", wander_path}
 		}}
 	};
@@ -1079,9 +1142,14 @@ void Settings::LoadSettings()
 			SetPlayerAnimationSpeed(animationMultiplier);
 		}
 
+
 		json Grindbot = curSettings["GrindBot"];
 		{
 			std::vector<uint32_t> attack_spells_v, buff_spells_v, cleanse_spells_v, HP_spells_v, MP_spells_v;
+			settings.max_wander_range = Grindbot["Wander_range"].get<float>();
+			settings.max_z_range = Grindbot["Max_Target_Height"].get<float>();
+			settings.min_health_percentage = Grindbot["min_health"].get<float>();
+			settings.min_mana_percentage = Grindbot["min_mana"].get<float>();
 
 			settings.loot_items = Grindbot["Loot_Items"];
 			settings.hide_from_players = Grindbot["Hide"];
@@ -1093,6 +1161,9 @@ void Settings::LoadSettings()
 			settings.whitelist_monsters = Grindbot["Whitelist_mobs"].get<std::vector<std::string>>();
 			settings.blacklist_monsters = Grindbot["Blacklist_mobs"].get<std::vector<std::string>>();
 			settings.open_item_list = Grindbot["Open_Item_List"].get<std::vector<uint32_t>>();
+			settings.store_item_list = Grindbot["Store_Item_list"].get<std::vector<uint32_t>>();
+			settings.recover_hp_item_list = Grindbot["HP_Items"].get<std::vector<uint32_t>>();
+			settings.recover_mp_item_list = Grindbot["MP_Items"].get<std::vector<uint32_t>>();
 
 			attack_spells_v = Grindbot["Attack_spells"].get<std::vector<uint32_t>>();
 			buff_spells_v = Grindbot["Buff_spells"].get<std::vector<uint32_t>>();

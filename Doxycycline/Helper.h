@@ -25,8 +25,10 @@ struct Addr {
 	UINT_PTR Addr_LootClass;
 	UINT_PTR Addr_GameStage;
 	UINT_PTR Addr_TransitionStage;
+	UINT_PTR Addr_CurrentTargetId;
 
 	DWORD Offset_LocalUnit;
+	DWORD Offset_BuffMngr;
 	DWORD Offset_ActorUnitModel;
 	DWORD Offset_Swapchain;
 	DWORD Offset_UserStats;
@@ -47,9 +49,11 @@ struct Addr {
 	UINT_PTR Func_GetIndexVelocity;
 	UINT_PTR Func_LootAll;
 	UINT_PTR Func_isLootable;
+	UINT_PTR Func_SetTarget;
 
 	UINT_PTR Func_GetSkillInfo;
 	UINT_PTR Func_GetSkillByID;
+	UINT_PTR Func_GetSkillStatByEnum;
 	UINT_PTR Func_GetSkillCooldown;
 	UINT_PTR Func_CastSkillWrapper;
 
@@ -76,6 +80,9 @@ struct Addr {
 	UINT_PTR Func_AI_CheckBuff;
 
 	UINT_PTR Func_GetUnitStat;
+	UINT_PTR Func_GetBuffCount;
+	UINT_PTR Func_GetBuffClassPtr;
+	UINT_PTR Func_GetBuffInfo;
 };
 
 class Detour64

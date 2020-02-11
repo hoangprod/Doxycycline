@@ -71,6 +71,12 @@ extern void* LuaStateRun;
 
 void* h_EndCall(IScriptSystem* scriptSys) // this is the method where we will exeucte lua
 {
+
+	if (settings.grinding_bot_on)
+	{
+		grind.Ai.update();
+	}
+
 	if (LuaStateRun)
 	{
 		lua_c_ExecuteLuaFile(LuaStateRun, "script.lua");
@@ -121,6 +127,10 @@ bool __fastcall h_EncryptPacket(__int64* Buffer, unsigned __int8 isEncrypted, __
 	return o_EncryptPacket(Buffer, isEncrypted, key, cleartextbuffer);
 }
 
+typedef bool(__fastcall* f_setTargetx)(uint32_t * targetId);
+
+f_setTargetx o_SetTargetx = (f_setTargetx)0x39576E00;
+
 LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	ImGuiIO& io = ImGui::GetIO();
@@ -145,11 +155,12 @@ LRESULT CALLBACK hWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		if (wParam == VK_NUMPAD6)
 		{
 
+			printf("%d\n", Combat::isRunning());
+
 
 		}
 		if (wParam == VK_NUMPAD7)
 		{
-
 
 		}
 		if (wParam == VK_NUMPAD8)
@@ -220,11 +231,6 @@ HRESULT __fastcall hookD3D11Present(IDXGISwapChain* pChain, UINT SyncInterval, U
 	if (g_ShowMenu)
 	{
 		MenuRender();
-	}
-
-	if (settings.grinding_bot_on)
-	{
-		grind.Ai.update();
 	}
 	
 

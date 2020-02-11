@@ -14,6 +14,8 @@ f_isLootable o_isLootable;
 f_loot_all o_loot_all;
 f_get_skill_by_id o_get_skill_by_id;
 f_get_skill_cooldown o_get_skill_cooldown;
+f_get_skill_info_by_enum o_get_skill_info_by_enum;
+f_setTarget o_SetTarget;
 
 f_AI_IsCasting o_AI_IsCasting;
 f_AI_StopCasting o_AI_StopCasting;
@@ -40,6 +42,10 @@ f_MoveItemPartial o_MoveItemPartial;
 f_DepositMoney o_DepositMoney;
 f_WithdrawMoney o_WithdrawMoney;
 
+f_GetBuffCount o_GetBuffCount;
+f_GetBuffClassPtr o_GetBuffClassPtr;
+f_GetBuffInfo o_GetBuffInfo;
+
 f_GetUnitStats o_GetUnitStats;
 
 void X2::InitializeX2()
@@ -50,10 +56,12 @@ void X2::InitializeX2()
 	o_VelocityOfIndex = (f_VelocityOfIndex)Patterns.Func_GetIndexVelocity;
 	o_loot_all = (f_loot_all)Patterns.Func_LootAll;
 	o_isLootable = (f_isLootable)Patterns.Func_isLootable;
+	o_SetTarget = (f_setTarget)Patterns.Func_SetTarget;
 
 	o_GetSkillInfo = (f_GetSkillInfo)Patterns.Func_GetSkillInfo;
 	o_get_skill_by_id = (f_get_skill_by_id)Patterns.Func_GetSkillByID;
 	o_get_skill_cooldown = (f_get_skill_cooldown)Patterns.Func_GetSkillCooldown;
+	o_get_skill_info_by_enum = (f_get_skill_info_by_enum)Patterns.Func_GetSkillStatByEnum;
 
 	o_AI_IsCasting = (f_AI_IsCasting)Patterns.Func_AI_IsCasting;
 	o_AI_StopCasting = (f_AI_StopCasting)Patterns.Func_AI_StopCasting;
@@ -78,6 +86,10 @@ void X2::InitializeX2()
 	o_MoveItemPartial = (f_MoveItemPartial)Patterns.Func_PickupItemPartial;
 	o_DepositMoney = (f_DepositMoney)Patterns.Func_DepositMoney;
 	o_WithdrawMoney = (f_WithdrawMoney)Patterns.Func_WithdrawMoney;
+
+	o_GetBuffCount = (f_GetBuffCount)Patterns.Func_GetBuffCount;
+	o_GetBuffClassPtr = (f_GetBuffClassPtr)Patterns.Func_GetBuffClassPtr;
+	o_GetBuffInfo = (f_GetBuffInfo)Patterns.Func_GetBuffInfo;
 
 	o_GetUnitStats = (f_GetUnitStats)Patterns.Func_GetUnitStat;
 }
@@ -112,6 +124,11 @@ char X2::W_loot_all(uint32_t null)
 	return o_loot_all(null);
 }
 
+bool X2::W_set_target(uint32_t targetId)
+{
+	return o_SetTarget(&targetId);
+}
+
 bool X2::W_get_skill_info(uint32_t skillId, CSkill * skillInfo)
 {
 	skillInfo->SkillId = skillId;
@@ -139,6 +156,11 @@ ISkill* X2::W_get_skill_by_id(uint32_t skillId)
 void* X2::W_get_skill_cooldown(void* skill_struct, void* cooldownHolderStruct, void* unkBuffer)
 {
 	return o_get_skill_cooldown(skill_struct, cooldownHolderStruct, unkBuffer);
+}
+
+UINT_PTR X2::W_get_skill_stat_by_enum(UINT_PTR* skillClass, uint32_t infoEnum)
+{
+	return o_get_skill_info_by_enum(*(UINT_PTR**)((*(UINT_PTR*)Patterns.Addr_UnitClass) + Patterns.Offset_LocalUnit), 1, skillClass, infoEnum);
 }
 
 bool X2::W_AI_IsCasting(void* nullParam, uint32_t unitId)
@@ -239,6 +261,21 @@ void X2::W_DepositMoney(int Amount, int AAPointCount)
 void X2::W_WithdrawMoney(int Amount, int AAPointCount)
 {
 	return o_WithdrawMoney(Amount, AAPointCount);
+}
+
+UINT_PTR X2::W_GetBuffCount(UINT_PTR* buffManager, int isDebuffOrBuff)
+{
+	return o_GetBuffCount((uint32_t*)buffManager, isDebuffOrBuff);
+}
+
+UINT_PTR* X2::W_GetBuffClassPtr(UINT_PTR* buffManager, int isDebuffOrBuff, int buffSlot)
+{
+	return o_GetBuffClassPtr((uint32_t*)buffManager, isDebuffOrBuff, buffSlot);
+}
+
+UINT_PTR* X2::W_GetBuffInfo(uint32_t buffId)
+{
+	return o_GetBuffInfo(buffId);
 }
 
 UINT_PTR X2::W_GetUnitStats(UINT_PTR* unitClass, uint32_t statType)

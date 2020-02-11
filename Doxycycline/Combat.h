@@ -3,10 +3,16 @@
 class Navigation {
 public:
 	static BOOL move_to_shop();
-	static BOOL move_to_next_target(DWORD TargetId);
 	static BOOL move_to_repair();
-	static BOOL move_to_bank();
+
 	static BOOL move_to_position(Vec3 position);
+	static BOOL move_to_target(IActor* Target);
+
+	static bool isAutoPathing();
+
+	static float get_distance(IActor* one, IActor* Two);
+	static float get_distance(Vec3 start, Vec3 end);
+	static int get_next_path(Vec3 currentPos, std::vector<Vec3> *path_list, bool reverse);
 };
 
 enum GameStage {
@@ -51,10 +57,14 @@ public:
 	static UINT_PTR get_local_unit();
 
 	static IActor* get_closest_monster_npc(float maxRange);
+	static IActor* get_closest_monster_filtered(float maxRange, std::vector<std::string> whitelist, std::vector<std::string> blacklist);
 	static IActor* get_closest_player(float maxRange);
 	static IActor* get_closest_lootable(float maxRange);
-	static bool is_player_nearby(float maxRange);
 
+	static bool is_player_nearby(float maxRange);
+	static bool is_targetable(uint32_t targetId);
+
+	//static uint32_t get_current_target_id();
 	static uint32_t get_closest_mob_targetid(float maxRange);
 	static uint32_t get_closest_target_with_type(uint32_t TargetType, float maxRange);
 	static uint32_t get_closest_targetId_with_name(char * TargetName, float maxRange);
@@ -74,8 +84,8 @@ public:
 	static BOOL is_casting();
 	static BOOL is_channeling();
 	static BOOL is_in_combat();
-	static BOOL is_dead(DWORD unitID);
-	static BOOL is_targeting_me(DWORD unitID);
+	static BOOL is_dead(uint32_t unitID);
+	static BOOL is_targeting_me(uint32_t unitID);
 
 	static BOOL stop_casting();
 	static BOOL stop_channeling();

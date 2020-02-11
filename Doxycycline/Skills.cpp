@@ -52,6 +52,7 @@ ISkill* Skill::get_skill_by_id(uint32_t skillId)
 
 bool Skill::get_skill_info(uint32_t skillId, CSkill * skillInfo)
 {
+	skillInfo->effectiveRange = get_skill_effective_range(skillId);
 	return X2::W_get_skill_info(skillId, skillInfo);
 }
 
@@ -63,6 +64,13 @@ int32_t Skill::get_skill_cooldown(uint32_t skillId)
 	int32_t unk2 = 0;
 	X2::W_get_skill_cooldown(skill, &cooldown, &unk2);
 	return cooldown;
+}
+
+uint32_t Skill::get_skill_effective_range(uint32_t skillId)
+{
+	ISkill* skill = X2::W_get_skill_by_id(skillId);
+
+	return X2::W_get_skill_stat_by_enum((UINT_PTR*)skill, skillStat::effectiveRange);
 }
 
 float Skill::get_skill_maxRange(uint32_t skillId)
@@ -93,7 +101,7 @@ std::pair<float, float> Skill::get_skill_min_max_range(uint32_t skillId)
 	return std::pair<float, float>(minRange, maxRange);
 }
 
-BOOL Skill::is_skill_on_cooldown(DWORD skillId)
+BOOL Skill::is_skill_off_cd(DWORD skillId)
 {
 	return get_skill_cooldown(skillId) == 0;
 }

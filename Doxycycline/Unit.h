@@ -23,4 +23,9 @@ public:
 
 	static bool IsUnitInCombat(uint32_t unitId);
 	static bool IsUnitDead(uint32_t unitId);
+
+	static UINT_PTR* GetBuffManager(uint32_t unitId);
+	static Buff* GetBuffInfo(uint32_t unitId, int debuffOrBuff, int buffSlot);
+	static UINT_PTR GetBuffCount(uint32_t unitId, int debuffOrBuff);
+	static UINT_PTR* GetBuffClassPtr(uint32_t unitId, int debuffOrBuff, int buffSlot);
 };

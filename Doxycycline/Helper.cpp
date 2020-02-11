@@ -324,7 +324,7 @@ char* ptr_offset_Scanner(char* pBase, UINT_PTR RegionSize, const char* szPattern
 
 	memcpy(&offset_read, second_addr, i_length - instruction_before_offset);
 
-	offset_read = i_length + initial_addr + i_offset + (uintptr_t)offset_read;
+	offset_read = i_length + initial_addr + i_offset + (int)offset_read;
 
 
 	if (offset_read)

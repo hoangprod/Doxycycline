@@ -119,6 +119,7 @@ public:
 	static CItem get_item_master_info(uint32_t slot);
 
 	// These store ItemID not Slot so when items are moved around -- it won't affect us
+	static std::vector<uint32_t> get_all_bag_items();
 	static std::vector<uint32_t> get_all_consumeable_item();
 	static std::vector<uint32_t> get_all_unidentified_item();
 };

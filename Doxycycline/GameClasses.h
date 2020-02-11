@@ -311,6 +311,19 @@ public:
 	virtual void Function9();
 }; //Size: 0x0040
 
+class Buff
+{
+public:
+	uint32_t BuffId; //0x0000
+	char pad_0004[116]; //0x0004
+	char* BuffDescription; //0x0078
+	char pad_0080[136]; //0x0080
+	uint32_t isBuff; //0x0108
+	char pad_010C[36]; //0x010C
+	char* BuffName; //0x0130
+	char pad_0138[72]; //0x0138
+}; //Size: 0x0180
+
 class CItem {
 public:
 	std::string Name;
@@ -350,6 +363,7 @@ public:
 	bool hasRange;
 	int upgradeCost;
 	int skillPoints;
+	int effectiveRange;
 };
 
 
@@ -422,7 +436,7 @@ public:
 	char pad_0008[16]; //0x0008
 	IEntity *Entity; //0x0018
 	char pad_0020[64]; //0x0020
-	int32_t unitID; //0x0060
+	uint32_t unitID; //0x0060
 	char pad_0064[540]; //0x0064
 
 	virtual void Function0();

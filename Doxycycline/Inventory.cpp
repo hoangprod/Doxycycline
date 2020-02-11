@@ -140,6 +140,28 @@ CItem Inventory::get_item_master_info(uint32_t slot)
 	return skillMasterInfo;
 }
 
+std::vector<uint32_t> Inventory::get_all_bag_items()
+{
+	std::vector<uint32_t> bag_items;
+
+	uint8_t maxSlot = get_max_bag_slot_count();
+
+	if (!maxSlot)
+		return std::vector<uint32_t>(); // Empty Vector
+
+	for (int i = 1; i < maxSlot; ++i)
+	{
+		auto info = get_bag_item_information(i);
+
+		if (!info)
+			continue;
+
+		bag_items.push_back(info->ItemId);
+	}
+
+	return bag_items;
+}
+
 std::vector<uint32_t> Inventory::get_all_consumeable_item()
 {
 	std::vector<uint32_t> consumeable_item_list;

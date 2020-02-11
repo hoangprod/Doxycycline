@@ -4,9 +4,20 @@
 #include "Skills.h"
 #include "Game.h"
 #include "Inventory.h"
+#include "Unit.h"
 #include "Combat.h"
 
 extern Addr Patterns;
+
+bool stringExistInVector(std::string name, std::vector<std::string> vector)
+{
+	if (std::find(vector.begin(), vector.end(), name) != vector.end())
+	{
+		return true;
+	}
+	
+	return false;
+}
 
 BOOL Stats::has_buff(uint32_t buffID)
 {
@@ -33,6 +44,7 @@ bool is_monster_name_already_in_list(std::vector<IActor*> list, const char * nam
 		return false;
 	}
 }
+
 
 IActor* get_closest_actor_from_map(std::map<IActor*, float> viableActors)
 {
@@ -64,7 +76,31 @@ IActor* Combat::get_closest_monster_npc(float maxRange)
 	auto actorList = LocalPlayerFinder::GetActorList();
 	for (auto actor : actorList)
 	{
-		if (actor && actor->Entity && EntityHelper::isNpcMob(actor->Entity) && EntityHelper::isHostile(actor->Entity))
+		if (actor && actor->Entity && EntityHelper::isNpcMob(actor->Entity) && actor->unitID && !Combat::is_dead(actor->unitID) && Combat::is_targetable(actor->unitID) && EntityHelper::isHostile(actor->Entity))
+		{
+			Vec3 actorPos = actor->Entity->GetWorldPos();
+			float heightDistance = abs(actorPos.y - localPos.y);
+			float totalDistance = abs(actorPos.x - localPos.x) + abs(actorPos.z - localPos.z) + heightDistance;
+			if (totalDistance <= maxRange && heightDistance <= 35.f)
+			{
+				viableActors.insert(std::make_pair(actor, totalDistance));
+			}
+		}
+	}
+
+	return get_closest_actor_from_map(viableActors);
+}
+
+IActor* Combat::get_closest_monster_filtered(float maxRange, std::vector<std::string> whitelist, std::vector<std::string> blacklist)
+{
+	std::map<IActor*, float> viableActors;
+	Vec3 localPos = LocalPlayerFinder::GetClientEntity()->GetWorldPos();
+	auto actorList = LocalPlayerFinder::GetActorList();
+	for (auto actor : actorList)
+	{
+		// Actor and Entity exist, is a mob, is hostile, in whitelist and not in blacklist
+		if (actor && actor->Entity && EntityHelper::isNpcMob(actor->Entity) && actor->unitID != 0 && !Combat::is_dead(actor->unitID) && Combat::is_targetable(actor->unitID) && EntityHelper::isHostile(actor->Entity) &&
+			stringExistInVector(actor->Entity->GetName(), whitelist) && !stringExistInVector(actor->Entity->GetName(), blacklist))
 		{
 			Vec3 actorPos = actor->Entity->GetWorldPos();
 			float heightDistance = abs(actorPos.y - localPos.y);
@@ -128,6 +164,32 @@ bool Combat::is_player_nearby(float maxRange)
 	IActor* player = get_closest_player(maxRange);
 
 	return player != 0;
+}
+
+std::vector<std::string> invulnerable_skill = { "Untouchable" };
+
+bool Combat::is_targetable(uint32_t targetId)
+{
+	uint32_t buffCount = Unit::GetBuffCount(targetId, 1);
+
+	if (buffCount > 0)
+	{
+		for (int j = 0; j < buffCount; j++)
+		{
+			auto buff = Unit::GetBuffInfo(targetId, 1, j);
+
+			if (!buff)
+				return false;
+
+			if (stringExistInVector(buff->BuffName, invulnerable_skill))
+				return false;
+		}
+
+		return true;
+	}
+
+	if (buffCount == 0)
+		return true;
 }
 
 uint32_t Combat::get_closest_mob_targetid(float maxRange)
@@ -301,16 +363,25 @@ BOOL Combat::is_in_combat()
 	return false;
 }
 
-BOOL Combat::is_dead(DWORD unitID)
+BOOL Combat::is_dead(uint32_t unitID)
 {
 	UINT_PTR Unit = X2::W_GetUnitById(unitID);
+
+	// Assume unit is dead if we can't get Unit from Id
+	if (!Unit)
+		return true;
+
 	return *(bool*)((UINT_PTR)Unit + (UINT_PTR)Patterns.Offset_isDead);
 }
 
-BOOL Combat::is_targeting_me(DWORD unitID)
+BOOL Combat::is_targeting_me(uint32_t unitID)
 {
 	DWORD local_UnitId = LocalPlayerFinder::GetClientActor()->unitID;
 	UINT_PTR MobUnit = X2::W_GetUnitById(unitID);
+
+	if (!MobUnit)
+		return false;
+
 	DWORD unitCurrentTarget = *(DWORD*)((UINT_PTR)MobUnit + (UINT_PTR)Patterns.Offset_CurrentTargetId);
 
 	if (unitCurrentTarget == local_UnitId)
@@ -393,6 +464,102 @@ BOOL Navigation::move_to_position(Vec3 position)
 	X2::W_GetNavPath_and_Move(ActorUnitModel, &position);
 
 	return true;
+}
+
+BOOL Navigation::move_to_target(IActor* Target)
+{
+	if(!Target)
+		return 0;
+
+	return move_to_position(Target->Entity->GetWorldPos());
+}
+
+bool Navigation::isAutoPathing()
+{
+	if(!Patterns.Addr_isAutoPathing)
+		return true;
+	else
+	{
+		return *Patterns.Addr_isAutoPathing;
+	}
+}
+
+float Navigation::get_distance(IActor* one, IActor* Two)
+{
+	if (!one || !Two)
+		return 0.0f;
+
+	Vec3 pos1 = one->Entity->GetWorldPos();
+	Vec3 pos2 = Two->Entity->GetWorldPos();
+
+	return sqrtf(pow((pos1.x - pos2.x), 2) + pow((pos1.y - pos2.y), 2) + pow((pos1.z - pos2.z), 2));
+}
+
+float Navigation::get_distance(Vec3 start, Vec3 end)
+{
+	return sqrtf(pow((start.x - end.x), 2) + pow((start.y - end.y), 2) + pow((start.z - end.z), 2));
+}
+
+int Navigation::get_next_path(Vec3 currentPos, std::vector<Vec3> * path_list, bool reverse)
+{
+	if (path_list && !path_list->empty())
+	{
+		int closestVectorIndex = -1;
+		float closestDistance = 999999999.f;
+
+		for (int i = 0; i < path_list->size(); i++)
+		{
+			float curDistance = get_distance(currentPos, (*path_list)[i]);
+
+			if (curDistance <= closestDistance)
+			{
+				closestDistance = curDistance;
+				closestVectorIndex = i;
+			}
+
+		}
+
+		// If the closest path is between 20 and 2000 units, this is the one we want to walk to
+		if (closestDistance > 20.0f && closestDistance < 2000.0f)
+		{
+			printf("1 %f\n", closestDistance);
+			return  closestVectorIndex;
+		}
+
+		// If found a valid closest path is super close to us, then we want to go to the next point
+		if (closestVectorIndex != -1)
+		{
+			// Go to the next point
+			closestVectorIndex++;
+
+			// If the next point does not exist because we have reached the end of the list, go back to the beginning
+			if (closestVectorIndex >= path_list->size())
+			{
+				printf("2 %d %d\n", closestVectorIndex, path_list->size());
+
+				// If reverse is true, then we will backtrace our steps and reverse the path_list
+				if (reverse)
+				{
+					printf("reversin\n");
+					std::reverse(std::begin(*path_list), std::end(*path_list));
+				}
+
+				// Go to the first path item, if it was not inverse, then it is first in the list added, if it is inversed - it is the last in the list
+				return  0;
+			}
+
+
+			printf("3 %d\n", closestVectorIndex);
+			// Next point does exist, we will just walk there
+			return closestVectorIndex;
+		}
+
+	}
+
+	printf("could not find\n");
+
+	// Could not find a closest path item
+	return -1;
 }
 
 

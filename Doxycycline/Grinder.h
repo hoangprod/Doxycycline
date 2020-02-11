@@ -20,7 +20,7 @@ class Grinding
 {
 public:
 	FSM Ai;
-	int tick = 150;
+	int tick = 250;
 	unsigned long long lastTick = 0;
 
 public:
@@ -37,15 +37,17 @@ public:
 	}
 
 	void States();
-	void Idle();
 	void Wander();
 	void Fight();
 	void Bank();
 	void Heal();
+	void Buff();
 	void Hide();
+	void Loot();
 
-	const char* BotStatus = NULL;
+	const char* BotStatus = "Idling...";
 
 private:
 	bool needHeal();
+	bool needMana();
 };

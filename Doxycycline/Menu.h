@@ -400,6 +400,7 @@ public:
 	std::vector<uint32_t> recover_hp_item_list;
 	std::vector<uint32_t> recover_mp_item_list;
 	std::vector<uint32_t> open_item_list;
+	std::vector<uint32_t> store_item_list;
 
 
 	int current_wander_path_selection = -1;
@@ -413,6 +414,7 @@ public:
 	int current_hp_item_selection = -1;
 	int current_mp_item_selection = -1;
 	int current_open_item_selection = -1;
+	int current_store_item_selection = -1;
 
 	int max_open_pack_lp;
 
